@@ -5,22 +5,20 @@ set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shel
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
 # On Mac OS, readlink -f doesn't work, so use._real_path get the real path of the file
-_ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-_ROOT_SAKE_PATH="${_ROOT_DIR}/bake"
+ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+_ROOT_SAKE_PATH="${ROOT_DIR}/bake"
 
-
-
-upgrade_bake() {
-  mkdir -p "$_ROOT_DIR/vendor"
-  echo "$_ROOT_SAKE_PATH -> upgrade_bake ▶︎【 curl -o $_ROOT_DIR/bake.bash https://github.com/chen56/bake/raw/main/bake.bash 】"
-  curl -L -o "$_ROOT_DIR/vendor/bake.bash" https://github.com/chen56/bake/raw/main/bake.bash
-}
-if ! [[ -f "$_ROOT_DIR/vendor/bake.bash" ]]; then
+upgrade_bake() (
+  mkdir -p "$ROOT_DIR/vendor"
+  set -x
+  curl -L -o "$ROOT_DIR/vendor/bake.bash" https://github.com/chen56/bake/raw/main/bake.bash
+)
+if ! [[ -f "$ROOT_DIR/vendor/bake.bash" ]]; then
   upgrade_bake
 fi
 
 # shellcheck disable=SC1091
-. "$_ROOT_DIR/vendor/bake.bash"
+. "$ROOT_DIR/vendor/bake.bash"
 
 
 # 清晰的函数调用日志，替代 `set -x` 功能
