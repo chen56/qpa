@@ -1,0 +1,14 @@
+########################
+### common
+########################
+# macbook
+.DS_Store
+dist
+tmp
+
+# 范例中的脚本会动态下载bake.bash到vendor，不保存到git
+vendor
+
+# IntelliJ IDEA
+.idea
+
