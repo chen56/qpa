@@ -8,17 +8,19 @@ set -o pipefail  # default pipeline status==last command status, If set, status=
 _ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 _ROOT_SAKE_PATH="${_ROOT_DIR}/bake"
 
-upgrade_sake() (
-  cd "$_ROOT_DIR"
-  git subtree add --prefix=vendor/bake https://github.com/chen56/bake.git main --squash
-)
 
-if ! [[ -f "$_ROOT_DIR/vendor/bake/bake.bash" ]]; then
-  upgrade_sake
+
+upgrade_bake() {
+  mkdir -p "$_ROOT_DIR/vendor"
+  echo "$_ROOT_SAKE_PATH -> upgrade_bake ▶︎【 curl -o $_ROOT_DIR/bake.bash https://github.com/chen56/bake/raw/main/bake.bash 】"
+  curl -L -o "$_ROOT_DIR/vendor/bake.bash" https://github.com/chen56/bake/raw/main/bake.bash
+}
+if ! [[ -f "$_ROOT_DIR/vendor/bake.bash" ]]; then
+  upgrade_bake
 fi
 
 # shellcheck disable=SC1091
-. "$_ROOT_DIR/vendor/bake/bake.bash"
+. "$_ROOT_DIR/vendor/bake.bash"
 
 
 # 清晰的函数调用日志，替代 `set -x` 功能
