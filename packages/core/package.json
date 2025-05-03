@@ -1,0 +1,31 @@
+{
+    "name": "@pa/core",
+    "version": "1.0.0",
+    "description": "pa core",
+    "publishConfig": {
+        "access": "public"
+    },
+    "bin": {
+        "bun": "index.ts"
+    },
+    "scripts": {
+        "start": "bun index.ts",
+        "build": "bun build index.ts --outfile dist/index.js",
+        "test": "bun test",
+        "build:bun": "bun build --outfile ./dist/pa-bun.js --format esm --target bun --standalone ./index.ts ",
+        "build:compile": " bun build  ./index.ts"
+  
+    },
+    "devDependencies": {
+        "@types/node": "^22.15.3"
+    },
+    "keywords": [
+        "bun",
+        "cli",
+        "greet"
+    ],
+    "author": "chen56",
+    "dependencies": {
+        "tencentcloud-sdk-nodejs": "^4.0.973"
+    }
+}

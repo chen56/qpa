@@ -1,0 +1,33 @@
+{
+  "name": "@pa/cli",
+  "version": "1.0.0",
+  "description": "pa cli",
+  "publishConfig": {
+      "access": "public"
+  },
+  "bin": {
+      "bun": "index.ts"
+  },
+  "scripts": {
+      "start": "bun index.ts",
+      "build": "bun build index.ts --outfile dist/index.js",
+      "test": "bun test",
+      "build:bun": "bun build --outfile ./dist/pa-bun.js --format esm --target bun --standalone ./index.ts ",
+      "build:compile": "bun build --compile --outfile ./dist/pa ./index.ts "
+  },
+  "devDependencies": {
+      "@types/node": "^22.15.3",
+      "@types/yargs": "^17.0.33",
+      "@commander-js/extra-typings": "^13.1.0"
+
+  },
+  "keywords": [
+      "pa",
+      "cli"
+  ],
+  "author": "chen56",
+  "dependencies": {
+      "commander": "^13.1.0",
+      "tencentcloud-sdk-nodejs": "^4.0.973"
+  }
+}
