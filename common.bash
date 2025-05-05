@@ -6,19 +6,18 @@ set -o pipefail  # default pipeline status==last command status, If set, status=
 
 # On Mac OS, readlink -f doesn't work, so use._real_path get the real path of the file
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-_ROOT_SAKE_PATH="${ROOT_DIR}/bake"
 
-upgrade_bake() (
+upgrade_sha() (
   mkdir -p "$ROOT_DIR/vendor"
   set -x
-  curl -L -o "$ROOT_DIR/vendor/bake.bash" https://github.com/chen56/bake/raw/main/bake.bash
+  curl -L -o "$ROOT_DIR/vendor/sha.bash" https://github.com/chen56/bake/raw/main/sha.bash
 )
-if ! [[ -f "$ROOT_DIR/vendor/bake.bash" ]]; then
-  upgrade_bake
+if ! [[ -f "$ROOT_DIR/vendor/sha.bash" ]]; then
+  upgrade_sha
 fi
 
 # shellcheck disable=SC1091
-. "$ROOT_DIR/vendor/bake.bash"
+. "$ROOT_DIR/vendor/sha.bash"
 
 
 # 清晰的函数调用日志，替代 `set -x` 功能

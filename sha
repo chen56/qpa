@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -o errtrace  # -E trap inherited in sub script
+set -o errexit   # -e
+set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
+set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
+
+
+PA_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$PA_DIR"
+
+# shellcheck disable=SC1091
+source "./common.bash"
+
+####################################################################################
+# app script
+# 应用项目补充的公共脚本，不在bake维护范围
+# 此位置以上的全都是bake工具脚本，copy走可以直接用，之下的为项目特定cmd，自己弄
+####################################################################################
+
+##########################################
+# app cmd script
+# 应用的命令脚本
+##########################################
+
+
+info2() {
+  _run echo "out ip: $(curl ipinfo.io/ip 2>/dev/null)"
+}
+
+cli() {
+  _run "$PA_DIR/packages/cli/sha" 
+}
+
+sha "$@"

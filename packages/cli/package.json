@@ -28,6 +28,7 @@
   "author": "chen56",
   "dependencies": {
       "commander": "^13.1.0",
-      "tencentcloud-sdk-nodejs": "^4.0.973"
+      "tencentcloud-sdk-nodejs": "^4.0.973",
+      "@pa/core": "file:../core"
   }
 }

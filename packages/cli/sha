@@ -5,11 +5,11 @@ set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shel
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
 
-PROJECT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-cd "$PROJECT_DIR"
+CLI_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$CLI_DIR"
 
 # shellcheck disable=SC1091
-source "./common.bash"
+source "../../common.bash"
 
 ####################################################################################
 # app script
@@ -22,18 +22,9 @@ source "./common.bash"
 # 应用的命令脚本
 ##########################################
 
-bake.cmd --cmd root --desc "$(
-  cat <<-EOF
-pa project!
-
-Usage: ./sake [cmd] [opts] [args...]
-
-EOF
-)"
 
 info() {
-  echo "ip: $(curl ipinfo.io/ip 2>/dev/null)"
-  profile
+  _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"
 }
-
-bake.go "$@"
+echo "lci:[$*]"
+sha "$@"
