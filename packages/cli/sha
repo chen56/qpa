@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2317
 set -o errtrace  # -E trap inherited in sub script
 set -o errexit   # -e
 set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
@@ -22,9 +23,22 @@ source "../../common.bash"
 # 应用的命令脚本
 ##########################################
 
-
 info() {
   _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"
 }
-echo "lci:[$*]"
+
+build() {
+  # bun build index.ts --outfile dist/index.js
+  js() { bun build --outfile ./dist/index.js --format esm --target bun --standalone ./src/index.ts;}
+  exe() { bun build --compile --outfile ./dist/pa ./src/index.ts;}
+}
+
+test() { bun test;}
+run() { bun src/index.ts "$@";}
+clean() { 
+  rm -rf dist;
+}
+
+
+
 sha "$@"

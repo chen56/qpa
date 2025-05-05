@@ -8,13 +8,6 @@
   "bin": {
       "bun": "index.ts"
   },
-  "scripts": {
-      "start": "bun index.ts",
-      "build": "bun build index.ts --outfile dist/index.js",
-      "test": "bun test",
-      "build:bun": "bun build --outfile ./dist/pa-bun.js --format esm --target bun --standalone ./index.ts ",
-      "build:compile": "bun build --compile --outfile ./dist/pa ./index.ts "
-  },
   "devDependencies": {
       "@types/node": "^22.15.3",
       "@types/yargs": "^17.0.33",
