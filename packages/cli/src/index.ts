@@ -1,49 +1,27 @@
-#!/usr/bin/env node
+// src/index.ts
 
-import { program } from 'commander';
-import type { Command } from 'commander'; // 显式导入 Command 类型
+import { program } from 'commander'; // 导入 Command 和 program
 
-// 定义全局选项的接口
-interface GlobalOptions {
-  verbose?: boolean;
-}
+// 导入子命令注册函数
+import { registerApplyCommand } from './commands/apply';
+import { registerPlanCommand } from './commands/plan';
 
-// 定义 greet 子命令选项的接口
-interface GreetOptions extends GlobalOptions {
-  exclaim?: boolean;
-  hobbies?: string[]; // 新增数组参数
-}
 
-// 定义 farewell 子命令选项的接口
-interface FarewellOptions extends GlobalOptions {
-  enthusiastic?: boolean;
-}
-
-// // 创建 greet 子命令
-const greetCommand: Command = program.command('greet <name>')
-  .description('Greets the given name')
-  .option('-x, --exclaim', 'Add an exclamation ')
-//   .option('-H, --hobbies <hobbies...>', 'List your hobbies (comma-separated or multiple times)')
-  .action((name: string, options: GreetOptions) => {
-    const greeting = `Hello, ${name}${options.exclaim ? '!' : ''}`;
-    console.log(options.verbose ? `[VERBOSE] ${greeting}` : greeting);
-    if (options.hobbies && options.hobbies.length > 0) {
-      console.log(`Hobbies: ${options.hobbies.join(', ')}`);
-    }
-  });
-
-// 创建 farewell 子命令
-const farewellCommand: Command = program.command('farewell [name]')
-  .description('Says goodbye')
-  .option('-e, --enthusiastic', 'Say goodbye enthusiastically')
-  .action((name: string | undefined, options: FarewellOptions) => {
-    const goodbye = `Goodbye, ${name || 'World'}${options.enthusiastic ? '!' : '.'}`;
-    console.log(options.verbose ? `[VERBOSE] ${goodbye}` : goodbye);
-  });
-
-// 定义全局选项
+// --- 定义全局选项 ---
+// 注意：全局选项定义在 program 上，它们的类型需要包含在各个子命令的 options 接口中 (通过继承 GlobalOptions)
 program
   .version('1.0.0')
-  .option('-v, --verbose', 'Enable verbose output')
-  .parse(process.argv);
+  // 将全局选项 verbose 添加到 program 上
+  // Commander 会自动将解析到的全局选项添加到 action handlers 的 options 对象中
+  .option('-v, --verbose', 'Enable verbose output');
 
+// --- 注册子命令 ---
+// 调用每个子命令的注册函数，并将主 program 实例传递进去
+registerApplyCommand(program);
+registerPlanCommand(program);
+
+// --- 解析命令行参数 ---
+// program.parse() 会解析 process.argv
+// 如果有子命令匹配，会触发相应子命令的 action handler
+// 如果没有子命令匹配，或者有帮助/版本等选项，commander 会处理并可能退出
+program.parse(process.argv);
