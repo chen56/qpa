@@ -39,6 +39,4 @@ clean() {
   rm -rf dist;
 }
 
-
-
 sha "$@"
