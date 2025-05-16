@@ -137,3 +137,6 @@ dist
 
 # macos
 .DS_Store
+
+# idea
+.idea/
