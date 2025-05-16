@@ -52,18 +52,16 @@ all() {
   }
 
   run() {
-      for project_dir in $(_all_workspaces); do
-         (
-           cd "$project_dir"
-           _run "$@"
-         )
-      done
+    for project_dir in $(_all_workspaces); do
+       cd "$project_dir"
+       _run "$@"
+    done
   }
 
   clean() {
-      for project_dir in $(_all_workspaces); do
-         _run "$project_dir/sha" clean
-      done
+    for project_dir in $(_all_workspaces); do
+       _run "$project_dir/sha" clean
+    done
   }
 }
 
@@ -79,7 +77,5 @@ cli() {
 #  _run "$PA_DIR/packages/cli/sha" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
   _run "$PA_DIR/packages/core/sha" "$@" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
 }
-
-
 
 sha "$@"
