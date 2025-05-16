@@ -33,7 +33,7 @@ build() {
   exe() { bun build --compile --outfile ./dist/pa ./src/index.ts;}
 }
 
-tests() { bun test;}
+test() { bun test;}
 run() {  bun src/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
 clean() { 
   _run rm -rf dist;

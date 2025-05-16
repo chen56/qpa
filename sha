@@ -63,9 +63,9 @@ all() {
        _run "$project_dir/sha" clean
     done
   }
-  tests() {
+  test() {
     for project_dir in $(_all_workspaces); do
-       _run "$project_dir/sha" tests
+       _run "$project_dir/sha" test
     done
   }
 }
@@ -74,7 +74,7 @@ clean() {
   echo "root workspace: clean"
 }
 
-tests() {
+test() {
   echo "root workspace: clean"
 }
 

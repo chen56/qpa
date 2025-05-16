@@ -37,7 +37,7 @@ build() {
 }
 
 install() { bun install;}
-tests() { bun test;}
+test() { bun test;}
 run() {
   # 由于我们set -e，执行的子进程退出码如果非0，会导致整个脚本退出，且sha.bash会显示trap到的错误堆栈
   # 但这里我们并不想显示堆栈，只当是普通参数错误，所以用||来处理，打印错误信息，然后继续执行
