@@ -1,11 +1,19 @@
 import {TencentCloudProvider, TaggableResourceService} from "@/providers/tencent_cloud/provider";
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models";
-import {StatePart} from "@/index";
+import {PaPaResource, SpecPart, StatePart} from "@/index";
+import {VpcState} from "@/providers/tencent_cloud/vpc";
 
+
+class Cvm{
+
+}
+class CvmState{
+
+}
 /**
  */
-export class CvmInstanceService extends TaggableResourceService {
+export class CvmInstanceService extends TaggableResourceService<Cvm,CvmState> {
     readonly serviceType: string = "vpc";
     readonly resourcePrefix: string = "vpc";
 
@@ -24,8 +32,25 @@ export class CvmInstanceService extends TaggableResourceService {
         return this.cvmClients.get(region)!;
     }
 
-    loadByTags(resourceTags: ResourceTag[]): Promise<StatePart[]> {
+    loadByTags(resourceTags: ResourceTag[]): Promise<StatePart<CvmState>[]> {
         throw Error(`CvmInstanceService.load not impl: ${resourceTags}`)
+    }
+
+    create(resource: SpecPart<Cvm>): Promise<StatePart<VpcState>> {
+        console.log(resource)
+        throw new Error("not implements")
+    }
+
+    destroy(resource: PaPaResource<Cvm, CvmState>): Promise<void> {
+        console.log(resource)
+
+        throw new Error("not implements")
+    }
+
+    refresh(resource: PaPaResource<Cvm, CvmState>): Promise<void> {
+        console.log(resource)
+
+        throw new Error("not implements")
     }
 
 }
