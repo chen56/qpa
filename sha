@@ -28,7 +28,9 @@ info2() {
 }
 
 cli() {
-  _run "$PA_DIR/packages/cli/sha" 
+#  _run "$PA_DIR/packages/cli/sha" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
+  _run "$PA_DIR/packages/core/sha" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
+
 }
 
 sha "$@"

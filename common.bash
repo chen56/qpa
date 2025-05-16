@@ -10,7 +10,7 @@ ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 upgrade_sha() (
   mkdir -p "$ROOT_DIR/vendor"
   set -x
-  curl -L -o "$ROOT_DIR/vendor/sha.bash" https://github.com/chen56/bake/raw/main/sha.bash
+  curl -L -o "$ROOT_DIR/vendor/sha.bash" https://github.com/chen56/sha/raw/main/sha.bash
 )
 if ! [[ -f "$ROOT_DIR/vendor/sha.bash" ]]; then
   upgrade_sha

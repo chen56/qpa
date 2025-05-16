@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2317
+set -o errtrace  # -E trap inherited in sub script
+set -o errexit   # -e
+set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
+set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
+
+
+CLI_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$CLI_DIR"
+
+# shellcheck disable=SC1091
+source "../../common.bash"
+
+####################################################################################
+# app script
+# 应用项目补充的公共脚本，不在bake维护范围
+# 此位置以上的全都是bake工具脚本，copy走可以直接用，之下的为项目特定cmd，自己弄
+####################################################################################
+
+##########################################
+# app cmd script
+# 应用的命令脚本
+##########################################
+
+info() {
+  _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"
+}
+build() {
+  # bun build direct_mode.ts --outfile dist/index.js
+  js() { bun build --outfile ./dist/index.js --format esm --target bun --standalone ./src/index.ts;}
+  exe() { bun build --compile --outfile ./dist/pa ./src/index.ts;}
+  lib() {
+    bun build ./src/index.ts --outdir ./dist
+    bunx tsc --emitDeclarationOnly --declaration --project tsconfig.json
+  }
+}
+
+install() { bun install;}
+tests() { bun test;}
+run() {
+  # 由于我们set -e，执行的子进程退出码如果非0，会导致整个脚本退出，且sha.bash会显示trap到的错误堆栈
+  # 但这里我们并不想显示堆栈，只当是普通参数错误，所以用||来处理，打印错误信息，然后继续执行
+  bun src/command/index.ts "$@" || printf "%b\n" "------------------\n [run src/index.ts $@], exit code($?)" ;
+}
+clean() { 
+  rm -rf dist;
+}
+
+sha "$@"
