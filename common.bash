@@ -48,7 +48,6 @@ _run() {
   # shellcheck disable=SC2001
   show_pwd=$(echo "$PWD" | sed "s@^$HOME@~@" )
 
-  echo "🔵 $caller_script:$caller_line ${FUNCNAME[1]}() ▶︎【$show_pwd$ $*】" >&2
+  echo "$_run_level 🔵 $caller_script:$caller_line ${FUNCNAME[1]}() ▶︎【$show_pwd$ $*】" >&2
   "$@"
 }
-

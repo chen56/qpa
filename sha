@@ -11,17 +11,65 @@ cd "$PA_DIR"
 # shellcheck disable=SC1091
 source "./common.bash"
 
-####################################################################################
-# app script
-# 应用项目补充的公共脚本，不在bake维护范围
-# 此位置以上的全都是bake工具脚本，copy走可以直接用，之下的为项目特定cmd，自己弄
-####################################################################################
+
+
+# nullglob选项默认off时：
+# -------------------------.bash
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=([0]="./no_exists_dir/*/sha")
+# -------------------------
+# 没有匹配到任何文件时，包含字符串字面量，这不是我们要的
+#
+# 而打开nullglob后：
+# -------------------------.bash
+# shopt -s nullglob
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=()
+# -------------------------s
+# 空数组!这是我们想要的
+shopt -s nullglob
+all_workspaces_sha=(./sha ./packages/*/sha )
 
 ##########################################
 # app cmd script
 # 应用的命令脚本
 ##########################################
+_all_workspaces() {
+    for file_path in "${all_workspaces_sha[@]}"; do
+      # 使用参数展开，移除字符串结尾的最短匹配 "/sha"
+      dir_path="${file_path%/sha}"
+      echo "$dir_path"
+    done
+}
 
+all() {
+  ls() {
+      for project_dir in $(_all_workspaces); do
+         echo "$project_dir"
+      done
+  }
+
+  run() {
+      for project_dir in $(_all_workspaces); do
+         (
+           cd "$project_dir"
+           _run "$@"
+         )
+      done
+  }
+
+  clean() {
+      for project_dir in $(_all_workspaces); do
+         _run "$project_dir/sha" clean
+      done
+  }
+}
+
+clean() {
+  echo "root workspace: clean"
+}
 
 info2() {
   _run echo "out ip: $(curl ipinfo.io/ip 2>/dev/null)"
@@ -29,8 +77,9 @@ info2() {
 
 cli() {
 #  _run "$PA_DIR/packages/cli/sha" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
-  _run "$PA_DIR/packages/core/sha" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
-
+  _run "$PA_DIR/packages/core/sha" "$@" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
 }
+
+
 
 sha "$@"

@@ -44,7 +44,7 @@ run() {
   bun src/command/index.ts "$@" || printf "%b\n" "------------------\n [run src/index.ts $@], exit code($?)" ;
 }
 clean() { 
-  rm -rf dist;
+  _run rm -rf dist;
 }
 
 sha "$@"

@@ -20,6 +20,13 @@
   "bin": {
     "bun": "index.ts"
   },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "bun build",
+    "test": "bun test",
+    "publish-packages": "bun publish --workspaces --if-present"
+  },
+
   "devDependencies": {
     "@commander-js/extra-typings": "^13.1.0",
     "@types/node": "^22.15.3",
