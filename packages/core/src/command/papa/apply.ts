@@ -1,6 +1,6 @@
-import type {GlobalOptions} from '@/internal/common';
-import {loadPlannedConfig} from '@/internal/common';
-import type {Project} from "@/index";
+import type {GlobalOptions} from '@/internal/common.ts';
+import {loadPlannedConfig} from '@/internal/common.ts';
+import type {Project} from "@/index.ts";
 import type {Command} from "commander";
 
 // 定义 apply 子命令选项的接口 (继承全局选项)

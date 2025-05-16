@@ -1,1 +1,1 @@
-export * from './vpc'
+export * from './vpc.ts'

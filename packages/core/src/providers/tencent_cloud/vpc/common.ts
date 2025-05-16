@@ -1,5 +1,5 @@
-import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client";
-import {TencentCloudProvider} from "@/providers/tencent_cloud";
+import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
+import {TencentCloudProvider} from "@/providers/tencent_cloud/index.ts";
 
 export class VpcClients {
     private readonly vpcClients: Map<string, tc_VpcClient> = new Map();

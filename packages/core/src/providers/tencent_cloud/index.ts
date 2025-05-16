@@ -9,13 +9,13 @@
 
 
 // 1. 明确列出要导出的内容（可选）
-export { TencentCloudPlannedFactory } from './factory';
+export { TencentCloudPlannedFactory } from './factory.ts';
 export {
 TencentCloudProvider
-} from './provider';
+} from './provider.ts';
 
 // 2. 为重要的类型添加类型导出
-export type { Vpc } from './vpc';
+export type { Vpc } from './vpc/vpc.ts';
 
 // 3. 添加详细的文档注释
 /**

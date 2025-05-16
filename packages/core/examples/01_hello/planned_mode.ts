@@ -1,6 +1,6 @@
 // noinspection JSUnusedGlobalSymbols
 import {Config, Project} from "@/index.ts";
-import {TencentCloudPlannedFactory, TencentCloudProvider} from "@/providers/tencent_cloud";
+import {TencentCloudPlannedFactory, TencentCloudProvider} from "@/providers/tencent_cloud/index.ts";
 import {allowServices} from "@/providers/tencent_cloud/default.ts";
 
 

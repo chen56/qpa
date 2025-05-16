@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     // ==== 项目输出和目标 ====
-    "target": "ESNext",
     // 编译目标 JavaScript 版本。ESNext 代表最新的标准，Bun 完全支持。
-    "module": "NodeNext",
+    "target": "ESNext",
     // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
-    "outDir": "./dist",
+    "module": "NodeNext",
     // 编译输出目录。将编译后的 JS 和 .d.ts 文件放入 dist 文件夹。
+    "outDir": "./dist",
     "rootDir": "./src",
     // **重要** declaration,declarationMap开启sourceMap,ide才能正确到行到ts
     // 包含源文件的根目录。假设你的 TypeScript 源代码都在 src 文件夹下。

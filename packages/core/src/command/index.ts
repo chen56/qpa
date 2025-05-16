@@ -1,6 +1,6 @@
-import * as apply from './apply';
-import * as destroy from './destroy';
-import * as plan from './plan';
+import * as apply from './apply.js';
+import * as destroy from './destroy.js';
+import * as plan from './plan.ts';
 import * as papa from './papa/index.ts';
 import process from "node:process";
 import {MyRootCommand} from "@/internal/command/common.ts";

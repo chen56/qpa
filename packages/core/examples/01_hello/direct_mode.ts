@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import {TencentCloudProvider} from "@/providers/tencent_cloud";
+import {TencentCloudProvider} from "@/providers/tencent_cloud/index.ts";
 import {Project,Config} from "@/index.ts";
 import {allowServices} from "@/providers/tencent_cloud/default.ts";
 import {TencentCloudDirectFactory} from "@/providers/tencent_cloud/factory.ts";

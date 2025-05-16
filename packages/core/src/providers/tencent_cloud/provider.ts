@@ -1,14 +1,14 @@
-import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface";
-import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client";
-import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models";
+import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
+import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
+import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {
     Constants,
     StatePart,
     Project,
     Provider,
     ResourceService
-} from "@/index";
-import * as common from "@/internal/common";
+} from "@/index.ts";
+import * as common from "@/internal/common.ts";
 
 export abstract class TencentCloudResourceService<SPEC,STATE> extends ResourceService<SPEC,STATE>{
 
