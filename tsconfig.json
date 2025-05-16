@@ -8,8 +8,10 @@
     "outDir": "./dist",
     // 编译输出目录。将编译后的 JS 和 .d.ts 文件放入 dist 文件夹。
     "rootDir": "./src",
+    // **重要** declaration,declarationMap开启sourceMap,ide才能正确到行到ts
     // 包含源文件的根目录。假设你的 TypeScript 源代码都在 src 文件夹下。
     "declaration": true,
+    "declarationMap":true,
     // 生成伴随 .js 文件的 .d.ts 类型声明文件。对于可重用的 CLI 代码（例如作为库导入）很有用。
     //      "declarationDir": "./dist",
     //      "emitDeclarationOnly": true,

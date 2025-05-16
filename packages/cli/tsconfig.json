@@ -4,11 +4,7 @@
   "compilerOptions": {
     // **必需**：表明这是一个 Composite Project，可以被其他项目引用，并支持增量构建
     "composite": true,
-    // **重要** declaration,declarationMap开启sourceMap,ide才能正确到行到ts
-    // 包含源文件的根目录。假设你的 TypeScript 源代码都在 src 文件夹下。
-    "declaration": true,
-    "declarationMap":true,
-    "declarationDir": "./dist",
+    // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
     "outDir": "./dist",
     // 编译输出目录。将编译后的 JS 和 .d.ts 文件放入 dist 文件夹。
     "rootDir": "./src",
@@ -17,10 +13,13 @@
     "baseUrl": ".",
     // 必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "paths": {
+      // 将 "@/" 开头的路径映射到 "./src/" 目录
       "@/*": [
         "./src/*"
-      ]
-      // 将 "@/" 开头的路径映射到 "./src/" 目录
+      ],
+//      "@pa/core": [
+//        "../core/src"
+//      ]
     }
   },
   "include": [
@@ -42,5 +41,8 @@
   "references": [
     // 如果 package-a 自己依赖 Monorepo 中的其他项目，在这里引用它们
     // 例如：{"path": "../package-c"}
+    {
+      "path": "../core"
+    }
   ]
 }

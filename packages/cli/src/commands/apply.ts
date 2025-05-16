@@ -3,12 +3,13 @@
 import { Command } from 'commander';
 // 导入共享类型（如果创建了 types.ts）
 import type { GlobalOptions } from '../common';
+import {Project} from "@pa/core";
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
 interface ApplyOptions extends GlobalOptions {
   extra?: boolean; // 示例选项
 }
-
+new Project()
 // 导出一个函数，用于注册 apply 子命令
 // 接受父命令 (通常是 program 实例) 作为参数
 export function registerApplyCommand(parentCommand: Command): void {
