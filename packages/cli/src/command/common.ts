@@ -1,5 +1,5 @@
 import {Command} from "commander";
-import {Config, Project} from "@/index.ts";
+import {Config, Project} from "@qpa/core";
 import process from "node:process";
 import path from "node:path";
 import fs from "node:fs";
@@ -30,12 +30,11 @@ export async function loadDirectConfig(configPath: string, options:GlobalOptions
         throw new Error(`config file ${configPath} not found`);
     })();
     const configModule = await import(configPath);
-    const config = configModule.default;
-    if(!(config instanceof Config)){
-        throw new Error(`Module '${configPath}' does not export a default Config, Please use: export default Config.directMode()/Config.plannedMode, config:${JSON.stringify(config)}`);
-    }
+    // if(!(configModule.default instanceof Config)){
+    //     throw new Error(`Module '${configPath}' does not export a default Config, Please use: export default Config.directMode()/Config.plannedMode, config:${JSON.stringify(config)}`);
+    // }
 
-    return config;
+    return configModule.default;
 }
 export async function loadPlannedConfig(config: string, options:GlobalOptions): Promise<Project> {
     const currentWorkingDirectory: string = process.cwd();

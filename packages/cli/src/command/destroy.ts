@@ -1,7 +1,7 @@
 // src/command/destroy.ts
 import {GlobalOptions, loadDirectConfig} from '@/command/common.ts';
 
-import {Config} from "@/index.ts";
+import {Config} from "@qpa/core";
 import type {Command} from "commander";
 
 interface Options extends GlobalOptions {

@@ -1,7 +1,7 @@
 import {GlobalOptions, loadDirectConfig} from '@/command/common.ts';
 // import type {Project} from "@/index";
 import type {Command} from "commander";
-import {Config} from "@/index.ts";
+import {Config} from "@qpa/core";
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
 interface ApplyOptions extends GlobalOptions {
