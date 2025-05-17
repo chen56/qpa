@@ -60,6 +60,19 @@ build() {
     bunx tsc --emitDeclarationOnly --declaration --project tsconfig.json
   }
 }
+publish() {
+  dry-run() {
+    npm pack
+    npm publish --dry-run --registry=https://registry.npmjs.org/
+  }
+   #npm publish --workspaces
+#  npm version patch: 增加补丁版本号（例如从 1.0.0 到 1.0.1）。
+#  npm version minor: 增加次要版本号（例如从 1.0.0 或 1.1.0 到 1.2.0）。
+#  npm version major: 增加主要版本号（例如从 1.0.0 或 1.x.y 到 2.0.0）。  npm version patch
+  real() {
+    npm publish --dry-run --registry=https://registry.npmjs.org/
+  }
+}
 
 install() { bun install;}
 test() { bun test;}

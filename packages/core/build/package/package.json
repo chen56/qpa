@@ -1,9 +1,9 @@
 {
-  "name": "@pa/core",
+  "name": "@qpa/core",
   "version": "0.1.0",
   "description": "pa cli",
   "keywords": [
-    "pa",
+    "qpa",
     "cli"
   ],
   "license": "MIT",
