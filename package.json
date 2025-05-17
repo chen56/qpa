@@ -12,5 +12,8 @@
     "test": "bun test",
     "publish-packages": "bun publish --workspaces --if-present"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1"
+  }
 }

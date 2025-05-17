@@ -2,11 +2,9 @@
   "name": "@qpa/cli",
   "version": "0.1.2",
   "description": "pa cli",
-  "publishConfig": {
-    "access": "public"
-  },
+  "private": true,
   "bin": {
-    "bun": "index.ts"
+    "qpa": "src/command/index.ts"
   },
   "scripts": {
     "clean": "rm -rf dist",
@@ -15,9 +13,8 @@
     "publish-packages": "bun publish --workspaces --if-present"
   },
   "devDependencies": {
-    "@types/node": "^22.15.3",
-    "@types/yargs": "^17.0.33",
     "@commander-js/extra-typings": "^13.1.0",
+    "@types/node": "^22.15.3",
     "chalk": "^5.3.0"
   },
   "keywords": [
@@ -27,7 +24,6 @@
   "author": "chen56",
   "dependencies": {
     "commander": "^13.1.0",
-    "tencentcloud-sdk-nodejs": "^4.0.973",
     "@qpa/core": "^0.1.0"
   }
 }
