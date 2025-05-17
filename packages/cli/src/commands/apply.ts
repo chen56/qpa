@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 // 导入共享类型（如果创建了 types.ts）
 import type { GlobalOptions } from '../common';
-// import {Project} from "@pa/core";
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
 interface ApplyOptions extends GlobalOptions {

@@ -1,3 +1,3 @@
-# @pa/core
+# @qpa/core
 
 core

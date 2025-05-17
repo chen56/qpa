@@ -1,5 +1,5 @@
 {
-  "name": "pa",
+  "name": "qpa",
   "private": true,
   "version": "0.1.0",
   "workspaces": [
@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "clean": "rm -rf dist ",
-    "build:all": "npm run --filter @pa/* build --if-present",
+    "build:all": "npm run --filter @qpa/* build --if-present",
 
     "build": "echo 'root build ' ",
     "test": "bun test",

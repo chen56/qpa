@@ -10,8 +10,8 @@ import {VpcState} from "@/providers/tencent_cloud/vpc/vpc.ts";
 
 export const Constants = {
     tagNames: {
-        resource: "pa_name",
-        project: "pa_project_name",
+        resource: "qpa_name",
+        project: "qpa_project_name",
     },
 } as const;
 

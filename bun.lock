@@ -2,16 +2,16 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "pa",
+      "name": "qpa",
     },
     "packages/cli": {
-      "name": "@pa/cli",
+      "name": "@qpa/cli",
       "version": "1.0.0",
       "bin": {
         "bun": "index.ts",
       },
       "dependencies": {
-        "@pa/core": "workspace:@pa/core",
+        "@qpa/core": "workspace:@qpa/core",
         "commander": "^13.1.0",
         "tencentcloud-sdk-nodejs": "^4.0.973",
       },
@@ -23,7 +23,7 @@
       },
     },
     "packages/core": {
-      "name": "@pa/core",
+      "name": "@qpa/core",
       "version": "1.0.0",
       "bin": {
         "bun": "index.ts",
@@ -126,9 +126,9 @@
 
     "@modelcontextprotocol/sdk": ["@modelcontextprotocol/sdk@1.11.3", "https://registry.npmmirror.com/@modelcontextprotocol/sdk/-/sdk-1.11.3.tgz", { "dependencies": { "content-type": "^1.0.5", "cors": "^2.8.5", "cross-spawn": "^7.0.5", "eventsource": "^3.0.2", "express": "^5.0.1", "express-rate-limit": "^7.5.0", "pkce-challenge": "^5.0.0", "raw-body": "^3.0.0", "zod": "^3.23.8", "zod-to-json-schema": "^3.24.1" } }, "sha512-rmOWVRUbUJD7iSvJugjUbFZshTAuJ48MXoZ80Osx1GM0K/H1w7rSEvmw8m6vdWxNASgtaHIhAgre4H/E9GJiYQ=="],
 
-    "@pa/cli": ["@pa/cli@workspace:packages/cli"],
+    "@qpa/cli": ["@qpa/cli@workspace:packages/cli"],
 
-    "@pa/core": ["@pa/core@workspace:packages/core"],
+    "@qpa/core": ["@qpa/core@workspace:packages/core"],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.40.2", "https://registry.npmmirror.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.40.2.tgz", { "os": "android", "cpu": "arm" }, "sha512-JkdNEq+DFxZfUwxvB58tHMHBHVgX23ew41g1OQinthJ+ryhdRk67O31S7sYw8u2lTjHUPFxwar07BBt1KHp/hg=="],
 

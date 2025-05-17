@@ -109,7 +109,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
         for (const vpc of tc_vpcSet??[]) {
             const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
             if (!resourceName) {
-                // 没找到pa_key的是问题资源，暂时不管
+                // 没找到qpa_key的是问题资源，暂时不管
                 continue;
             }
             const toState:VpcState = {
