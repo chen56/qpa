@@ -1,6 +1,6 @@
 {
   "name": "@qpa/cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "pa cli",
   "publishConfig": {
     "access": "public"
@@ -14,7 +14,6 @@
     "test": "bun run --workspaces test",
     "publish-packages": "bun publish --workspaces --if-present"
   },
-
   "devDependencies": {
     "@types/node": "^22.15.3",
     "@types/yargs": "^17.0.33",
