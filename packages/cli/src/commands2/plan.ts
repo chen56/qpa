@@ -1,4 +1,4 @@
-// src/commands/plan.ts
+// src/commands2/plan.ts
 
 import { Command } from 'commander';
 // 导入共享类型（如果创建了 types.ts）

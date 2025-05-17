@@ -1,5 +1,5 @@
 // src/command/destroy.ts
-import {GlobalOptions, loadDirectConfig} from '@/internal/common.ts';
+import {GlobalOptions, loadDirectConfig} from '@/command/common.ts';
 
 import {Config} from "@/index.ts";
 import type {Command} from "commander";

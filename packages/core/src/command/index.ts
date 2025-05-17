@@ -3,7 +3,7 @@ import * as destroy from './destroy.js';
 import * as plan from './plan.ts';
 import * as papa from './papa/index.ts';
 import process from "node:process";
-import {MyRootCommand} from "@/internal/command/common.ts";
+import {MyRootCommand} from "@/command/common.ts";
 
 const program = new MyRootCommand();
 program

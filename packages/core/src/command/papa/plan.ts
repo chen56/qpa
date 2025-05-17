@@ -1,5 +1,5 @@
-import type {GlobalOptions} from '@/internal/common.ts';
-import {loadPlannedConfig} from '@/internal/common.ts';
+import type {GlobalOptions} from '@/command/common.ts';
+import {loadPlannedConfig} from '@/command/common.ts';
 import type {Project} from "@/index.ts";
 import type {Command} from "commander";
 

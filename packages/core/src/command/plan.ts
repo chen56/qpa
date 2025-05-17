@@ -1,5 +1,5 @@
-import type {GlobalOptions} from '@/internal/common.ts';
-import {loadDirectConfig} from '@/internal/common.ts';
+import type {GlobalOptions} from '@/command/common.ts';
+import {loadDirectConfig} from '@/command/common.ts';
 import {Config} from "@/index.ts";
 import type {Command} from "commander";
 

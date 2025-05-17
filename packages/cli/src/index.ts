@@ -3,8 +3,8 @@
 import { program } from 'commander'; // 导入 Command 和 program
 
 // 导入子命令注册函数
-import { registerApplyCommand } from './commands/apply';
-import { registerPlanCommand } from './commands/plan';
+import { registerApplyCommand } from '@/commands2/apply';
+import { registerPlanCommand } from '@/commands2/plan';
 
 
 // --- 定义全局选项 ---
