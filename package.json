@@ -1,18 +1,16 @@
 {
   "name": "qpa",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "clean": "rm -rf dist ",
     "build:all": "npm run --filter @qpa/* build --if-present",
-
     "build": "echo 'root build ' ",
     "test": "bun test",
     "publish-packages": "bun publish --workspaces --if-present"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
