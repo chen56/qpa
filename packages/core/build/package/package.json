@@ -1,6 +1,6 @@
 {
   "name": "@qpa/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "pa cli",
   "keywords": [
     "qpa",
@@ -24,10 +24,10 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
+    "src",
     "dist",
     "README.md",
-    "LICENSE",
-    "../../LICENSE"
+    "LICENSE"
   ],
   "exports": {
     ".": {
@@ -42,7 +42,12 @@
   },
   "bun": {
     "resolve": {
-      "extensions": [".tsx", ".ts", ".jsx", ".js"]
+      "extensions": [
+        ".tsx",
+        ".ts",
+        ".jsx",
+        ".js"
+      ]
     }
   },
   "scripts": {
