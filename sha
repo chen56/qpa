@@ -45,7 +45,7 @@ _all_workspaces() {
 }
 
 all() {
-  ls() {
+  list() {
       for project_dir in $(_all_workspaces); do
          echo "$project_dir"
       done
@@ -63,14 +63,15 @@ all() {
        _run "$project_dir/sha" clean
     done
   }
-  test() {
+  tests() {
     for project_dir in $(_all_workspaces); do
-       _run "$project_dir/sha" test
+       _run "$project_dir/sha" tests
     done
   }
 }
 
-npm() {
+# npm 名字和已有命令重复
+npmjs() {
   login() {
     # 指定--registry防止登陆跳转到镜像网站
     npm login --registry=https://registry.npmjs.org/
@@ -81,7 +82,7 @@ clean() {
   echo "root workspace: clean"
 }
 
-test() {
+tests() {
   echo "root workspace: clean"
 }
 
@@ -92,6 +93,21 @@ info2() {
 cli() {
 #  _run "$PA_DIR/packages/cli/sha" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
   _run "$PA_DIR/packages/core/sha" "$@" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
+}
+
+version() {
+  info() {
+     npm version --workspaces "$@"
+  }
+  patch() {
+    npm version patch --workspaces "$@"
+  }
+  prerelease() {
+    npm version prerelease --workspaces "$@"
+  }
+  push() {
+    git push origin --tags  "$@"
+  }
 }
 
 sha "$@"

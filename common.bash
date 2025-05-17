@@ -12,10 +12,12 @@ upgrade_sha() (
   set -x
   curl -L -o "$ROOT_DIR/vendor/sha.bash" https://github.com/chen56/sha/raw/main/sha.bash
 )
+
 if ! [[ -f "$ROOT_DIR/vendor/sha.bash" ]]; then
   upgrade_sha
 fi
 
+# 注意，当前import sha.bash前不能定义任何函数，否则会被认为是系统函数，注册时会因为
 # shellcheck disable=SC1091
 . "$ROOT_DIR/vendor/sha.bash"
 

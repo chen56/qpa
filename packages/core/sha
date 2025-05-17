@@ -24,7 +24,7 @@ cd "$CLI_DIR"
 # 应用的命令脚本
 ##########################################
 
-info() {
+status() {
   _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"
 }
 
@@ -76,9 +76,9 @@ publish() {
   }
 }
 
-install() { bun install;}
+deps() { bun install;}
 
-test() { bun test;}
+tests() { bun test;}
 
 run() {
   # 由于我们set -e，执行的子进程退出码如果非0，会导致整个脚本退出，且sha.bash会显示trap到的错误堆栈
