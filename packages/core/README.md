@@ -1,0 +1,3 @@
+# @pa/core
+
+core

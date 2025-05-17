@@ -4,13 +4,7 @@
   "compilerOptions": {
     // **必需**：表明这是一个 Composite Project，可以被其他项目引用，并支持增量构建
     "composite": true,
-    // **重要** declaration,declarationMap开启sourceMap,ide才能正确到行到ts
-    // 包含源文件的根目录。假设你的 TypeScript 源代码都在 src 文件夹下。
-    "declaration": true,
-    "declarationMap":true,
-    "declarationDir": "./dist",
     "outDir": "./dist",
-    // 编译输出目录。将编译后的 JS 和 .d.ts 文件放入 dist 文件夹。
     "rootDir": "./src",
     //====. 配置 @/a/b 形式 替代 ../a/b
     //确保 moduleResolution 设置为与 Bun 兼容的值，例如 'bundler' 或 'node16'/'nodenext'
@@ -19,28 +13,29 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ]
+      ],
+
       // 将 "@/" 开头的路径映射到 "./src/" 目录
-    }
+    },
+    // 将 tsconfig.tsbuildinfo 文件生成在 ./build 目录,默认是tsc执行目录
+    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
+
   },
+  "references": [
+    // 如果 package-a 自己依赖 Monorepo 中的其他项目，在这里引用它们
+    // 例如：{"path": "../package-c"}
+  ],
   "include": [
     "src/**/*",
     // 告诉 TypeScript 编译器需要包含哪些文件进行编译。这里包含了 src 目录下所有文件和子目录。
-    "examples/**/*"
+//    "examples/**/*"
     // 告诉 TypeScript 编译器需要包含哪些文件进行编译。这里包含了 src 目录下所有文件和子目录。
   ],
   "exclude": [
     "node_modules",
-    // 排除 node_modules 目录，通常不需要编译依赖库。
     "dist",
-    // 排除输出目录，避免重复编译或错误引用。
-    "**/*.test.ts",
-    // 可选：排除测试文件，如果你的测试文件在 src 目录下且以 .test.ts 结尾。
-    "**/*.spec.ts"
-    // 可选：排除测试文件，如果你的测试文件在 src 目录下且以 .spec.ts 结尾。
-  ],
-  "references": [
-    // 如果 package-a 自己依赖 Monorepo 中的其他项目，在这里引用它们
-    // 例如：{"path": "../package-c"}
+    "examples",
+    "test",
   ]
+
 }

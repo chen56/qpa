@@ -70,6 +70,13 @@ all() {
   }
 }
 
+npm() {
+  login() {
+    # 指定--registry防止登陆跳转到镜像网站
+    npm login --registry=https://registry.npmjs.org/
+  }
+}
+
 clean() {
   echo "root workspace: clean"
 }

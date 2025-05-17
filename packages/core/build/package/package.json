@@ -15,9 +15,7 @@
   "bugs": {
     "url": "https://github.com/chen56/issues"
   },
-
   "author": "chen56",
-
   "publishConfig": {
     "access": "public"
   },
@@ -38,24 +36,21 @@
       "types": "./dist/index.d.ts"
     },
     "./package.json": "./package.json"
-   },
+  },
   "bin": {
     "bun": "./src/index.ts"
   },
-
   "bun": {
     "resolve": {
       "extensions": [".tsx", ".ts", ".jsx", ".js"]
     }
   },
-
   "scripts": {
     "clean": "rm -rf dist",
     "build": "bun build",
     "test": "bun test",
     "publish-packages": "bun publish --workspaces --if-present"
   },
-
   "devDependencies": {
     "@commander-js/extra-typings": "^13.1.0",
     "@types/node": "^22.15.3",
