@@ -1,5 +1,5 @@
 import {TencentCloudProvider, Vpc} from "@/providers/tencent_cloud/index.ts";
-import {PaPaResource, SpecPartProps, AppliedResource, SpecPart} from "@/index.ts";
+import {PaPaResource, SpecPartProps, AppliedResource, SpecPart} from "@qpa/core";
 import {VpcService, VpcState} from "@/providers/tencent_cloud/vpc/vpc.ts";
 
 /**

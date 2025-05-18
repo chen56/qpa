@@ -3,7 +3,7 @@
   // 继承根目录的共享配置
   "compilerOptions": {
     // **必需**：表明这是一个 Composite Project，可以被其他项目引用，并支持增量构建
-    "composite": false,
+    "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
     //====. 配置 @/a/b 形式 替代 ../a/b
@@ -24,10 +24,13 @@
   "references": [
     // 如果 package-a 自己依赖 Monorepo 中的其他项目，在这里引用它们
     // 例如：{"path": "../package-c"}
-     {"path": "../core"}
+    {"path": "../core"}
   ],
   "include": [
     "src/**/*",
+    "examples/**/*",
+    "test",
+
     // 告诉 TypeScript 编译器需要包含哪些文件进行编译。这里包含了 src 目录下所有文件和子目录。
     //    "examples/**/*"
     // 告诉 TypeScript 编译器需要包含哪些文件进行编译。这里包含了 src 目录下所有文件和子目录。
@@ -35,8 +38,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "examples",
-    "test",
   ]
 
 }

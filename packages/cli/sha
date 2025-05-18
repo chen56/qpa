@@ -37,6 +37,7 @@ tests() { bun test;}
 run() {  bun src/command/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
 clean() { 
   _run rm -rf dist;
+  _run rm -rf node_modules;
 }
 
 sha "$@"

@@ -34,8 +34,8 @@
   "exclude": [
     "node_modules",
     "dist",
-    "examples",
-    "test",
+    "../provider-tencentcloud/examples",
+    "test"
   ]
 
 }

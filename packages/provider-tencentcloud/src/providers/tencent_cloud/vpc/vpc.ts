@@ -5,7 +5,7 @@ import {
 import {
     ResourceTag as tc_ResourceTag
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {PaPaResource, Constants, StatePart, SpecPart} from "@/index.ts";
+import {PaPaResource, Constants, StatePart, SpecPart} from "@qpa/core";
 import {
     ResourceType,
     TencentCloudProvider,

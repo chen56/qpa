@@ -5,7 +5,6 @@
  *   这些被删除的资源配置对应的真实资源也将被被清理
  * - Unmanaged Resources: 非管理资源, 即脱离IAC工具，由其他工具或手工创建的资源。
  * */
-import {VpcState} from "@/providers/tencent_cloud/vpc/vpc.ts";
 
 
 export const Constants = {
@@ -20,22 +19,26 @@ export enum _ConfigMode {
     Direct,
     Planned
 }
-export type ConfigSetup=(project: Project) => Promise<void>;
+
+export type ConfigSetup = (project: Project) => Promise<void>;
+
 export class Config {
     public project: Project;
-    public _setup:ConfigSetup;
+    public _setup: ConfigSetup;
 
     private constructor(public readonly _configMode: _ConfigMode, props: ConfigProps) {
         // 这里可以添加配置验证逻辑
         if (!props.project.name) {
             throw new Error('Missing required project name');
         }
-        this.project= props.project;
+        this.project = props.project;
         this._setup = props.setup
     }
-    public setup() :Promise<void>{
-       return this._setup(this.project);
+
+    public setup(): Promise<void> {
+        return this._setup(this.project);
     }
+
     static directMode(props: ConfigProps) {
         return new Config(_ConfigMode.Direct, props);
     }
@@ -94,7 +97,7 @@ export class AppliedResource<SPEC, STATE> {
 
 
 export abstract class ResourceService<SPEC, STATE> {
-    abstract create(resource: SpecPart<SPEC>): Promise<StatePart<VpcState>>;
+    abstract create(resource: SpecPart<SPEC>): Promise<StatePart<STATE>>;
 
     abstract destroy(resource: PaPaResource<SPEC, STATE>): Promise<void>;
 
@@ -139,7 +142,7 @@ export class PaPaResource<SPEC, STATE> {
         return this._states;
     }
 
-    async create(): Promise<StatePart<VpcState>> {
+    async create(): Promise<StatePart<STATE>> {
         return this.service.create(this.specPart);
     }
 

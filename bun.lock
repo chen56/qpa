@@ -44,6 +44,22 @@
         "vitest": "^3.1.3",
       },
     },
+    "packages/provider-tencentcloud": {
+      "name": "@qpa/provider-tencentcloud",
+      "version": "0.1.2",
+      "dependencies": {
+        "@qpa/core": "^0.1.0",
+        "dotenv": "^16.5.0",
+        "tencentcloud-sdk-nodejs": "^4.0.973",
+      },
+      "devDependencies": {
+        "@types/node": "^22.15.3",
+        "eslint": "^9.26.0",
+        "jiti": "^2.4.2",
+        "typescript": "^5.8.3",
+        "vitest": "^3.1.3",
+      },
+    },
   },
   "packages": {
     "@commander-js/extra-typings": ["@commander-js/extra-typings@13.1.0", "https://registry.npmmirror.com/@commander-js/extra-typings/-/extra-typings-13.1.0.tgz", { "peerDependencies": { "commander": "~13.1.0" } }, "sha512-q5P52BYb1hwVWE6dtID7VvuJWrlfbCv4klj7BjUUOqMz4jbSZD4C9fJ9lRjL2jnBGTg+gDDlaXN51rkWcLk4fg=="],
@@ -137,6 +153,8 @@
     "@qpa/cli": ["@qpa/cli@workspace:packages/cli"],
 
     "@qpa/core": ["@qpa/core@workspace:packages/core"],
+
+    "@qpa/provider-tencentcloud": ["@qpa/provider-tencentcloud@workspace:packages/provider-tencentcloud"],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.40.2", "https://registry.npmmirror.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.40.2.tgz", { "os": "android", "cpu": "arm" }, "sha512-JkdNEq+DFxZfUwxvB58tHMHBHVgX23ew41g1OQinthJ+ryhdRk67O31S7sYw8u2lTjHUPFxwar07BBt1KHp/hg=="],
 

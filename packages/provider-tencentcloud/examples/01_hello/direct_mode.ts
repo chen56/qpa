@@ -1,15 +1,14 @@
-// noinspection JSUnusedGlobalSymbols
-import {Config, Project} from "@/index.ts";
-import {TencentCloudPlannedFactory, TencentCloudProvider} from "@/providers/tencent_cloud/index.ts";
-import {allowServices} from "@/providers/tencent_cloud/default.ts";
+import 'dotenv/config';
+import {Project,Config} from "@qpa/core";
+import {TencentCloudProvider} from "@/providers/tencent_cloud/index.js";
+import {allowServices} from "@/providers/tencent_cloud/default.js";
+import {TencentCloudDirectFactory} from "@/providers/tencent_cloud/factory.js";
 
-
-export default Config.plannedMode({
+export default Config.directMode({
     project: new Project({
         name: "test",
     }),
     setup: async (project: Project): Promise<void> => {
-
         const tencentCloudProvider = new TencentCloudProvider(project, {
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,
@@ -18,9 +17,9 @@ export default Config.plannedMode({
             allowedResourceServices: allowServices
         });
 
-        const tc = new TencentCloudPlannedFactory(tencentCloudProvider);
+        const tc = new TencentCloudDirectFactory(tencentCloudProvider);
 
-        tc.vpc.vpc({
+        const vpc = await tc.vpc.vpc({
             name: "main",
             spec: {
                 Region: "ap-guangzhou",
@@ -28,5 +27,6 @@ export default Config.plannedMode({
                 CidrBlock: '10.0.0.0/16',
             }
         });
+        console.log("vpc:", vpc.spec, vpc.state)
     }
 });
