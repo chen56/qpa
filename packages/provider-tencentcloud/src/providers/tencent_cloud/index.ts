@@ -16,7 +16,7 @@ TencentCloudProvider
 
 // 2. 为重要的类型添加类型导出
 export type { Vpc } from './vpc/vpc.ts';
-
+export * from './default.ts'
 // 3. 添加详细的文档注释
 /**
  * @packageDocumentation

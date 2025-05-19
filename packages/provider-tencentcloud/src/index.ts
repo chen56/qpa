@@ -13,6 +13,5 @@
 // export * from './factory';
 // export * from './vpc';
 
-
-export * from '@/providers/tencent_cloud/index.ts';
+export * from './providers/tencent_cloud/index.ts';
 

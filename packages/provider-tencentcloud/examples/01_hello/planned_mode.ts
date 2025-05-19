@@ -1,7 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 import {Config, Project} from "@qpa/core";
-import {TencentCloudPlannedFactory, TencentCloudProvider} from "@/providers/tencent_cloud/index.js";
-import {allowServices} from "@/providers/tencent_cloud/default.js";
+import {TencentCloudPlannedFactory, TencentCloudProvider} from "../../src/providers/tencent_cloud/index.js";
+import {allowServices} from "../../src/providers/tencent_cloud/default.js";
 
 
 export default Config.plannedMode({

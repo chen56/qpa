@@ -71,7 +71,7 @@ deps() { bun install;}
 tests() { bun test;}
 
 clean() { 
-  _run rm -rf dist build;
+  _run rm -rf dist build node_modules;
 }
 
 sha "$@"

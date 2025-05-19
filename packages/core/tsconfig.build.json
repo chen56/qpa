@@ -3,7 +3,7 @@
   // 继承根目录的共享配置
   "compilerOptions": {
     "composite": true,
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "./dist",
     //## 配置 @/a/b 形式 替代 ../a/b
     //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
@@ -15,6 +15,9 @@
         "./src/*",
 
       ],
+      "@pqa/core/*": ["packages/core/src/*"],
+      //      "@pqa//*": ["packages/*/src"]
+
     },
     // 将 tsconfig.tsbuildinfo 文件生成在 ./build 目录,默认是tsc执行目录
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
@@ -48,6 +51,6 @@
     // 开启 strict: true 能让 TypeScript 编译器执行更严格的类型检查，如 strictNullChecks、strictFunctionTypes 等
     "strict": true
   },
-  "include": ["src","test"],
+  "include": ["src"],
   "exclude": ["node_modules"],
 }

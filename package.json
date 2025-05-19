@@ -6,11 +6,6 @@
     "packages/*"
   ],
   "scripts": {
-    "clean": "rm -rf dist ",
-    "build:all": "npm run --filter @qpa/* build --if-present",
-    "build": "echo 'root build ' ",
-    "test": "bun test",
-    "publish-packages": "bun publish --workspaces --if-present"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.32.1",

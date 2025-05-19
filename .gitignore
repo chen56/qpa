@@ -139,7 +139,8 @@ dist
 
 # idea
 .idea/
-
+!.idea/dictionaries/project.xml
+!.idea/inspectionProfiles/Project_Default.xml
 
 tsconfig.tsbuildinfo
 

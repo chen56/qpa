@@ -34,10 +34,9 @@ build() {
 }
 
 tests() { bun test;}
-run() {  bun src/command/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
+run() {  npx tsx src/command/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
 clean() { 
-  _run rm -rf dist;
-  _run rm -rf node_modules;
+  _run rm -rf dist build node_modules;
 }
 
 sha "$@"

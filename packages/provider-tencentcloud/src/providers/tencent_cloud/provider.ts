@@ -8,7 +8,7 @@ import {
     Provider,
     ResourceService
 } from "@qpa/core";//@qpa/core
-import * as common from "@/internal/common.ts";
+import * as common from "../../internal/common.ts";
 
 export abstract class TencentCloudResourceService<SPEC,STATE> extends ResourceService<SPEC,STATE>{
 

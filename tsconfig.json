@@ -1,81 +1,63 @@
+// build阶段 配置
 {
+  // 继承根目录的共享配置
   "compilerOptions": {
-    // ==== 项目输出和目标 ====
-    // 编译目标 JavaScript 版本。ESNext 代表最新的标准，Bun 完全支持。
-    "target": "ESNext",
+    "composite": true,
+        "rootDir": "./",
+    "outDir": "./dist",
+    //## 配置 @/a/b 形式 替代 ../a/b
+    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
+    "baseUrl": "./",
+    "paths": {
+      // 改造相对引用为绝对引用，让代码更简单清晰：比如： 用@/a/b 替代 ../a/b
+      // "@/*"的配置可以认为是项目内引用
+      "@/*": [
+        "./src/*",
+
+      ],
+      "@pqa/core/*": ["packages/core/src/*"],
+//      "@pqa//*": ["packages/*/src"]
+
+    },
+    // 将 tsconfig.tsbuildinfo 文件生成在 ./build 目录,默认是tsc执行目录
+    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
+
+
+    "allowImportingTsExtensions":true,
+    "emitDeclarationOnly":true,
+    "declaration": true,
+
+    // 启用 ES Modules 与 CommonJS 的互操作
+    // 当 esModuleInterop 设置为 true 时，TypeScript 编译后的代码会处理好 ES Modules 和 CommonJS 模块之间的差异，让默认导入正常工作。
+    "esModuleInterop": true,
+
+
+    "types": [
+      "vitest/importMeta"
+    ],
+    /*
+    ## Bundler mode
+    */
+    // Node.js 项目：如果使用 CommonJS，选 node；如果使用 ES Modules，选 node16 或 nodenext。
+    // 前端项目：使用打包工具时，选 bundler。
+    // 旧项目：可以考虑 classic，不过建议升级到现代解析策略。
+    "moduleResolution": "nodenext",
     // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
     "module": "NodeNext",
-    // 编译输出目录。将编译后的 JS 和 .d.ts 文件放入 dist 文件夹。
-    "outDir": "./dist",
-    "rootDir": "./src",
-    //====. 配置 @/a/b 形式 替代 ../a/b
-    //确保 moduleResolution 设置为与 Bun 兼容的值，例如 'bundler' 或 'node16'/'nodenext'
-    "baseUrl": ".",
-    // 必须设置 baseUrl，paths 是相对于 baseUrl 解析的
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-      // 将 "@/" 开头的路径映射到 "./src/" 目录
-    },
-    // **重要** declaration,declarationMap开启sourceMap,ide才能正确到行到ts
-    // 包含源文件的根目录。假设你的 TypeScript 源代码都在 src 文件夹下。
-    "declaration": true,
-    "declarationMap":true,
-    "emitDeclarationOnly": true,
-    // 生成 .map 文件，方便调试编译后的 JavaScript 代码。
-    "sourceMap": true,
 
-    // ==== 模块解析 ====
-    "moduleResolution": "NodeNext",
-    // 模块解析策略，与 Node.js (和 Bun) 的解析行为保持一致。
-    "esModuleInterop": true,
-    // 允许从 CommonJS 模块进行默认导入 (import ... from '...'). 强烈建议开启。
-    "allowSyntheticDefaultImports": true,
-    // 允许合成默认导入。通常与 esModuleInterop 一起使用。
-    "forceConsistentCasingInFileNames": true,
-    // 强制文件名大小写一致，避免某些操作系统上的问题。
-
-    // ==== 严格性和代码质量 ====
-    "strict": true,
-    // 启用所有严格的类型检查选项。这是 TypeScript 的核心优势所在，强烈建议开启。
-    // 当 strict 为 true 时，以下选项也默认开启：
-    // "noImplicitAny": true, // 不允许隐式的 any 类型。
-    // "noImplicitThis": true, // 当 this 表达式具有 any 类型时，抛出错误。
-    // "alwaysStrict": true, // 在编译后的 JS 文件中，在每个文件顶部发出 "use strict"。
-//     "strictNullChecks": true, // 启用严格的 null 和 undefined 检查。防止很多常见的运行时错误。
-    // "strictFunctionTypes": true, // 启用严格的函数类型检查。
-    // "strictPropertyInitialization": true, // 类的非延迟加载属性必须在构造函数中初始化。
-    // "strictBindCallApply": true, // 对函数的 bind, call, apply 方法进行严格的参数检查。
-
-    "noUnusedLocals": true,
-    // 报告未使用的本地变量的错误。帮助清理代码。
-    "noUnusedParameters": true,
-    // 报告未使用的函数参数的错误。帮助清理函数签名。
-    "noImplicitReturns": true,
-    // 不是所有代码路径都有返回值时，报告错误。
-    "noFallthroughCasesInSwitch": true,
-    // switch 语句中不允许出现 fallthrough。
-
-    // ==== 其他 ====
-    "skipLibCheck": true,
-    // 跳过所有声明文件 (*.d.ts) 的类型检查。可以加快编译速度，但在极少数情况下可能会隐藏库中的类型问题。对于应用代码通常是安全的。
-
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule":true,
+    /*
+    ## lint
+    */
+    // 开启 strict: true 能让 TypeScript 编译器执行更严格的类型检查，如 strictNullChecks、strictFunctionTypes 等
+    "strict": true
   },
-  "include": [
-    // 告诉 TypeScript 编译器需要包含哪些文件进行编译。这里包含了 src 目录下所有文件和子目录。
-    "src/**/*",
-  ],
-  "exclude": [
-    "node_modules",
-    // 排除 node_modules 目录，通常不需要编译依赖库。
-    "dist",
-    // 排除输出目录，避免重复编译或错误引用。
-    "**/*.test.ts",
-    // 可选：排除测试文件，如果你的测试文件在 src 目录下且以 .test.ts 结尾。
-    "**/*.spec.ts"
-    // 可选：排除测试文件，如果你的测试文件在 src 目录下且以 .spec.ts 结尾。
+  "include": ["src","test"],
+  "exclude": ["node_modules"],
+  "references": [
+    // 如果 package-a 自己依赖 Monorepo 中的其他项目，在这里引用它们
+    // 例如：{"path": "../package-c"}
+    {"path": "packages/core/src"},
+    {"path": "packages/cli/src"},
+    {"path": "packages/provider-tencentcloud/src"}
   ]
 }

@@ -53,14 +53,31 @@ readarray -t _on_workspace_list < <(_all_projects) ;
 g() {
   all() {
     readarray -t _on_workspace_list < <(_all_projects) ;
-    _workspace_context_commands
+    _enable_project_basic_commands
   }
   pkgs() {
     readarray -t _on_workspace_list < <(_npm_projects) ;
-    _workspace_context_commands
+    _enable_project_basic_commands
+    _enable_project_impl_commands
   }
 }
-
+p() {
+  core() {
+    _on_workspace_list=(./packages/core)
+    _enable_project_basic_commands
+    _enable_project_impl_commands
+  }
+  cli() {
+    _on_workspace_list=(./packages/core)
+    _enable_project_basic_commands
+    _enable_project_impl_commands
+  }
+  tencentcloud() {
+    _on_workspace_list=(./packages/provider-tencentcloud)
+    _enable_project_basic_commands
+    _enable_project_impl_commands
+  }
+}
 _packages() {
   local workspace
   for workspace in "${@}"; do
@@ -80,8 +97,9 @@ _all_workspaces() {
     done
 }
 
-_workspace_context_commands() {
 
+# 可扩展的命令集合，需要_on_workspace_list
+_enable_project_basic_commands() {
   list() {
     for project_dir in "${_on_workspace_list[@]}"; do
        echo "$project_dir"
@@ -100,7 +118,21 @@ _workspace_context_commands() {
   clean() {
     for project_dir in "${_on_workspace_list[@]}"; do
       echo "😀project: $project_dir"
-      _run "$project_dir/sha" clean
+      cd "$PA_DIR/$project_dir"
+      _run rm -rf dist build node_modules
+      echo
+    done
+  }
+
+}
+
+# 可扩展的命令集合，需要各个项目自己实现相应命令
+# 执行在 _on_workspace_list 项目列表上
+_enable_project_impl_commands() {
+  deps() {
+    for project_dir in "${_on_workspace_list[@]}"; do
+      echo "😀project: $project_dir"
+      _run "$project_dir/sha" deps
       echo
     done
   }
@@ -108,11 +140,11 @@ _workspace_context_commands() {
   tests() {
     for project_dir in "${_on_workspace_list[@]}"; do
       echo "project: $project_dir"
-       _run "$project_dir/sha" tests
+      _run "$project_dir/sha" tests
     done
   }
-}
 
+}
 # npm 名字和已有命令重复
 npmjs() {
   login() {
@@ -129,18 +161,13 @@ tests() {
   echo "root workspace: clean"
 }
 
-info2() {
+status() {
   echo "## workspaces:"
   printf "  %s\n" "${_workspace_list[@]}"
   echo "## packages:"
-  printf "  %s\n" $(_packages "${_workspace_list[@]}")
+  printf "  %s\n" "$(_packages "${_workspace_list[@]}")"
   echo "## out ip:"
   echo "  $(curl ipinfo.io/ip 2>/dev/null)"
-}
-
-cli() {
-#  _run "$PA_DIR/packages/cli/sha" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
-  _run "$PA_DIR/packages/core/sha" "$@" || printf "%b\n" "------------------\n [cli $@], exit code($?)" ;
 }
 
 version() {
