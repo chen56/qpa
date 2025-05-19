@@ -9,7 +9,6 @@
 
 
 // 1. 明确列出要导出的内容（可选）
-export { TencentCloudPlannedFactory } from './factory.ts';
 export {
 TencentCloudProvider
 } from './provider.ts';
@@ -17,6 +16,12 @@ TencentCloudProvider
 // 2. 为重要的类型添加类型导出
 export type { Vpc } from './vpc/vpc.ts';
 export * from './default.ts'
+export{
+    TencentCloudPlannedFactory,
+    TencentCloudDirectFactory,
+} from './factory.ts';
+export {allowServices} from "./factory.js";
+
 // 3. 添加详细的文档注释
 /**
  * @packageDocumentation

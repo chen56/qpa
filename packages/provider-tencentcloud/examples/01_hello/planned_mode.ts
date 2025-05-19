@@ -1,7 +1,8 @@
 // noinspection JSUnusedGlobalSymbols
 import {Config, Project} from "@qpa/core";
-import {TencentCloudPlannedFactory, TencentCloudProvider} from "../../src/providers/tencent_cloud/index.js";
-import {allowServices} from "../../src/providers/tencent_cloud/default.js";
+
+import {allowServices, TencentCloudPlannedFactory} from "../../src/index.ts";
+import { TencentCloudProvider } from "../../src/index.ts";
 
 
 export default Config.plannedMode({
@@ -18,7 +19,8 @@ export default Config.plannedMode({
             allowedResourceServices: allowServices
         });
 
-        const tc = new TencentCloudPlannedFactory(tencentCloudProvider);
+        let tc: TencentCloudPlannedFactory;
+        tc = new TencentCloudPlannedFactory(tencentCloudProvider);
 
         tc.vpc.vpc({
             name: "main",
