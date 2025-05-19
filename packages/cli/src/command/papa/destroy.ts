@@ -1,5 +1,5 @@
 // src/command/destroy.ts
-import {GlobalOptions, loadPlannedConfig} from '@/command/common.ts';
+import {GlobalOptions, loadPlannedConfig} from '../common.ts';
 
 import type {Command} from "commander";
 import {Project} from "@qpa/core";

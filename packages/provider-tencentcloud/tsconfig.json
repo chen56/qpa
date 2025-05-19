@@ -10,14 +10,7 @@
 
   // 继承根目录的共享配置
   "compilerOptions": {
-//    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
+    //    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "baseUrl": "./",
   },
-  "include": [
-    "src",
-    "test"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
 }

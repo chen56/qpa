@@ -1,5 +1,5 @@
-import {VpcDirectFactory, VpcPlannedFactory} from "@/providers/tencent_cloud/vpc/factory.ts";
-import {TencentCloudProvider} from "@/providers/tencent_cloud/provider.js";
+import {VpcDirectFactory, VpcPlannedFactory} from "./vpc/factory.ts";
+import {TencentCloudProvider} from "./provider.js";
 
 
 /**

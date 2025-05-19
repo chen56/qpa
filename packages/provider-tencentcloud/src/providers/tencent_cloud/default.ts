@@ -1,6 +1,6 @@
-import {  VpcService} from "@/providers/tencent_cloud/vpc/vpc.ts";
-import {TencentCloudProvider, ResourceType, TencentCloudResourceService} from "@/providers/tencent_cloud/provider.ts";
-import {VpcClients} from "@/providers/tencent_cloud/vpc/common.ts";
+import {  VpcService} from "./vpc/vpc.ts";
+import {TencentCloudProvider, ResourceType, TencentCloudResourceService} from "./provider.ts";
+import {VpcClients} from "./vpc/common.ts";
 
 export function allowServices(provider: TencentCloudProvider): Map<ResourceType, TencentCloudResourceService<unknown,unknown>> {
     const result: Map<ResourceType, TencentCloudResourceService<unknown,unknown>> = new Map();

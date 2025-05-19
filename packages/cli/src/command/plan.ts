@@ -1,5 +1,5 @@
-import type {GlobalOptions} from '@/command/common.ts';
-import {loadDirectConfig} from '@/command/common.ts';
+import type {GlobalOptions} from './common.ts';
+import {loadDirectConfig} from './common.ts';
 import {Config} from "@qpa/core";
 import type {Command} from "commander";
 

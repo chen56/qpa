@@ -13,11 +13,4 @@
 //    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "baseUrl": "./",
   },
-  "include": [
-    "src",
-    "test"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
 }

@@ -1,8 +1,8 @@
-import {TencentCloudProvider, TaggableResourceService} from "@/providers/tencent_cloud/provider.ts";
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {PaPaResource, SpecPart, StatePart} from "@qpa/core";
-import {VpcState} from "@/providers/tencent_cloud/vpc/vpc.ts";
+import {VpcState} from "../vpc/index.js";
+import {TaggableResourceService, TencentCloudProvider} from "../provider.js";
 
 
 class Cvm{

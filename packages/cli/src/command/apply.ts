@@ -1,4 +1,4 @@
-import {GlobalOptions, loadDirectConfig} from '@/command/common.ts';
+import {GlobalOptions, loadDirectConfig} from './common.ts';
 // import type {Project} from "@/index";
 import type {Command} from "commander";
 import {Config} from "@qpa/core";

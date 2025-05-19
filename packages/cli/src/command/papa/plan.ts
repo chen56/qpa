@@ -1,5 +1,5 @@
-import type {GlobalOptions} from '@/command/common.ts';
-import {loadPlannedConfig} from '@/command/common.ts';
+import type {GlobalOptions} from '../common.ts';
+import {loadPlannedConfig} from '../common.ts';
 import type {Command} from "commander";
 import {Project} from "@qpa/core";
 

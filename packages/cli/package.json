@@ -1,15 +1,56 @@
 {
   "name": "@qpa/cli",
   "version": "0.1.2",
-  "description": "pa cli",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chen56/qpa.git"
+  },
+  "homepage": "https://github.com/chen56",
+  "bugs": {
+    "url": "https://github.com/chen56/issues"
+  },
+  "keywords": [
+    "qpa",
+    "cli"
+  ],
+  "author": "chen56",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {
-    "qpa": "src/command/index.ts"
+    "bun": "./src/index.ts"
+  },
+  "bun": {
+    "resolve": {
+      "extensions": [
+        ".tsx",
+        ".ts",
+        ".jsx",
+        ".js"
+      ]
+    }
   },
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "bun run build",
-    "test": "bun run --workspaces test",
+    "build": "bun build",
+    "test": "bun test",
     "publish-packages": "bun publish --workspaces --if-present"
   },
   "devDependencies": {
@@ -17,11 +58,6 @@
     "@types/node": "^22.15.3",
     "chalk": "^5.3.0"
   },
-  "keywords": [
-    "qpa",
-    "cli"
-  ],
-  "author": "chen56",
   "dependencies": {
     "commander": "^13.1.0",
     "@qpa/core": "^0.1.0"

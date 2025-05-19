@@ -20,13 +20,13 @@
     //## 配置 @/a/b 形式 替代 ../a/b
     //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "baseUrl": "./",
-    "paths": {
-      // 改造相对引用为绝对引用，让代码更简单清晰：比如： 用@/a/b 替代 ../a/b
-      // "@/*"的配置可以认为是项目内引用
-      "@/*": [
-        "./src/*"
-      ]
-    },
+//    "paths": {
+//      // 改造相对引用为绝对引用，让代码更简单清晰：比如： 用@/a/b 替代 ../a/b
+//      // "@/*"的配置可以认为是项目内引用
+//      "@/*": [
+//        "./src/*"
+//      ]
+//    },
     // 将 tsconfig.tsbuildinfo 文件生成在 ./build 目录,默认是tsc执行目录
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
     "allowImportingTsExtensions": true,
@@ -46,7 +46,7 @@
     // 旧项目：可以考虑 classic，不过建议升级到现代解析策略。
     "moduleResolution": "nodenext",
     // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
-    "module": "NodeNext",
+    "module": "Node16",
     /*
     ## lint
     */
@@ -54,10 +54,9 @@
     "strict": true
   },
   "include": [
-    "src",
-    "test"
+    "**/*.ts",
   ],
   "exclude": [
-    "node_modules"
+    "**/node_modules"
   ]
 }

@@ -1,6 +1,6 @@
-import {TencentCloudProvider, Vpc} from "@/providers/tencent_cloud/index.ts";
 import {PaPaResource, SpecPartProps, AppliedResource, SpecPart} from "@qpa/core";
-import {VpcService, VpcState} from "@/providers/tencent_cloud/vpc/vpc.ts";
+import {Vpc, VpcService, VpcState} from "./vpc.ts";
+import {TencentCloudProvider} from "../provider.js";
 
 /**
  * 工厂方法类

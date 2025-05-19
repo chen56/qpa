@@ -7,8 +7,8 @@ import {
     Project,
     Provider,
     ResourceService
-} from "@qpa/core";//@qpa/core
-import * as common from "../../internal/common.ts";
+} from "@qpa/core";
+import {Paging} from "../../internal/common.ts";
 
 export abstract class TencentCloudResourceService<SPEC,STATE> extends ResourceService<SPEC,STATE>{
 
@@ -127,7 +127,7 @@ export class TencentCloudProvider extends Provider {
 
     async loadAll(): Promise<StatePart<unknown>[]> {
         const projectName=this.project.name;
-        const gen = common.queryPage(async (offset) => {
+        const gen = Paging.queryPage<ResourceTag>(async (offset) => {
             const limit = 100;
             const resp = await this._getTagClient().DescribeResourcesByTags({
                 TagFilters: [{
