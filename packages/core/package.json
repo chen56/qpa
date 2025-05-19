@@ -9,7 +9,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chen56/pa.git"
+    "url": "git+https://github.com/chen56/qpa.git"
   },
   "homepage": "https://github.com/chen56",
   "bugs": {
@@ -20,8 +20,7 @@
     "access": "public"
   },
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
+  "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
     "src",
@@ -31,8 +30,7 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./package.json": "./package.json"
@@ -61,6 +59,8 @@
     "@types/node": "^22.15.3",
     "eslint": "^9.26.0",
     "jiti": "^2.4.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "vitest": "^3.1.3"
   },
