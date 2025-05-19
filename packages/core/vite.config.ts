@@ -2,8 +2,6 @@
 
 // Configure Vitest (https://vitest.dev/config/)
 
-import tsconfigPaths from "vite-tsconfig-paths";
-import * as path from "node:path";
 import {defineConfig} from "vite";
 
 export default defineConfig({
@@ -28,7 +26,7 @@ export default defineConfig({
         alias: {
             // 放弃和'@/'的战斗，nodejs工具链真的是太搞了
             // '@/': './src/', // [!code --]
-            // '@/': new URL('./src/', import.meta.url).pathname, // [!code ++]
+            '@/': new URL('./src/', import.meta.url).pathname, // [!code ++]
         },
         /* for example, use global to avoid globals imports (describe, test, expect): */
         globals: true,
