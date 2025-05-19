@@ -11,8 +11,6 @@ cd "$PA_DIR"
 # shellcheck disable=SC1091
 source "./common.bash"
 
-
-
 # nullglob选项默认off时：
 # -------------------------.bash
 # bash-5.2$ a=(./no_exists_dir/*/sha)
@@ -30,41 +28,86 @@ source "./common.bash"
 # -------------------------s
 # 空数组!这是我们想要的
 shopt -s nullglob
-all_workspaces_sha=(./sha ./packages/*/sha )
+
+#############################################################
+### 基于bash脚本的mono项目管理
+### 1. 称呼: workspace/project/子项目,名词等同
+### 2. 子项目的认定: 包含sha脚本的目录，就是子项目路径
+### 3. 子项目列表(_workspace_list): 包含sha脚本的目录的列表
+### 4. 子项目名: 项目目录的basename，比如./packages/core, 名称为core
+#############################################################
+declare -a _workspace_list=()
+# 进程替换输入内容给数组：取所有path的dirname，最终得到子项目目录
+readarray -t _workspace_list < <(
+  declare -a _workspace_sha_paths=(./sha ./packages/*/sha);
+  printf "%s\n" "${_workspace_sha_paths[@]}" | xargs dirname
+) # 进程替换的右括号后不需要分号
+
+_all_projects() { printf "%s\n" "${_workspace_list[@]}";}
+_npm_projects() { _all_projects | grep -E -v "^\.$" ;}
+
+# 项目组，即子项目组
+declare -a _on_workspace_list=()
+readarray -t _on_workspace_list < <(_all_projects) ;
+
+g() {
+  all() {
+    readarray -t _on_workspace_list < <(_all_projects) ;
+    _workspace_context_commands
+  }
+  pkgs() {
+    readarray -t _on_workspace_list < <(_npm_projects) ;
+    _workspace_context_commands
+  }
+}
+
+_packages() {
+  local workspace
+  for workspace in "${@}"; do
+    echo "$workspace" | xargs basename | xargs -I {} echo @qpa/{}
+  done
+}
 
 ##########################################
 # app cmd script
 # 应用的命令脚本
 ##########################################
 _all_workspaces() {
-    for file_path in "${all_workspaces_sha[@]}"; do
+    for file_path in "${_workspace_sha_paths[@]}"; do
       # 使用参数展开，移除字符串结尾的最短匹配 "/sha"
       dir_path="${file_path%/sha}"
       echo "$dir_path"
     done
 }
 
-all() {
+_workspace_context_commands() {
+
   list() {
-      for project_dir in $(_all_workspaces); do
-         echo "$project_dir"
-      done
+    for project_dir in "${_on_workspace_list[@]}"; do
+       echo "$project_dir"
+    done
   }
 
   run() {
-    for project_dir in $(_all_workspaces); do
-       cd "$project_dir"
-       _run "$@"
+    for project_dir in "${_on_workspace_list[@]}"; do
+      echo "😀project: $project_dir"
+      cd "$PA_DIR/$project_dir"
+      _run "$@"
+      echo
     done
   }
 
   clean() {
-    for project_dir in $(_all_workspaces); do
-       _run "$project_dir/sha" clean
+    for project_dir in "${_on_workspace_list[@]}"; do
+      echo "😀project: $project_dir"
+      _run "$project_dir/sha" clean
+      echo
     done
   }
+
   tests() {
-    for project_dir in $(_all_workspaces); do
+    for project_dir in "${_on_workspace_list[@]}"; do
+      echo "project: $project_dir"
        _run "$project_dir/sha" tests
     done
   }
@@ -87,7 +130,12 @@ tests() {
 }
 
 info2() {
-  _run echo "out ip: $(curl ipinfo.io/ip 2>/dev/null)"
+  echo "## workspaces:"
+  printf "  %s\n" "${_workspace_list[@]}"
+  echo "## packages:"
+  printf "  %s\n" $(_packages "${_workspace_list[@]}")
+  echo "## out ip:"
+  echo "  $(curl ipinfo.io/ip 2>/dev/null)"
 }
 
 cli() {

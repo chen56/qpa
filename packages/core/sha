@@ -35,16 +35,6 @@ build() {
     mkdir -p ./dist
     _run bunx tsc --noEmit
     _run bun build --outdir=./dist  --sourcemap=linked --format=esm --target=node --entry-as-name src/index.ts
-    for file in ./dist/*.js; do
-        mv "$file" "${file%.js}.mjs"
-        mv "${file}.map" "${file%.js}.mjs.map"
-    done
-
-    _run bun build --outdir=./dist  --sourcemap=linked --format=cjs --target=node --entry-as-name src/index.ts
-    for file in ./dist/*.js; do
-        mv "$file" "${file%.js}.cjs"
-        mv "${file}.map" "${file%.js}.cjs.map"
-    done
 
     # 构建 Composite 项目 (带有 references 时推荐): tsc --build 或 tsc -b。这是用于协调 Monorepo 中 Composite 项目构建的命令。
     # 它会读取 tsconfig.json 并根据 composite 和 references 来决定做什么（包括检查依赖、使用 .tsbuildinfo、生成 .js 和/或 .d.ts）。
