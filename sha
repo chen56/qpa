@@ -169,7 +169,9 @@ status() {
   echo "## out ip:"
   echo "  $(curl ipinfo.io/ip 2>/dev/null)"
 }
-
+deps() {
+  echo root deps
+}
 version() {
   info() {
      npm version --workspaces "$@"

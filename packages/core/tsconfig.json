@@ -3,7 +3,17 @@
   "extends": "../../tsconfig.json",
   // 继承根目录的共享配置
   "compilerOptions": {
-//    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
+    "rootDir": "./",
+    //    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "baseUrl": "./",
+    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo"
   },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+  ],
+  "exclude": [
+    "**/node_modules"
+  ]
+
 }

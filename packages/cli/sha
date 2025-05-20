@@ -38,5 +38,8 @@ run() {  npx tsx src/command/index.ts "$@" || printf "%b\n" "------------------\
 clean() { 
   _run rm -rf dist build node_modules;
 }
-
+deps() {
+  echo $PWD - $CLI_DIR
+#  npm install
+}
 sha "$@"
