@@ -2,9 +2,6 @@ import 'dotenv/config';
 import {Project,Config} from "@qpa/core";
 import {allowServices, TencentCloudProvider} from "../../src/index.ts";
 import {TencentCloudDirectFactory} from "../../src/index.ts";
-// import {TencentCloudProvider} from "../../src/providers/tencent_cloud/index.js";
-// import {allowServices} from "../../src/providers/tencent_cloud/default.js";
-// import {TencentCloudDirectFactory} from "../../src/providers/tencent_cloud/factory.js";
 
 export default Config.directMode({
     project: new Project({

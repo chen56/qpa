@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
-import {xxx} from "@/common.ts";
-import {Project} from "@/direct.ts";
+import {xxx} from "../src/common.ts";
+import {Project} from "../src/direct.ts";
 
 // Edit an assertion and save to see HMR in action
 

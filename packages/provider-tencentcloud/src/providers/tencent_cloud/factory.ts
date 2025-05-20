@@ -1,10 +1,10 @@
 import {VpcDirectFactory, VpcPlannedFactory} from "./vpc/factory.ts";
-import {ResourceType, TencentCloudProvider, TencentCloudResourceService} from "./provider.js";
-import {VpcClients} from "./vpc/common.js";
-import {VpcService} from "./vpc/index.js";
+import { VpcService } from "./vpc/vpc.ts";
+import { VpcClients } from "./vpc/common.ts";
+import {ResourceType, TencentCloudProvider, TencentCloudResourceService} from "./provider.ts";
 
 export abstract class TencentCloudFactory{
-    constructor(readonly provider: TencentCloudProvider) {
+    protected constructor(readonly provider: TencentCloudProvider) {
     }
 }
 /**

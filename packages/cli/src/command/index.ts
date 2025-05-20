@@ -1,5 +1,5 @@
-import * as apply from './apply.js';
-import * as destroy from './destroy.js';
+import * as apply from './apply.ts';
+import * as destroy from './destroy.ts';
 import * as plan from './plan.ts';
 import * as papa from './papa/index.ts';
 import process from "node:process";
