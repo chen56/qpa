@@ -34,7 +34,7 @@ build() {
 }
 
 tests() { bun test;}
-run() {  npx tsx src/command/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
+run() {  _run pnpm exec tsx src/command/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
 clean() { 
   _run rm -rf dist build node_modules;
 }

@@ -32,9 +32,9 @@
     "esModuleInterop": true,
 
 
-    "types": [
-      "vitest/importMeta"
-    ],
+//    "types": [
+//      "vitest/importMeta"
+//    ],
     /*
     ## Bundler mode
     */

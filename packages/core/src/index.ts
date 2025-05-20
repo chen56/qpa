@@ -5,7 +5,7 @@
  *   这些被删除的资源配置对应的真实资源也将被被清理
  * - Unmanaged Resources: 非管理资源, 即脱离IAC工具，由其他工具或手工创建的资源。
  * */
-import {xxx} from "@/common.ts";
+import {xxx} from "./common.ts";
 // import {xxx} from "./common";
 
 export * from "./direct.ts"
