@@ -7,10 +7,7 @@
  * 腾讯云服务模块
  *
  * @example
- * import { Vpc } from '@qpa/providers-tencentcloud';
+ * import { TencentCloudProvider } from '@qpa/provider-tencentcloud'
  */
-// export * from './provider';
-// export * from './factory';
-// export * from './vpc';
 
 export * from './providers/tencent_cloud/index.ts';

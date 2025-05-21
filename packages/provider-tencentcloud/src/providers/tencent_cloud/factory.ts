@@ -1,6 +1,6 @@
 import {VpcDirectFactory, VpcPlannedFactory} from "./vpc/factory.ts";
 import { VpcService } from "./vpc/vpc.ts";
-import { VpcClients } from "./vpc/common.ts";
+import { VpcClients } from "./vpc/_common.ts";
 import {ResourceType, TencentCloudProvider, TencentCloudResourceService} from "./provider.ts";
 
 export abstract class TencentCloudFactory{

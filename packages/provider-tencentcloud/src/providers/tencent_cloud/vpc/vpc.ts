@@ -5,7 +5,7 @@ import {
 import {ResourceTag as tc_ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Constants, PaPaResource, SpecPart, StatePart} from "@qpa/core";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
-import { VpcClients } from "./common.ts";
+import { VpcClients } from "./_common.ts";
 
 export interface Vpc extends tc_CreateVpcRequest {
     Region: string;

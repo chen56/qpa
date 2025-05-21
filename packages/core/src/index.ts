@@ -10,4 +10,4 @@ import {xxx} from "./common.ts";
 
 export * from "./direct.ts"
 
-console.log("import @/common.ts",xxx);
+console.log("import点点滴滴 @/_common.ts",xxx);

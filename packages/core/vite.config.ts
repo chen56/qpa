@@ -8,8 +8,8 @@ export default defineConfig({
     plugins: [
         // Vite（以及 Vitest，因为它基于 Vite）在进行模块解析时，默认情况下不会读取和应用 tsconfig.json 中的 paths 映射。
         // 比如vitest
-        //     不支持：import {xxx} from "@/common.ts";
-        //     只支持：import {xxx} from "../src/common.ts";
+        //     不支持：import {xxx} from "@/_common.ts";
+        //     只支持：import {xxx} from "../src/_common.ts";
         // 起因是Vite 在开发服务器或测试环境中加载模块时有自己的解析逻辑。
         // 而tsconfigPaths插件告诉 Vite 除了标准的 Node.js 模块解析规则外，还要参考 tsconfig.json 的 paths 映射
         // tsconfigPaths(),
