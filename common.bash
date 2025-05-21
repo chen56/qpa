@@ -7,14 +7,14 @@ set -o pipefail  # default pipeline status==last command status, If set, status=
 # On Mac OS, readlink -f doesn't work, so use._real_path get the real path of the file
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-upgrade_sha() (
+install_sha() (
   mkdir -p "$ROOT_DIR/vendor"
   set -x
   curl -L -o "$ROOT_DIR/vendor/sha.bash" https://github.com/chen56/sha/raw/main/sha.bash
 )
 
 if ! [[ -f "$ROOT_DIR/vendor/sha.bash" ]]; then
-  upgrade_sha
+  install_sha
 fi
 
 # 注意，当前import sha.bash前不能定义任何函数，否则会被认为是系统函数，注册时会因为
@@ -50,6 +50,31 @@ _run() {
   # shellcheck disable=SC2001
   show_pwd=$(echo "$PWD" | sed "s@^$HOME@~@" )
 
-  echo "$_run_level 🔵 $caller_script:$caller_line ${FUNCNAME[1]}() ▶︎【$show_pwd$ $*】" >&2
+  echo "  🔵$caller_script:$caller_line ${FUNCNAME[1]}() ▶︎【$show_pwd$ $*】" >&2
   "$@"
 }
+
+# 正常化路径
+# Usage: normal_path <path>
+# Examples:
+# $ normal_path './'
+# .
+# $ normal_path './a'
+# a
+# $ normal_path './a/'
+# a
+# $ normal_path './a/'
+# ./a
+# $ normal_path '/'
+# /
+_normal_path() {
+  if [[ "${1}" == "/" ]]; then
+    echo $1
+  else
+    echo "${1%/}"
+  fi
+}
+
+#_npm_project() {
+#
+#}

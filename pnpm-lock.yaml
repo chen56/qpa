@@ -8,6 +8,9 @@ importers:
 
   .:
     devDependencies:
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.19
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.32.1
         version: 8.32.1(@typescript-eslint/parser@8.32.1(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)
@@ -17,56 +20,6 @@ importers:
       esbuild:
         specifier: ^0.25.4
         version: 0.25.4
-      tsx:
-        specifier: ^4.19.4
-        version: 4.19.4
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
-      vitest:
-        specifier: ^3.1.4
-        version: 3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
-
-  packages/cli:
-    dependencies:
-      '@qpa/core':
-        specifier: ^0.1.0
-        version: 0.1.1
-      commander:
-        specifier: ^13.1.0
-        version: 13.1.0
-    devDependencies:
-      '@commander-js/extra-typings':
-        specifier: ^13.1.0
-        version: 13.1.0(commander@13.1.0)
-      '@types/node':
-        specifier: ^22.15.3
-        version: 22.15.19
-      chalk:
-        specifier: ^5.3.0
-        version: 5.4.1
-      vitest:
-        specifier: ^3.1.4
-        version: 3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
-
-  packages/core:
-    dependencies:
-      commander:
-        specifier: ^13.1.0
-        version: 13.1.0
-      dotenv:
-        specifier: ^16.5.0
-        version: 16.5.0
-      tencentcloud-sdk-nodejs:
-        specifier: ^4.0.973
-        version: 4.1.41
-    devDependencies:
-      '@commander-js/extra-typings':
-        specifier: ^13.1.0
-        version: 13.1.0(commander@13.1.0)
-      '@types/node':
-        specifier: ^22.15.3
-        version: 22.15.19
       eslint:
         specifier: ^9.26.0
         version: 9.27.0(jiti@2.4.2)
@@ -89,6 +42,34 @@ importers:
         specifier: ^3.1.3
         version: 3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
 
+  packages/cli:
+    dependencies:
+      '@qpa/core':
+        specifier: ^0.1.0
+        version: 0.1.1
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
+    devDependencies:
+      '@commander-js/extra-typings':
+        specifier: ^13.1.0
+        version: 13.1.0(commander@13.1.0)
+      chalk:
+        specifier: ^5.3.0
+        version: 5.4.1
+
+  packages/core:
+    dependencies:
+      commander:
+        specifier: ^13.1.0
+        version: 13.1.0
+      dotenv:
+        specifier: ^16.5.0
+        version: 16.5.0
+      tencentcloud-sdk-nodejs:
+        specifier: ^4.0.973
+        version: 4.1.41
+
   packages/provider-tencentcloud:
     dependencies:
       '@qpa/core':
@@ -100,22 +81,6 @@ importers:
       tencentcloud-sdk-nodejs:
         specifier: ^4.0.973
         version: 4.1.41
-    devDependencies:
-      '@types/node':
-        specifier: ^22.15.3
-        version: 22.15.19
-      eslint:
-        specifier: ^9.26.0
-        version: 9.27.0(jiti@2.4.2)
-      jiti:
-        specifier: ^2.4.2
-        version: 2.4.2
-      typescript:
-        specifier: ^5.8.3
-        version: 5.8.3
-      vitest:
-        specifier: ^3.1.3
-        version: 3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
 
 packages:
 

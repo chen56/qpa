@@ -317,11 +317,12 @@ _sha_register_children_cmds() {
 
     func_content=$(declare -f "$func_name")
 
-    if [[ -v _sha_sys_commands["$func_name"] ]]; then
-      echo  "ERROR: function '$func_name' 和os系统命令或alias重名, 请检查这个函数:"
-      echo "$func_content"
-      exit 1;
-    fi
+    # 暂时关闭系统命令检测，等回头做成一个options, 严格模式
+    # if [[ -v _sha_sys_commands["$func_name"] ]]; then
+    #   echo  "ERROR: function '$func_name' 和os系统命令或alias重名, 请检查这个函数:"
+    #   echo "$func_content"
+    #   exit 1;
+    # fi
     
     # 新增的cmd才是下一级的cmd
     # 父节点的子命令中可能和当前节点子命令同名
@@ -458,9 +459,9 @@ sha() {
 }
 
 
-# Usage: _sha_init_sys_commands
+# Usage: _sha_register_sys_commands
 # 用途：初始化系统命令列表 _sha_sys_commands
-_sha_init_sys_commands() {
+_sha_register_sys_commands() {
   # 所有命令列表, 用于判断我们的命令名是否和系统命令冲突
   local -a sys_cmds
   mapfile -t sys_cmds < <(compgen -c)
@@ -495,4 +496,4 @@ _sha_init_sys_commands() {
 ## 入口
 #######################################
 trap "_sha_on_error" ERR
-_sha_init_sys_commands
+_sha_register_sys_commands

@@ -1,0 +1,149 @@
+#!/usr/bin/env bash
+set -o errtrace  # -E trap inherited in sub script
+set -o errexit   # -e
+set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
+set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
+
+PA_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$PA_DIR"
+
+# shellcheck disable=SC1091
+source "./common.bash"
+
+# nullglob选项默认off时：
+# -------------------------.bash
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=([0]="./no_exists_dir/*/sha")
+# -------------------------
+# 没有匹配到任何文件时，包含字符串字面量，这不是我们要的
+#
+# 而打开nullglob后：
+# -------------------------.bash
+# shopt -s nullglob
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=()
+# -------------------------s
+# 空数组!这是我们想要的
+shopt -s nullglob
+
+#############################################################
+### 基于bash脚本的mono项目管理
+### 1. 称呼: workspace/project/子项目,名词等同
+### 2. 子项目的认定: 包含sha脚本的目录，就是子项目路径
+### 3. 子项目列表(_work_on_projects): 包含sha脚本的目录的列表
+### 4. 子项目名: 项目目录的basename，比如./packages/core, 名称为core
+#############################################################
+declare -a _npm_project_array=(
+./
+./packages/core
+./packages/*
+)
+declare -a _project_array=("${_npm_project_array[@]}")
+
+##########################################
+# app cmd script
+# 应用的命令脚本
+##########################################
+
+# 项目组，即子项目组, 暂时工作数组为全部项目
+declare -a _work_on_project_array=("${_project_array[@]}")
+
+_work_on_projects() { printf "%s\n" "${_work_on_project_array[@]}";}
+
+exec() {
+  for project_dir in "${_work_on_project_array[@]}"; do
+    echo "😀project: $project_dir"
+    cd "$PA_DIR/$project_dir"
+    _run "$@"
+    echo
+  done
+}
+# Usage: _run_project_cmd <project> <cmd>
+# 本函数做多次加载相关项目的命令集，外部执行时最好用子进程形式执行：( _run_project_cmd "project" "cmd" )
+_run_project_cmd(){
+  local project="$1"
+  local cmd="$2"
+  if [[ "$project" == "" ]]; then echo "ERROR: 缺少<project>参数,Usage: _run_project_cmd <project> <cmd>"; fi
+  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: _run_project_cmd <project> <cmd>"; fi
+
+  shift 2
+  local before_load
+  before_load=$(declare -f $cmd)
+
+  ## load cmd function from group
+#  clean() {
+#    echo new
+#  }
+
+
+
+  ## load cmd function from project
+  if [ -f "${project}/sha" ]; then
+    . "${project}/sha"
+  fi
+
+  local after_load
+  after_load=$(declare -f "$cmd")
+  # 如果cmd的函数加载前后内容相同，说明用户并为定义相关函数，则忽略执行
+  if [[ "$before_load" == "$after_load" ]]; then
+    echo "  ⚪️ignore 项目 $project 执行 $cmd, 因为您未定义[$cmd]函数实现"
+    return 0
+  fi
+  # 执行相应的命令函数
+  $cmd "$@"
+
+}
+
+_run_on_work_projects() {
+  local cmd="$1"
+  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: _run_on_work_projects <cmd>"; fi
+
+  local project_dir;
+  for project_dir in "${_work_on_project_array[@]}"; do
+    # 用()建立子进程，执行时互不干扰
+    (
+        echo "🟪 project: $project_dir"
+        _run_project_cmd "$project_dir" "$cmd" "$@"
+    )
+  done
+}
+
+clean() {    _run_on_work_projects "clean"   "$@";}
+install() {  _run_on_work_projects "install" "$@";}
+test() {     _run_on_work_projects "test"    "$@";}
+
+# npm 名字和已有命令重复
+npmjs() {
+  login() {
+    # 指定--registry防止登陆跳转到镜像网站
+    npm login --registry=https://registry.npmjs.org/
+  }
+}
+
+status() {
+  echo "## workspaces:"
+  printf "  %s\n" "${_project_array[@]}"
+  echo "## packages:"
+  printf "  %s\n" "$(_dir_to_package_name "${_project_array[@]}")"
+  echo "## out ip:"
+  echo "  $(curl ipinfo.io/ip 2>/dev/null)"
+}
+
+version() {
+  info() { npm version --workspaces "$@"; }
+  patch() { npm version patch --workspaces "$@"; }
+  prerelease() { npm version prerelease --workspaces "$@";}
+  push() {  git push origin --tags  "$@" ; }
+}
+
+# 守卫语句，当'source ./sha'执行，脚本被当类库导入时，$0为bash或zsh等值
+# 即当类库引用时不执行后续命令式入口代码
+if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
+  echo 'shas脚本为mono项目脚本，不能作为类库导入，只能命令式执行'
+  exit 1
+fi
+
+# 当脚本被直接执行的入口代码
+sha "$@"
