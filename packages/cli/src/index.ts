@@ -5,6 +5,18 @@ import * as papa from './command/papa/index.ts';
 import process from "node:process";
 import {MyRootCommand} from "./command/common.ts";
 
+
+import * as dotenv from 'dotenv';
+import * as dotenvExpand from 'dotenv-expand';
+
+// 首先加载 .env 文件中的原始键值对
+// dotenv.config() 返回一个包含 parsed 属性的对象，其中是解析后的键值对
+const myEnv = dotenv.config();
+
+// 然后使用 dotenvExpand.expand() 来处理变量扩展
+// 它会修改 process.env，并返回一个包含所有扩展后变量的对象
+dotenvExpand.expand(myEnv);
+
 const program = new MyRootCommand();
 program
   .version('1.0.0') ;

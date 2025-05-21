@@ -2,7 +2,6 @@ import 'dotenv/config';
 import {Project,Config} from "@qpa/core";
 import {allowServices, TencentCloudProvider} from "../../src/index.ts";
 import {TencentCloudDirectFactory} from "../../src/index.ts";
-
 export default Config.directMode({
     project: new Project({
         name: "test",
@@ -15,7 +14,6 @@ export default Config.directMode({
             },
             allowedResourceServices: allowServices
         });
-
         const tc = new TencentCloudDirectFactory(tencentCloudProvider);
 
         const vpc = await tc.vpc.vpc({
