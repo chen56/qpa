@@ -10,35 +10,40 @@ cd "$SHAS_DIR"
 # shellcheck disable=SC1091
 source "./common.bash"
 
+# ############################################################
+# 基于bash脚本的mono项目管理
+# 1. 名词:workspace/project/子项目,名词等同
+# 2. shas脚本为根脚本，主要是遍历多个项目执行命令，而各子项目的sha执行实际本项目命令
+# 3. 项目组是相同体系规范的一组项目容器，可共享命令实现，
+#    比如定义一个npm组，build命令只需要写一次就可以被所有npm项目使用，除非项目本身对build命令有其特殊实现，可覆盖之
+# 4. 多项目命令的实现和执行分3个层级：shas -> 项目组-> 项目
+#    比如执行'shas build'，先循环一组项目，每个项目加载其所属项目组build函数，再加载项目自己sha脚本build函数，
+#    利用bash脚本后定义的函数可覆盖先定义的函数的特性，如果项目的sha脚本没有build函数实现，就执行项目组的build函数，
+#    否则，执行项目自己的build函数。
+# 5. 项目定义时按相对路径或绝对路径，其作为项目过滤的依据
 #############################################################
-### 基于bash脚本的mono项目管理
-### 1. 称呼: workspace/project/子项目,名词等同
-### 2. 子项目的认定: 包含sha脚本的目录，就是子项目路径
-### 3. 子项目列表(_work_on_projects): 包含sha脚本的目录的列表
-### 4. 子项目名: 项目目录的basename，比如./packages/core, 名称为core
-#############################################################
-declare -a _group_npm=(
+declare -a __project_group_pnpm=(
 .
 ./packages/core
 ./packages/provider-tencentcloud
 ./packages/cli
 )
-declare -a _group_other=()
+declare -a __project_group_other=()
 
-declare -a _project_array=("${_group_other[@]}"  "${_group_npm[@]}")
+declare -a __project_array=("${__project_group_other[@]}"  "${__project_group_pnpm[@]}")
 
-# 项目组，即子项目组, 暂时工作数组为全部项目
-declare -a _work_on_project_array=("${_project_array[@]}")
+# 当前待处理的项目数组，暂时全部，回头加过滤器
+declare -a __current_project_array=("${__project_array[@]}")
 
-_work_on_projects() { printf "%s\n" "${_work_on_project_array[@]}";}
+__current_projects() { printf "%s\n" "${__current_project_array[@]}";}
 
-# Usage: _run_project_cmd <project> <cmd>
-# 本函数做多次加载相关项目的命令集，外部执行时最好用子进程形式执行：( _run_project_cmd "project" "cmd" )
-_run_project_cmd(){
+# Usage: __run_project_cmd <project> <cmd>
+# 本函数做多次加载相关项目的命令集，外部执行时最好用子进程形式执行：( __run_project_cmd "project" "cmd" )
+__run_project_cmd(){
   local project="$1"
   local cmd="$2"
-  if [[ "$project" == "" ]]; then echo "ERROR: 缺少<project>参数,Usage: _run_project_cmd <project> <cmd>"; fi
-  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: _run_project_cmd <project> <cmd>"; fi
+  if [[ "$project" == "" ]]; then echo "ERROR: 缺少<project>参数,Usage: __run_project_cmd <project> <cmd>"; fi
+  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: __run_project_cmd <project> <cmd>"; fi
 
   shift 2
   local before_load
@@ -46,9 +51,9 @@ _run_project_cmd(){
 
   cd "$project"
 
-  for n in "${_group_npm[@]}"; do
+  for n in "${__project_group_pnpm[@]}"; do
     if [[ "$project" == "$n" ]]; then
-      _group_npm_on
+      _project_group_pnpm_on
       break;
     fi
   done
@@ -70,16 +75,16 @@ _run_project_cmd(){
   $cmd "$@"
 }
 
-_run_on_work_projects() {
+__run__current_projects() {
   local cmd="$1"
-  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: _run_on_work_projects <cmd>"; fi
+  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: __run__current_projects <cmd>"; fi
 
   local project_dir;
-  for project_dir in "${_work_on_project_array[@]}"; do
+  for project_dir in "${__current_project_array[@]}"; do
     # 用()建立子进程，执行时互不干扰
     (
         echo "🟪 project: $project_dir"
-        _run_project_cmd "$project_dir" "$cmd" "$@"
+        __run_project_cmd "$project_dir" "$cmd" "$@"
     )
   done
 }
@@ -91,18 +96,18 @@ _run_on_work_projects() {
 ##########################################
 
 exec() {
-  for project_dir in "${_work_on_project_array[@]}"; do
-    echo "😀project: $project_dir"
+  for project_dir in "${__current_project_array[@]}"; do
+    echo "😀project: '$project_dir'"
     cd "$SHAS_DIR/$project_dir"
     _run "$@"
     echo
   done
 }
 
-clean() {    _run_on_work_projects "clean"   "$@";}
-install() {  _run_on_work_projects "install" "$@";}
-build() {    _run_on_work_projects "build"    "$@";}
-test() {     _run_on_work_projects "test"    "$@";}
+clean() {    __run__current_projects "clean"   "$@";}
+install() {  __run__current_projects "install" "$@";}
+build() {    __run__current_projects "build"    "$@";}
+test() {     __run__current_projects "test"    "$@";}
 
 # npm 名字和已有命令重复
 npmjs() {
@@ -114,9 +119,9 @@ npmjs() {
 
 status() {
   echo "## workspaces:"
-  printf "  %s\n" "${_project_array[@]}"
+  printf "  %s\n" "${__project_array[@]}"
   echo "## packages:"
-  printf "  %s\n" "$(_dir_to_package_name "${_project_array[@]}")"
+  printf "  %s\n" "$(_dir_to_package_name "${__project_array[@]}")"
   echo "## out ip:"
   echo "  $(curl ipinfo.io/ip 2>/dev/null)"
 }

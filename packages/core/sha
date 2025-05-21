@@ -14,7 +14,7 @@ cd "$CLI_DIR"
 source "../../common.bash"
 
 # 按项目组复用command
-_group_npm_on
+_project_group_pnpm_on
 
 
 ##########################################

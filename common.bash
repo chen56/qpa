@@ -98,7 +98,7 @@ _normal_path() {
 #}
 
 # 打开npm命令组
-_group_npm_on() {
+_project_group_pnpm_on() {
   clean() { _run rm -rf build dist out node_modules;}
   test() { _run vitest run;}
   install() { _run pnpm install; build;  }
