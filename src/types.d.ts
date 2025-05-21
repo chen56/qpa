@@ -1,4 +1,5 @@
 // 扩展 ImportMeta 接口，添加 customConfig 属性
+// 使用import.meta.url时需要配置，以使ide不报错
 declare global {
     interface ImportMeta {
         customConfig: {
