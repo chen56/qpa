@@ -45,8 +45,8 @@ importers:
   packages/cli:
     dependencies:
       '@qpa/core':
-        specifier: ^0.1.0
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../core
       commander:
         specifier: ^13.1.0
         version: 13.1.0
@@ -73,8 +73,8 @@ importers:
   packages/provider-tencentcloud:
     dependencies:
       '@qpa/core':
-        specifier: ^0.1.0
-        version: 0.1.1
+        specifier: workspace:*
+        version: link:../core
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -311,10 +311,6 @@ packages:
   '@nodelib/fs.walk@1.2.8':
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
-
-  '@qpa/core@0.1.1':
-    resolution: {integrity: sha512-YAkjbd091Pc3AqHzwezZRYh55PH2KTlrt5C5VcW5tRXtUGkZrM14elNOSqcdfArkA62mxwkfJnrsM/KWiT9UFQ==}
-    hasBin: true
 
   '@rollup/rollup-android-arm-eabi@4.41.0':
     resolution: {integrity: sha512-KxN+zCjOYHGwCl4UCtSfZ6jrq/qi88JDUtiEFk8LELEHq2Egfc/FgW+jItZiOLRuQfb/3xJSgFuNPC9jzggX+A==}
@@ -1379,15 +1375,6 @@ snapshots:
     dependencies:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.19.1
-
-  '@qpa/core@0.1.1':
-    dependencies:
-      commander: 13.1.0
-      dotenv: 16.5.0
-      tencentcloud-sdk-nodejs: 4.1.41
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
 
   '@rollup/rollup-android-arm-eabi@4.41.0':
     optional: true

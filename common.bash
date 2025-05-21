@@ -4,6 +4,24 @@ set -o errexit   # -e
 set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
+# nullglob选项默认off时：
+# -------------------------.bash
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=([0]="./no_exists_dir/*/sha")
+# -------------------------
+# 没有匹配到任何文件时，包含字符串字面量，这不是我们要的
+#
+# 而打开nullglob后：
+# -------------------------.bash
+# shopt -s nullglob
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=()
+# -------------------------s
+# 空数组!这是我们想要的
+shopt -s nullglob
+
 # On Mac OS, readlink -f doesn't work, so use._real_path get the real path of the file
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
@@ -78,3 +96,34 @@ _normal_path() {
 #_npm_project() {
 #
 #}
+
+# 打开npm命令组
+_group_npm_on() {
+  clean() { _run rm -rf build dist out node_modules;}
+  test() { _run vitest run;}
+  install() { _run pnpm install; build;  }
+  build() {
+        mkdir -p ./dist
+    #    _run npx tsc --noEmit
+        _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/index.ts
+
+#    npm install --save-dev esbuild
+
+        # 构建 Composite 项目 (带有 references 时推荐): tsc --build 或 tsc -b。这是用于协调 Monorepo 中 Composite 项目构建的命令。
+        # 它会读取 tsconfig.json 并根据 composite 和 references 来决定做什么（包括检查依赖、使用 .tsbuildinfo、生成 .js 和/或 .d.ts）。
+        # 这是在 Monorepo 中构建子项目的推荐命令。
+        _run  pnpm exec  tsc --build  ./tsconfig.build.json
+
+        _run bun pm pack --destination=./build/
+        _run tar -xzf ./build/*.tgz -C "./build"
+  }
+  pack() {
+        build
+
+        _run bun pm pack --destination=./build/
+        _run tar -xzf ./build/*.tgz -C "./build"
+  }
+
+  info() { _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"; }
+  main() {  _run pnpm exec tsx src/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
+}

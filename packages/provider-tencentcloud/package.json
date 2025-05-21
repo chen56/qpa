@@ -56,6 +56,6 @@
   "dependencies": {
     "dotenv": "^16.5.0",
     "tencentcloud-sdk-nodejs": "^4.0.973",
-    "@qpa/core": "^0.1.0"
+    "@qpa/core": "workspace:*"
   }
 }

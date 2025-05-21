@@ -4,29 +4,11 @@ set -o errexit   # -e
 set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
-PA_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-cd "$PA_DIR"
+SHAS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$SHAS_DIR"
 
 # shellcheck disable=SC1091
 source "./common.bash"
-
-# nullglob选项默认off时：
-# -------------------------.bash
-# bash-5.2$ a=(./no_exists_dir/*/sha)
-# bash-5.2$ declare -p a
-# declare -a a=([0]="./no_exists_dir/*/sha")
-# -------------------------
-# 没有匹配到任何文件时，包含字符串字面量，这不是我们要的
-#
-# 而打开nullglob后：
-# -------------------------.bash
-# shopt -s nullglob
-# bash-5.2$ a=(./no_exists_dir/*/sha)
-# bash-5.2$ declare -p a
-# declare -a a=()
-# -------------------------s
-# 空数组!这是我们想要的
-shopt -s nullglob
 
 #############################################################
 ### 基于bash脚本的mono项目管理
@@ -35,31 +17,21 @@ shopt -s nullglob
 ### 3. 子项目列表(_work_on_projects): 包含sha脚本的目录的列表
 ### 4. 子项目名: 项目目录的basename，比如./packages/core, 名称为core
 #############################################################
-declare -a _npm_project_array=(
-./
+declare -a _group_npm=(
+.
 ./packages/core
-./packages/*
+./packages/provider-tencentcloud
+./packages/cli
 )
-declare -a _project_array=("${_npm_project_array[@]}")
+declare -a _group_other=()
 
-##########################################
-# app cmd script
-# 应用的命令脚本
-##########################################
+declare -a _project_array=("${_group_other[@]}"  "${_group_npm[@]}")
 
 # 项目组，即子项目组, 暂时工作数组为全部项目
 declare -a _work_on_project_array=("${_project_array[@]}")
 
 _work_on_projects() { printf "%s\n" "${_work_on_project_array[@]}";}
 
-exec() {
-  for project_dir in "${_work_on_project_array[@]}"; do
-    echo "😀project: $project_dir"
-    cd "$PA_DIR/$project_dir"
-    _run "$@"
-    echo
-  done
-}
 # Usage: _run_project_cmd <project> <cmd>
 # 本函数做多次加载相关项目的命令集，外部执行时最好用子进程形式执行：( _run_project_cmd "project" "cmd" )
 _run_project_cmd(){
@@ -72,16 +44,18 @@ _run_project_cmd(){
   local before_load
   before_load=$(declare -f $cmd)
 
-  ## load cmd function from group
-#  clean() {
-#    echo new
-#  }
+  cd "$project"
 
-
+  for n in "${_group_npm[@]}"; do
+    if [[ "$project" == "$n" ]]; then
+      _group_npm_on
+      break;
+    fi
+  done
 
   ## load cmd function from project
-  if [ -f "${project}/sha" ]; then
-    . "${project}/sha"
+  if [ -f "./sha" ]; then
+    . "./sha"
   fi
 
   local after_load
@@ -92,8 +66,8 @@ _run_project_cmd(){
     return 0
   fi
   # 执行相应的命令函数
+#  echo "run: $after_load"
   $cmd "$@"
-
 }
 
 _run_on_work_projects() {
@@ -110,8 +84,24 @@ _run_on_work_projects() {
   done
 }
 
+
+##########################################
+# app cmd script
+# 应用的命令脚本
+##########################################
+
+exec() {
+  for project_dir in "${_work_on_project_array[@]}"; do
+    echo "😀project: $project_dir"
+    cd "$SHAS_DIR/$project_dir"
+    _run "$@"
+    echo
+  done
+}
+
 clean() {    _run_on_work_projects "clean"   "$@";}
 install() {  _run_on_work_projects "install" "$@";}
+build() {    _run_on_work_projects "build"    "$@";}
 test() {     _run_on_work_projects "test"    "$@";}
 
 # npm 名字和已有命令重复
@@ -137,6 +127,7 @@ version() {
   prerelease() { npm version prerelease --workspaces "$@";}
   push() {  git push origin --tags  "$@" ; }
 }
+
 
 # 守卫语句，当'source ./sha'执行，脚本被当类库导入时，$0为bash或zsh等值
 # 即当类库引用时不执行后续命令式入口代码

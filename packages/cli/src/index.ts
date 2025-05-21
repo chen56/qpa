@@ -1,9 +1,9 @@
-import * as apply from './apply.ts';
-import * as destroy from './destroy.ts';
-import * as plan from './plan.ts';
-import * as papa from './papa/index.ts';
+import * as apply from './command/apply.ts';
+import * as destroy from './command/destroy.ts';
+import * as plan from './command/plan.ts';
+import * as papa from './command/papa/index.ts';
 import process from "node:process";
-import {MyRootCommand} from "./common.ts";
+import {MyRootCommand} from "./command/common.ts";
 
 const program = new MyRootCommand();
 program

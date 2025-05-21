@@ -12,36 +12,20 @@ cd "$CLI_DIR"
 # shellcheck disable=SC1091
 source "../../common.bash"
 
-####################################################################################
-# app script
-# 应用项目补充的公共脚本，不在bake维护范围
-# 此位置以上的全都是bake工具脚本，copy走可以直接用，之下的为项目特定cmd，自己弄
-####################################################################################
+# 按项目组复用command
+_group_npm_on
+
 
 ##########################################
 # app cmd script
-# 应用的命令脚本
+# 独立于项目组的特殊命令
 ##########################################
 
-status() {
-  _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"
-}
 
-build() {
-  # bun build index.ts --outfile dist/index.js
-  js() { bun build --outfile ./dist/index.js --format esm --target bun --standalone ./src/index.ts;}
-  exe() { bun build --compile --outfile ./dist/pa ./src/index.ts;}
-}
 
-tests() { bun test;}
-run() {  _run pnpm exec tsx src/command/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
-clean() { 
-  _run rm -rf dist build node_modules;
-}
-deps() {
-  echo $PWD - $CLI_DIR
-#  npm install
-}
+##########################################
+# app 入口
+##########################################
 # 守卫语句，本脚本如果作为lib导入使用则不再执行后续命令入口代码
 # - 当本脚本作为命令被执行时'$ ./sha', $0为'./sha,
 # - 当本脚本当作类库导入时即: '. ./sha'，$0值为bash/zsh等

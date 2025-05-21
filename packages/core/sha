@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+#!/usr/bin/env bash
 # shellcheck disable=SC2317
 set -o errtrace  # -E trap inherited in sub script
 set -o errexit   # -e
@@ -11,24 +12,17 @@ cd "$CLI_DIR"
 
 # shellcheck disable=SC1091
 source "../../common.bash"
-cd "$CLI_DIR"
 
-####################################################################################
-# app script
-# 应用项目补充的公共脚本，不在bake维护范围
-# 此位置以上的全都是bake工具脚本，copy走可以直接用，之下的为项目特定cmd，自己弄
-####################################################################################
+# 按项目组复用command
+_group_npm_on
+
 
 ##########################################
 # app cmd script
-# 应用的命令脚本
+# 独立于项目组的特殊命令
 ##########################################
 
-status() {
-  _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"
-}
-
-build() {
+builds() {
   # bun build direct_mode.ts --outfile dist/index.js
   all() {
     clean
@@ -36,7 +30,7 @@ build() {
 #    _run npx tsc --noEmit
     _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/index.ts
 
-npm install --save-dev esbuild
+#    npm install --save-dev esbuild
 
 
 
@@ -70,13 +64,10 @@ publish() {
   }
 }
 
-clean() {
-  _run rm -rf dist build node_modules;
-}
-deps() { npm install;}
 
-tests() { vitest run;}
-
+##########################################
+# app 入口
+##########################################
 # 守卫语句，本脚本如果作为lib导入使用则不再执行后续命令入口代码
 # - 当本脚本作为命令被执行时'$ ./sha', $0为'./sha,
 # - 当本脚本当作类库导入时即: '. ./sha'，$0值为bash/zsh等
