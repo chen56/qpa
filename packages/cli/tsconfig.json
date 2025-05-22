@@ -1,6 +1,6 @@
 // build阶段 配置
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   // **非常重要** mono项目依靠 references 告诉tsc子项目间的依赖关系
   "references": [
     {
@@ -13,6 +13,7 @@
     "rootDir": "./",
     //    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "baseUrl": "./",
+    "outDir": "./dist",
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo"
 
   },
