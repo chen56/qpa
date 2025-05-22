@@ -13,7 +13,7 @@
     "rootDir": "./",
     //    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "baseUrl": "./",
-    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
   },
 
   "include": [
