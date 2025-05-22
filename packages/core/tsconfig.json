@@ -6,7 +6,8 @@
     //    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
     "rootDir": ".",
     "outDir": "./dist",
-    "baseUrl": "./",
+    // 开发阶段坚决不要在子项目配置baseUrl,会导致ide无法跨项目重构
+     "baseUrl": "./",
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo"
   },
   "include": [

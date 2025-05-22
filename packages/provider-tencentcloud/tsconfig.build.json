@@ -1,56 +1,14 @@
 // build阶段 配置
 {
+  "extends": "./tsconfig.json",
+
   // 继承根目录的共享配置
   "compilerOptions": {
-    "composite": true,
+    // build时必须设置rootDir,会影响编译结果的目录结构
     "rootDir": "./src",
-    "outDir": "./dist",
-    //## 配置 @/a/b 形式 替代 ../a/b
-    //必须设置 baseUrl，paths 是相对于 baseUrl 解析的
-    "baseUrl": "./",
-    "paths": {
-      // 改造相对引用为绝对引用，让代码更简单清晰：比如： 用@/a/b 替代 ../a/b
-      // "@/*"的配置可以认为是项目内引用
-      "@/*": [
-        "./src/*",
-
-      ],
-      "@pqa/core/*": ["packages/core/src/*"],
-      //      "@pqa//*": ["packages/*/src"]
-
-    },
-    // 将 tsconfig.tsbuildinfo 文件生成在 ./build 目录,默认是tsc执行目录
-    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
-
-
-    "allowImportingTsExtensions":true,
-    "emitDeclarationOnly":true,
-    "declaration": true,
-
-    // 启用 ES Modules 与 CommonJS 的互操作
-    // 当 esModuleInterop 设置为 true 时，TypeScript 编译后的代码会处理好 ES Modules 和 CommonJS 模块之间的差异，让默认导入正常工作。
-    "esModuleInterop": true,
-
-
-    "types": [
-      "vitest/importMeta"
-    ],
-    /*
-    ## Bundler mode
-    */
-    // Node.js 项目：如果使用 CommonJS，选 node；如果使用 ES Modules，选 node16 或 nodenext。
-    // 前端项目：使用打包工具时，选 bundler。
-    // 旧项目：可以考虑 classic，不过建议升级到现代解析策略。
-    "moduleResolution": "nodenext",
-    // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
-    "module": "NodeNext",
-
-    /*
-    ## lint
-    */
-    // 开启 strict: true 能让 TypeScript 编译器执行更严格的类型检查，如 strictNullChecks、strictFunctionTypes 等
-    "strict": true
+    // build时必须指定baseUrl，bun会用根目录继承来的baseurl作为outDir的基准，会搞错目录
+    "baseUrl": "./"
   },
+  // build时只需src即可
   "include": ["src"],
-  "exclude": ["node_modules"],
 }

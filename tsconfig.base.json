@@ -10,7 +10,8 @@
     "baseUrl": "./",
     // 将 tsconfig.tsbuildinfo 文件生成在 ./build 目录,默认是tsc执行目录
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
-
+//    // 本配置默认先被dev环境继承，即各子项目的：./tsconfig.json，不需要build，只开发使用
+//    "noEmit": true,
     "paths": {
       // 改造相对引用为绝对引用，让代码更简单清晰：比如： 用@/a/b 替代 ../a/b
       // "@/*"的配置可以认为是项目内引用

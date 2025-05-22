@@ -108,6 +108,7 @@ clean() {          __run__current_projects "clean"         "$@";}
 install() {        __run__current_projects "install"       "$@";}
 build() {          __run__current_projects "build"         "$@";}
 clean_build() {    __run__current_projects "clean_build"   "$@";}
+clean_all_build() {    __run__current_projects "clean_all_build"   "$@";}
 test() {           __run__current_projects "test"          "$@";}
 
 # npm 名字和已有命令重复
