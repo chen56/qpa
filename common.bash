@@ -101,7 +101,7 @@ _normal_path() {
 _project_group_pnpm_on() {
   clean() { _run rm -rf build dist out node_modules;}
   test() { _run vitest run;}
-  install() { _run pnpm install; build;  }
+  install() { _run pnpm install;  }
   build() {
         mkdir -p ./dist
     #    _run npx tsc --noEmit
@@ -117,6 +117,9 @@ _project_group_pnpm_on() {
         _run bun pm pack --destination=./build/
         _run tar -xzf ./build/*.tgz -C "./build"
   }
+
+  clean_build() { clean; install; build;  }
+
   pack() {
         build
 
