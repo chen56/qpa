@@ -99,8 +99,9 @@ _normal_path() {
 
 # 打开npm命令组
 _project_group_pnpm_on() {
-  clean() {     _run rm -rf build dist out node_modules;}
-  test() { _run vitest run;}
+  clean() {         _run rm -rf build dist out ;}
+  clean_all() {     _run rm -rf build dist out node_modules;}
+  test() { _run vitest run ./test ;}
   install() { _run pnpm install;  }
   build() {
         mkdir -p ./dist
@@ -121,11 +122,10 @@ _project_group_pnpm_on() {
         _run tar -xzf ./build/*.tgz -C "./build"
   }
 
-  clean_install() {   clean;        install;  }
-  clean_build() {     clean;        install; build;  }
-  clean_test() {      clean_build;  test;  }
-  clean_pack() {      clean_test;   pack;  }
-
+  reinstall() {   clean_all;        install;  }
+  rebuild() {     clean_all;        install; build;  }
+  retest() {      rebuild;  test;  }
+  repack() {      retest;   pack;  }
 
   info() { _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"; }
   main() {  _run pnpm exec tsx src/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}

@@ -105,16 +105,16 @@ exec() {
 }
 
 clean() {          __run__current_projects "clean"         "$@";}
+clean_all() {      __run__current_projects "clean_all"         "$@";}
 install() {        __run__current_projects "install"       "$@";}
 build() {          __run__current_projects "build"         "$@";}
 pack() {           __run__current_projects "pack"          "$@";}
 test() {           __run__current_projects "test"          "$@";}
-clean_install() {  __run__current_projects "clean_install"   "$@";}
-clean_build() {    __run__current_projects "clean_build"   "$@";}
-clean_test() {     __run__current_projects "clean_test"    "$@";}
-clean_pack() {     __run__current_projects "clean_pack"    "$@";}
+reinstall() {      __run__current_projects "reinstall"   "$@";}
+rebuild() {        __run__current_projects "rebuild"   "$@";}
+retest() {         __run__current_projects "retest"    "$@";}
+repack() {         __run__current_projects "repack"    "$@";}
 
-# npm 名字和已有命令重复
 npmjs() {
   login() {
     # 指定--registry防止登陆跳转到镜像网站

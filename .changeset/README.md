@@ -16,8 +16,8 @@ ref: <https://semver.org/>
 ### snapshot 手工流程
 
 ```bash
-# 一次纯净的 shas clean > shas build > shas test > shas pack
-shas clean_pack
+# 一次纯净的 shas clean_all > shas build > shas test > shas pack
+shas repack
 # 观察 build、dist 目录是否符合发布预期
 
 # 开发发布
