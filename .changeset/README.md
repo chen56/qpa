@@ -13,7 +13,7 @@ ref: <https://semver.org/>
 
 ## 流程参考
 
-### snapshot 流程
+### snapshot 手工流程
 
 ```bash
 # 一次纯净的 shas clean > shas build > shas test > shas pack
@@ -30,9 +30,9 @@ changeset publish --tag snapshot --no-git-tag
 # 或 
 changeset publish --tag snapshot --no-git-tag --otp={token}
 
-# git 提交 合并分支
-git add .
-git commit -m 'some description '
+# 只提交package.json的更新，不要changeset添加的HANGELOG.md更新
+git add packages/*/package.json
+git commit -m 'snapshot publish description '
 git push 
 
 # 
