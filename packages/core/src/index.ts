@@ -6,4 +6,8 @@
  * - Unmanaged Resources: 非管理资源, 即脱离IAC工具，由其他工具或手工创建的资源。
  * */
 
-export {Config,Project,Provider,StatePart,SpecPart,PaPaResource,ResourceService,Constants,AppliedResource,SpecPartProps,} from "./direct.ts"
+export {
+    Config, Project, Provider, StatePart, SpecPart, PaPaResource, ResourceService, Constants, AppliedResource
+} from "./direct.ts"
+
+export type {SpecPartProps} from './direct.ts'

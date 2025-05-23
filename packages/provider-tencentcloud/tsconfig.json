@@ -3,9 +3,8 @@
   "extends": "../../tsconfig.base.json",
   // **非常重要** mono项目依靠 references 告诉tsc子项目间的依赖关系
   "references": [
-    {
-      "path": "../core"
-    },
+    {  "path": "../core" },
+    {  "path": "../cli" }
   ],
 
   // 继承根目录的共享配置

@@ -1,8 +1,10 @@
 import 'dotenv/config';
 import {Project,Config} from "@qpa/core";
+import {createCommand} from "@qpa/cli";
 import {allowServices, TencentCloudProvider} from "../../src/index.ts";
 import {TencentCloudDirectFactory} from "../../src/index.ts";
-export default Config.directMode({
+
+const program=createCommand(Config.directMode({
     project: new Project({
         name: "test",
     }),
@@ -15,7 +17,6 @@ export default Config.directMode({
             allowedResourceServices: allowServices
         });
         const tc = new TencentCloudDirectFactory(tencentCloudProvider);
-
         const vpc = await tc.vpc.vpc({
             name: "main",
             spec: {
@@ -26,4 +27,9 @@ export default Config.directMode({
         });
         console.log("vpc:", vpc.spec, vpc.state)
     }
-});
+}));
+// --- 解析命令行参数 ---
+// program.parse() 会解析 process.argv
+// 如果有子命令匹配，会触发相应子命令的 action handler
+// 如果没有子命令匹配，或者有帮助/版本等选项，commander 会处理并可能退出
+program.parse(process.argv);

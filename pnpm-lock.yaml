@@ -84,6 +84,9 @@ importers:
 
   packages/provider-tencentcloud:
     dependencies:
+      '@qpa/cli':
+        specifier: workspace:*
+        version: link:../cli
       '@qpa/core':
         specifier: workspace:*
         version: link:../core
