@@ -6,8 +6,6 @@
   "compilerOptions": {
     // build时必须设置rootDir,会影响编译结果的目录结构
     "rootDir": "./src",
-    // build时必须指定baseUrl，bun会用根目录继承来的baseurl作为outDir的基准，会搞错目录
-    "baseUrl": "./"
   },
   // build时只需src即可
   "include": ["src"],
