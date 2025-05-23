@@ -1,5 +1,11 @@
 # @qpa/core
 
+## 0.1.5
+
+### Patch Changes
+
+- publish test v0.1.5
+
 ## 0.1.4
 
 ### Patch Changes

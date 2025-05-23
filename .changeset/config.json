@@ -1,10 +1,11 @@
 {
+  "comment":"ref:  https://github.com/changesets/changesets/blob/main/docs/config-file-options.md#access-restricted--public" ,
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
   "linked": [],
-  "access": "restricted",
+  "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": []
