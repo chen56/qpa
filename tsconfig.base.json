@@ -35,6 +35,7 @@
 
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
+    "sourceMap": true,
     "declaration": true,
     // 启用 ES Modules 与 CommonJS 的互操作
     // 当 esModuleInterop 设置为 true 时，TypeScript 编译后的代码会处理好 ES Modules 和 CommonJS 模块之间的差异，让默认导入正常工作。
@@ -48,9 +49,9 @@
     // Node.js 项目：如果使用 CommonJS，选 node；如果使用 ES Modules，选 node16 或 nodenext。
     // 前端项目：使用打包工具时，选 bundler。
     // 旧项目：可以考虑 classic，不过建议升级到现代解析策略。
-    "moduleResolution": "nodenext",
+    "moduleResolution": "bundler",
     // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
-    "module": "NodeNext",
+    "module": "es2022",
     "target": "es2022",
     // 同: /// <reference lib="ES2022" />
     // 取值：https://github.com/microsoft/TypeScript/tree/main/src/lib
