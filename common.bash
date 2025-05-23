@@ -121,9 +121,10 @@ _project_group_pnpm_on() {
         _run tar -xzf ./build/*.tgz -C "./build"
   }
 
-  clean_build() {     clean;     install; build;  }
-  clean_test() { clean_build; test;  }
-  clean_pack() { clean_test; pack;  }
+  clean_install() {   clean;        install;  }
+  clean_build() {     clean;        install; build;  }
+  clean_test() {      clean_build;  test;  }
+  clean_pack() {      clean_test;   pack;  }
 
 
   info() { _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"; }
