@@ -1,4 +1,0 @@
-[build]
-# https://bun.sh/docs/bunfig/build
-# bun build --config 并不能指定tsconfig,这个文件放在根目录即可，其他目录不需要再放置
-config = "./tsconfig.build.json"

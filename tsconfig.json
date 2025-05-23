@@ -16,9 +16,15 @@
   // 继承根目录的共享配置
   "compilerOptions": {
     "composite": true,
-    "outDir": "./dist",
     "rootDir": "./",
-    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo"
+    // 开发阶段坚决不要在子项目配置baseUrl,会导致ide无法跨项目重构
+    "baseUrl": "./",
+    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
+    // paths基于baseUrl
+    "paths": {
+      "@qpa/*": ["../*/src"]
+    }
+
   },
   "include": [
     "src/**/*.ts",

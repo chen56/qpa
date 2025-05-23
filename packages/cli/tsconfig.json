@@ -13,7 +13,11 @@
     // 开发阶段坚决不要在子项目配置baseUrl,会导致ide无法跨项目重构
      "baseUrl": "./",
     "outDir": "./dist",
-    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
+    // paths基于baseUrl
+    "paths": {
+      "@qpa/*": ["../*/src"]
+    }
   },
 
   "include": [

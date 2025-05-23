@@ -99,8 +99,7 @@ _normal_path() {
 
 # 打开npm命令组
 _project_group_pnpm_on() {
-  clean() {     _run rm -rf build dist out;}
-  clean_all() { _run rm -rf build dist out node_modules;}
+  clean() {     _run rm -rf build dist out node_modules;}
   test() { _run vitest run;}
   install() { _run pnpm install;  }
   build() {
@@ -120,7 +119,7 @@ _project_group_pnpm_on() {
   }
 
   clean_build() {     clean;     install; build;  }
-  clean_all_build() { clean_all; install; build;  }
+  clean_test() { clean_build; test;  }
 
   pack() {
         build
