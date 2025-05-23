@@ -2,7 +2,7 @@ ignoredBuiltDependencies:
   - esbuild
 # pnpm-workspace.yaml
 packages:
-  #  - 'packages/*'
-  - 'packages/core'
-  - 'packages/cli'
+  - 'packages/*'
+#  - 'packages/core'
+#  - 'packages/cli'
 #  - 'packages/provider-tencentcloud'
