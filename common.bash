@@ -113,20 +113,18 @@ _project_group_pnpm_on() {
         # 它会读取 tsconfig.json 并根据 composite 和 references 来决定做什么（包括检查依赖、使用 .tsbuildinfo、生成 .js 和/或 .d.ts）。
         # 这是在 Monorepo 中构建子项目的推荐命令。
         _run  pnpm exec tsc --build ./tsconfig.build.json
+  }
 
-        _run bun pm pack --destination=./build/
+  pack() {
+#        _run bun pm pack --destination=./build/
+         _run pnpm pack --pack-destination ./build/
         _run tar -xzf ./build/*.tgz -C "./build"
   }
 
   clean_build() {     clean;     install; build;  }
   clean_test() { clean_build; test;  }
+  clean_pack() { clean_test; pack;  }
 
-  pack() {
-        build
-
-        _run bun pm pack --destination=./build/
-        _run tar -xzf ./build/*.tgz -C "./build"
-  }
 
   info() { _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"; }
   main() {  _run pnpm exec tsx src/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}

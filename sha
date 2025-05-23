@@ -1,26 +1,31 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2317
 set -o errtrace  # -E trap inherited in sub script
 set -o errexit   # -e
 set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
-# nullglob选项默认off时：
-# -------------------------.bash
-# bash-5.2$ a=(./no_exists_dir/*/sha)
-# bash-5.2$ declare -p a
-# declare -a a=([0]="./no_exists_dir/*/sha")
-# -------------------------
-# 没有匹配到任何文件时，包含字符串字面量，这不是我们要的
-shopt -s nullglob
 
-ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-cd "$ROOT_DIR"
+CLI_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$CLI_DIR"
 
 # shellcheck disable=SC1091
 source "./common.bash"
 
-install() {  \pnpm install; }
+# 按项目组复用command
+_project_group_pnpm_on
 
+
+##########################################
+# app cmd script
+# 独立于项目组的特殊命令
+##########################################
+
+
+
+##########################################
+# app 入口
+##########################################
 # 守卫语句，本脚本如果作为lib导入使用则不再执行后续命令入口代码
 # - 当本脚本作为命令被执行时'$ ./sha', $0为'./sha,
 # - 当本脚本当作类库导入时即: '. ./sha'，$0值为bash/zsh等

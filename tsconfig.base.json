@@ -20,16 +20,17 @@
     - rootDir
     - outDir
 
+    下面都是子项目可以继承的
     ***********************************************************************************/
 
     /**********************************************************************************
-    ## 子项目可以继承的
+
+    ## module 选项
     ***********************************************************************************/
     // 允许项目被references
     "composite": true,
 //    // 本配置默认先被dev环境继承，即各子项目的：./tsconfig.json，不需要build，只开发使用
 //    "noEmit": true,
-
 
     "allowImportingTsExtensions": true,
     "emitDeclarationOnly": true,
@@ -49,9 +50,6 @@
     "moduleResolution": "nodenext",
     // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
     "module": "NodeNext",
-    // 在不同操作系统里，文件系统对文件名大小写的处理方式不同，像 Windows 不区分大小写，而 Linux 和 macOS 区分。
-    // 这个配置项能确保在 TypeScript 项目里，引用文件时使用的文件名大小写与实际文件一致，避免因大小写不一致引发的问题。
-    "forceConsistentCasingInFileNames": true,
     "target": "es2022",
     // 同: /// <reference lib="ES2022" />
     // 取值：https://github.com/microsoft/TypeScript/tree/main/src/lib
@@ -62,7 +60,24 @@
     ## lint
     */
     // 开启 strict: true 能让 TypeScript 编译器执行更严格的类型检查，如 strictNullChecks、strictFunctionTypes 等
+
+
+    /**********************************************************************************
+    ## lint , 编译约束
+    ***********************************************************************************/
+
+    "useUnknownInCatchVariables":true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    // 在不同操作系统里，文件系统对文件名大小写的处理方式不同，像 Windows 不区分大小写，而 Linux 和 macOS 区分。
+    // 这个配置项能确保在 TypeScript 项目里，引用文件时使用的文件名大小写与实际文件一致，避免因大小写不一致引发的问题。
+    "forceConsistentCasingInFileNames": true,
+
+    /**********************************************************************************
+    ## debug use
+    ***********************************************************************************/
+
+    "traceResolution": false
+
   }
 }

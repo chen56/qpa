@@ -52,7 +52,7 @@ builds() {
 publish() {
   dry-run() {
     npm pack
-    npm publish --dry-run --registry=https://registry.npmjs.org/
+    pnpm publish --dry-run --registry=https://registry.npmjs.org/
   }
 
    #npm publish --workspaces
@@ -60,7 +60,7 @@ publish() {
 #  npm version minor: 增加次要版本号（例如从 1.0.0 或 1.1.0 到 1.2.0）。
 #  npm version major: 增加主要版本号（例如从 1.0.0 或 1.x.y 到 2.0.0）。  npm version patch
   real() {
-    npm publish --registry=https://registry.npmjs.org/
+    pnpm publish --registry=https://registry.npmjs.org/
   }
 }
 
