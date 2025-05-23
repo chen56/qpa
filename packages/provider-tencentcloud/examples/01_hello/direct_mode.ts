@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import {Project,Config} from "@qpa/core";
-import {createCommand} from "@qpa/cli";
+import {Cli} from "@qpa/cli";
 import {allowServices, TencentCloudProvider} from "../../src/index.ts";
 import {TencentCloudDirectFactory} from "../../src/index.ts";
 
-const program=createCommand(Config.directMode({
+const cli=Cli.of(Config.directMode({
     project: new Project({
         name: "test",
     }),
@@ -29,7 +29,7 @@ const program=createCommand(Config.directMode({
     }
 }));
 // --- 解析命令行参数 ---
-// program.parse() 会解析 process.argv
+// parse() 会解析 process.argv
 // 如果有子命令匹配，会触发相应子命令的 action handler
 // 如果没有子命令匹配，或者有帮助/版本等选项，commander 会处理并可能退出
-program.parse(process.argv);
+cli.rootCommand.parse(process.argv);

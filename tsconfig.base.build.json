@@ -9,6 +9,6 @@
   "$schema": "https://json.schemastore.org/tsconfig",
 
   "compilerOptions": {
-    "removeComments": true
+    "removeComments": true,
   }
 }

@@ -81,7 +81,7 @@ export class Config {
     }
 }
 
-export type ConfigProps = {
+export interface ConfigProps  {
     project: Project;
     setup: ConfigSetup;
 }

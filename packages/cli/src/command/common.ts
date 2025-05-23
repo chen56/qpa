@@ -1,19 +1,7 @@
-import {Command} from "commander";
 import {Config, Project} from "@qpa/core";
 import process from "node:process";
 import path from "node:path";
 import fs from "node:fs";
-
-export class RootCommand extends Command {
-
-    // commander的设计，父选项是需要command.parent?.opts()获取的，很不方便
-    // 覆盖命令创建的工厂方法，让每个命令都有一些公共父选项
-    createCommand(name:string) {
-        return new Command(name)
-            .option('-v, --verbose', 'use verbose logging');
-    }
-}
-
 
 
 export interface GlobalOptions {
