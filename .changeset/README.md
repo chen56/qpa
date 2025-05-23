@@ -6,3 +6,37 @@ find the full documentation for it [in our repository](https://github.com/change
 
 We have a quick list of common questions to get you started engaging with this project in
 [our documentation](https://github.com/changesets/changesets/blob/main/docs/common-questions.md)
+
+ref: <https://semver.org/>
+
+
+
+## 流程参考
+
+### snapshot 流程
+
+```bash
+# 一次纯净的 shas clean > shas build > shas test > shas pack
+shas clean_pack
+# 观察 build、dist 目录是否符合发布预期
+
+# 开发发布
+changeset
+changeset version --snapshot snapshot  # 可改为相应的名称
+# 默认的npm tag为latest，即执行 pnpm install @qpa/core 时的包
+# 而snapshot包不应该更新latest
+# snapshot 也不应该给git打tag
+changeset publish --tag snapshot --no-git-tag
+# 或 
+changeset publish --tag snapshot --no-git-tag --otp={token}
+
+# git 提交 合并分支
+git add .
+git commit -m 'some description '
+git push 
+
+# 
+pnpm install @qpa/core@0.0.0-snapshot-20250523090000
+# 或者
+pnpm install @qpa/core@snapshot
+```
