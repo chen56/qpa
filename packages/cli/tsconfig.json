@@ -21,7 +21,7 @@
   },
 
   "include": [
-    "./*.ts",
+    "./**/*.ts"
   ],
   "exclude": [
     "./build",
