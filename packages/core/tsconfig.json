@@ -14,11 +14,11 @@
     }
   },
   "include": [
-    "src/**/*.ts",
-    "test/**/*.ts",
+    "./*.ts",
   ],
   "exclude": [
-    "**/node_modules"
+    "./build",
+    "./dist",
+    "**/node_modules",
   ]
-
 }

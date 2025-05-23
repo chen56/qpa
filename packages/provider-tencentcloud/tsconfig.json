@@ -20,17 +20,15 @@
     // paths基于baseUrl
     "paths": {
       "@qpa/*": ["../*/src"]
-    }
-
+    },
   },
 
   "include": [
-    "src/**/*.ts",
-    "test/**/*.ts",
-    "examples/**/*.ts"
+    "./*.ts",
   ],
   "exclude": [
-    "**/node_modules"
-  ]
-
+    "./build",
+    "./dist",
+    "./node_modules",
+  ],
 }

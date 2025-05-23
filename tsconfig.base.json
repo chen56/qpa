@@ -7,18 +7,19 @@
 */
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-
+  "extends": ["@tsconfig/recommended/tsconfig.json"],
   "compilerOptions": {
     /**********************************************************************************
-    ## 子项目必须自行配置的，tsconfig.base.json 设置无意义或混乱的
-
-    以下所有和相对目录的选项在base里设置只会造成混乱，因为base的里的相对目录是相对根目录
+    ## 🈲️禁止在tsconfig.base.json 的选项
 
     - baseUrl和paths
       - 必须子项目自行设置,paths基于baseUrl,如果子项目继承使用根目录base config的baseUrl和paths,就会在子项目的目录里找packages目录，会失败.
     - tsBuildInfoFile
     - rootDir
     - outDir
+
+    所有路径相关配置都禁止在本文件中设置，因为在本文件中设置的path，被子项目extends后，值仍然相对以本目录，
+    假设本文件配置 outDir:'./dist', 从 packages/cli 项目看变成: outDir: '../../dist'，这只会造成混乱.
 
     下面都是子项目可以继承的
     ***********************************************************************************/
@@ -38,9 +39,9 @@
     // 启用 ES Modules 与 CommonJS 的互操作
     // 当 esModuleInterop 设置为 true 时，TypeScript 编译后的代码会处理好 ES Modules 和 CommonJS 模块之间的差异，让默认导入正常工作。
     "esModuleInterop": true,
-    //    "types": [
-    //      "vitest/importMeta"
-    //    ],
+        "types": [
+          "vitest/importMeta"
+        ],
     /*
     ## Bundler mode
     */
@@ -72,12 +73,14 @@
     // 在不同操作系统里，文件系统对文件名大小写的处理方式不同，像 Windows 不区分大小写，而 Linux 和 macOS 区分。
     // 这个配置项能确保在 TypeScript 项目里，引用文件时使用的文件名大小写与实际文件一致，避免因大小写不一致引发的问题。
     "forceConsistentCasingInFileNames": true,
-
+    // 强制将项目中的所有 .ts、.tsx、.js、.jsx 文件都视为独立的 ECMAScript 模块, 默认会自动侦测
+    // 防止typescript认为一个文件是全局脚本，而把其内部变量都注册到全局空间
+    "moduleDetection": "force",
     /**********************************************************************************
     ## debug use
     ***********************************************************************************/
 
     "traceResolution": false
 
-  }
+  },
 }
