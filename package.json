@@ -1,7 +1,39 @@
 {
   "name": "qpa",
-  "private": true,
-  "version": "0.1.3",
+  "version": "0.1.4",
+  "description": "qpa",
+  "keywords": [
+    "qpa"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chen56/qpa.git"
+  },
+  "homepage": "https://github.com/chen56",
+  "bugs": {
+    "url": "https://github.com/chen56/issues"
+  },
+  "author": "chen56",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
   "workspaces": [
     "packages/*"
   ],
