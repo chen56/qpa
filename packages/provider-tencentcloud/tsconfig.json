@@ -12,10 +12,10 @@
   "compilerOptions": {
     // 开发阶段坚决不要在子项目配置baseUrl,会导致ide无法跨项目重构
     //     "baseUrl": "./",
-    "rootDir": "./",
+//    "rootDir": "./",
     // 开发阶段坚决不要在子项目配置baseUrl,会导致ide无法跨项目重构
      "baseUrl": "./",
-    "outDir": "./dist",
+//    "outDir": "./dist",
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
     // paths基于baseUrl
     "paths": {

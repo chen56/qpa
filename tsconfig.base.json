@@ -8,27 +8,25 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
 
-  // 继承根目录的共享配置
   "compilerOptions": {
     /**********************************************************************************
-    ## 子项目必须自行配置的，base config不能设置的
+    ## 子项目必须自行配置的，tsconfig.base.json 设置无意义或混乱的
+
+    以下所有和相对目录的选项在base里设置只会造成混乱，因为base的里的相对目录是相对根目录
+
+    - baseUrl和paths
+      - 必须子项目自行设置,paths基于baseUrl,如果子项目继承使用根目录base config的baseUrl和paths,就会在子项目的目录里找packages目录，会失败.
+    - tsBuildInfoFile
+    - rootDir
+    - outDir
+
     ***********************************************************************************/
-//  baseUrl和paths，必须子项目自行设置
-//  paths基于baseUrl,如果子项目继承使用根目录base config的baseUrl和paths,就会在子项目的目录里找packages目录，会失败
-//    "baseUrl": "./",
-//    "paths": {
-//      // 跨mono项目引用的指示，可以让编辑器跨项目重构
-//      "@qpa/*": ["packages/*/src"]
-//    },
-    // 将 tsconfig.tsbuildinfo 文件生成在 ./build 目录,默认是tsc执行目录
-    "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
 
     /**********************************************************************************
     ## 子项目可以继承的
     ***********************************************************************************/
+    // 允许项目被references
     "composite": true,
-    "rootDir": "./",
-    "outDir": "./dist",
 //    // 本配置默认先被dev环境继承，即各子项目的：./tsconfig.json，不需要build，只开发使用
 //    "noEmit": true,
 

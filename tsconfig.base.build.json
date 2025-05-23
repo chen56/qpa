@@ -1,0 +1,13 @@
+// build阶段 配置
+/*
+参考：
+- 已写好的基础配置，可直接extends: https://github.com/tsconfig/bases
+- https://github.com/microsoft/TypeScript
+- tsc -h 只列出部分参数，全部参数参考: https://www.typescriptlang.org/docs/handbook/compiler-options.html
+*/
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "removeComments": true
+  }
+}
