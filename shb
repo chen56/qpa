@@ -4,8 +4,8 @@ set -o errexit   # -e
 set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
-SHAS_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-cd "$SHAS_DIR"
+SHB_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+cd "$SHB_DIR"
 
 # shellcheck disable=SC1091
 source "./common.bash"
@@ -13,11 +13,11 @@ source "./common.bash"
 # ############################################################
 # 基于bash脚本的mono项目管理
 # 1. 名词:workspace/project/子项目,名词等同
-# 2. shas脚本为根脚本，主要是遍历多个项目执行命令，而各子项目的sha执行实际本项目命令
+# 2. shb脚本为根脚本，主要是遍历多个项目执行命令，而各子项目的sha执行实际本项目命令
 # 3. 项目组是相同体系规范的一组项目容器，可共享命令实现，
 #    比如定义一个npm组，build命令只需要写一次就可以被所有npm项目使用，除非项目本身对build命令有其特殊实现，可覆盖之
-# 4. 多项目命令的实现和执行分3个层级：shas -> 项目组-> 项目
-#    比如执行'shas build'，先循环一组项目，每个项目加载其所属项目组build函数，再加载项目自己sha脚本build函数，
+# 4. 多项目命令的实现和执行分3个层级：shb -> 项目组-> 项目
+#    比如执行'shb build'，先循环一组项目，每个项目加载其所属项目组build函数，再加载项目自己sha脚本build函数，
 #    利用bash脚本后定义的函数可覆盖先定义的函数的特性，如果项目的sha脚本没有build函数实现，就执行项目组的build函数，
 #    否则，执行项目自己的build函数。
 # 5. 项目定义时按相对路径或绝对路径，其作为项目过滤的依据
@@ -98,7 +98,7 @@ __run__current_projects() {
 exec() {
   for project_dir in "${__current_project_array[@]}"; do
     echo "😀project: '$project_dir'"
-    cd "$SHAS_DIR/$project_dir"
+    cd "$SHB_DIR/$project_dir"
     _run "$@"
     echo
   done
@@ -150,7 +150,7 @@ pref() {
 # 守卫语句，当'source ./sha'执行，脚本被当类库导入时，$0为bash或zsh等值
 # 即当类库引用时不执行后续命令式入口代码
 if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
-  echo 'shas脚本为mono项目脚本，不能作为类库导入，只能命令式执行'
+  echo 'shb脚本为mono项目脚本，不能作为类库导入，只能命令式执行'
   exit 1
 fi
 
