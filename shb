@@ -50,7 +50,8 @@ declare -a __current_workspaces=("${__all_workspaces[@]}")
 #  __group_loaders["$group_name"]="$loader_func"
 #  __group_array_names["$group_name"]="$group_array_name"
 #}
-#
+
+#__register_group "all"    "_load_all_group_defaults"    "__all_workspaces"
 #__register_group "nodejs" "_load_nodejs_group_defaults" "__nodejs_workspaces"
 #__register_group "golang" "_load_golang_group_defaults" "__golang_workspaces"
 
@@ -135,9 +136,10 @@ __for_each_workspace() {
 ##########################################
 
 #############################################################
-## workspaces级别的任务集
+## workspaces级别的任务集(可全局>组>workspace 覆盖实现)
 #############################################################
-exec() {           __for_each_workspace __current_workspaces "exec"     "$@";}
+
+exec() {           __for_each_workspace __current_workspaces "exec"      "$@";}
 clean() {          __for_each_workspace __current_workspaces "clean"     "$@";}
 clean_all() {      __for_each_workspace __current_workspaces "clean_all" "$@";}
 install() {        __for_each_workspace __current_workspaces "install"   "$@";}
@@ -149,10 +151,17 @@ rebuild() {        __for_each_workspace __current_workspaces "rebuild"   "$@";}
 retest() {         __for_each_workspace __current_workspaces "retest"    "$@";}
 repack() {         __for_each_workspace __current_workspaces "repack"    "$@";}
 
-# 所有workspace的默认任务/命令集
+
+#############################################################
+## 任务的默认实现
+#############################################################
+
+# 全局，所有workspace的默认任务/命令集
+# 任务的覆盖顺序为：全局>组>workspace
 _load_all_group_defaults() {
   exec() { _run "$@"; }
 }
+
 
 #############################################################
 ## 其他任务
@@ -169,7 +178,7 @@ status() {
   echo "## workspaces:"
   printf "  %s\n" "${__all_workspaces[@]}"
   echo "## packages:"
-  printf "  %s\n" "$(_dir_to_package_name "${__all_workspaces[@]}")"
+#  printf "  %s\n" "$(_dir_to_package_name "${__all_workspaces[@]}")"
   echo "## out ip:"
   echo "  $(curl ipinfo.io/ip 2>/dev/null)"
 }
