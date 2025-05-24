@@ -13,15 +13,16 @@ cd "$CLI_DIR"
 source "./common.bash"
 
 # 按项目组复用command
-_project_group_pnpm_on
+_load_nodejs_group_defaults
 
 
 ##########################################
 # app cmd script
 # 独立于项目组的特殊命令
 ##########################################
-
-
+clean() {
+  _run rm -rf build dist node_modules
+}
 
 ##########################################
 # app 入口

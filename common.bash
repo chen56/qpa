@@ -98,7 +98,7 @@ _normal_path() {
 #}
 
 # 打开npm命令组
-_project_group_pnpm_on() {
+_load_nodejs_group_defaults() {
   clean() {         _run rm -rf build dist out ;}
   clean_all() {     _run rm -rf build dist out node_modules;}
   test() { _run vitest run ./test ;}
@@ -129,4 +129,9 @@ _project_group_pnpm_on() {
 
   info() { _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"; }
   main() {  _run pnpm exec tsx src/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}
+}
+
+# 当前没golang任务，只是为了体现workspace脚本机制
+_load_golang_group_defaults() {
+  clean() {         _run rm -rf build dist out ;}
 }

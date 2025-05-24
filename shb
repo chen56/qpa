@@ -22,43 +22,77 @@ source "./common.bash"
 #    否则，执行项目自己的build函数。
 # 5. 项目定义时按相对路径或绝对路径，其作为项目过滤的依据
 #############################################################
-declare -a __project_group_pnpm=(
+declare -a __nodejs_workspaces=(
 .
 ./packages/core
 ./packages/provider-tencentcloud
 ./packages/cli
 )
-declare -a __project_group_other=()
+declare -a __golang_workspaces=()
 
-declare -a __project_array=("${__project_group_other[@]}"  "${__project_group_pnpm[@]}")
+declare -a __all_workspaces=("${__golang_workspaces[@]}"  "${__nodejs_workspaces[@]}")
 
-# 当前待处理的项目数组，暂时全部，回头加过滤器
-declare -a __current_project_array=("${__project_array[@]}")
+# 当前待处理的项目数组，暂时全部，回头通过脚本option 加过滤器 动态化此数组
+declare -a __current_workspaces=("${__all_workspaces[@]}")
 
-__current_projects() { printf "%s\n" "${__current_project_array[@]}";}
+# 定义一个关联数组来存储“组”对应的默认任务加载函数
+# Key: 组名 (e.g., "nodejs", "golang")
+# Value: 对应的加载函数名 (e.g., "_load_group_defaults_for_nodejs")
+#declare -A __group_loaders
+#declare -A __group_array_names
 
-# Usage: __run_project_cmd <project> <cmd>
-# 本函数做多次加载相关项目的命令集，外部执行时最好用子进程形式执行：( __run_project_cmd "project" "cmd" )
-__run_project_cmd(){
-  local project="$1"
+# Usage: _sha_register_group_loader <group_name> <loader_function_name>
+# 注册一个组的默认任务加载函数
+#__register_group() {
+#  local group_name="$1"
+#  local loader_func="$2"
+#  local group_array_name="$3"
+#  __group_loaders["$group_name"]="$loader_func"
+#  __group_array_names["$group_name"]="$group_array_name"
+#}
+#
+#__register_group "nodejs" "_load_nodejs_group_defaults" "__nodejs_workspaces"
+#__register_group "golang" "_load_golang_group_defaults" "__golang_workspaces"
+
+
+# Usage: __execute_in_workspace <workspace> <cmd>
+# 本函数做多次加载相关项目的命令集，外部执行时最好用子进程形式执行：( __execute_in_workspace "workspace" "cmd" )
+__execute_in_workspace(){
+  local workspace="$1"
   local cmd="$2"
-  if [[ "$project" == "" ]]; then echo "ERROR: 缺少<project>参数,Usage: __run_project_cmd <project> <cmd>"; fi
-  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: __run_project_cmd <project> <cmd>"; fi
+  if [[ "$workspace" == "" ]]; then echo "ERROR: 缺少<workspace>参数,Usage: __execute_in_workspace <workspace> <cmd>"; fi
+  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: __execute_in_workspace <workspace> <cmd>"; fi
 
   shift 2
   local before_load
   before_load=$(declare -f $cmd)
 
-  cd "$project"
+  cd "$workspace"
 
-  for n in "${__project_group_pnpm[@]}"; do
-    if [[ "$project" == "$n" ]]; then
-      _project_group_pnpm_on
+
+#  local group_name
+#  local group_array
+#  for group_name in "${!__group_array_names[@]}"; do
+#      declare -n group_array="${__group_array_names[$key]}"
+#      for n in "${group_array[@]}"; do
+#        if [[ "$workspace" == "$n" ]]; then
+#          local loader_func="${__group_loaders[$group_name]}"
+#          $loader_func
+#          break;
+#        fi
+#      done
+#  done
+
+  _load_all_group_defaults
+
+  for n in "${__nodejs_workspaces[@]}"; do
+    if [[ "$workspace" == "$n" ]]; then
+      _load_nodejs_group_defaults
       break;
     fi
   done
 
-  ## load cmd function from project
+  ## load cmd function from workspace
   if [ -f "./sha" ]; then
     . "./sha"
   fi
@@ -67,7 +101,7 @@ __run_project_cmd(){
   after_load=$(declare -f "$cmd")
   # 如果cmd的函数加载前后内容相同，说明用户并为定义相关函数，则忽略执行
   if [[ "$before_load" == "$after_load" ]]; then
-    echo "  ⚪️ignore 项目 $project 执行 $cmd, 因为您未定义[$cmd]函数实现"
+    echo "  ⚪️ignore 项目 $workspace 执行 $cmd, 因为您未定义[$cmd]函数实现"
     return 0
   fi
   # 执行相应的命令函数
@@ -75,16 +109,21 @@ __run_project_cmd(){
   $cmd "$@"
 }
 
-__run__current_projects() {
-  local cmd="$1"
-  if [[ "$cmd" == "" ]];     then echo "ERROR: 缺少<cmd>参数,Usage: __run__current_projects <cmd>"; fi
+__for_each_workspace() {
+  local workspaces_array_name="$1" # 数组名，例如 "__current_workspaces"
+  local cmd="$2"
+  shift # cmd保留，workspaces_array_name在本函数使用
 
-  local project_dir;
-  for project_dir in "${__current_project_array[@]}"; do
+  if [[ "$cmd" == "" ]];                       then echo "ERROR: 缺少<cmd>参数,Usage: __for_each_workspace <workspaces_array_name> <cmd> "; fi
+  if [[ "$workspaces_array_name" == "" ]];     then echo "ERROR: 缺少<workspaces_array_name>参数,Usage: __for_each_workspace <workspaces_array_name> <cmd> "; fi
+
+  local -n workspaces="$workspaces_array_name" # Bash 4.3+ nameref
+  local workspace;
+  for workspace in "${workspaces[@]}"; do
     # 用()建立子进程，执行时互不干扰
     (
-        echo "🟪 project: $project_dir"
-        __run_project_cmd "$project_dir" "$cmd" "$@"
+        echo "🟪 workspace: $workspace"
+        __execute_in_workspace "$workspace" "$@"
     )
   done
 }
@@ -92,28 +131,32 @@ __run__current_projects() {
 
 ##########################################
 # app cmd script
-# 应用的命令脚本
+# 以下为应用的任务脚本
 ##########################################
 
-exec() {
-  for project_dir in "${__current_project_array[@]}"; do
-    echo "😀project: '$project_dir'"
-    cd "$SHB_DIR/$project_dir"
-    _run "$@"
-    echo
-  done
+#############################################################
+## workspaces级别的任务集
+#############################################################
+exec() {           __for_each_workspace __current_workspaces "exec"     "$@";}
+clean() {          __for_each_workspace __current_workspaces "clean"     "$@";}
+clean_all() {      __for_each_workspace __current_workspaces "clean_all" "$@";}
+install() {        __for_each_workspace __current_workspaces "install"   "$@";}
+build() {          __for_each_workspace __current_workspaces "build"     "$@";}
+pack() {           __for_each_workspace __current_workspaces "pack"      "$@";}
+test() {           __for_each_workspace __current_workspaces "test"      "$@";}
+reinstall() {      __for_each_workspace __current_workspaces "reinstall" "$@";}
+rebuild() {        __for_each_workspace __current_workspaces "rebuild"   "$@";}
+retest() {         __for_each_workspace __current_workspaces "retest"    "$@";}
+repack() {         __for_each_workspace __current_workspaces "repack"    "$@";}
+
+# 所有workspace的默认任务/命令集
+_load_all_group_defaults() {
+  exec() { _run "$@"; }
 }
 
-clean() {          __run__current_projects "clean"         "$@";}
-clean_all() {      __run__current_projects "clean_all"         "$@";}
-install() {        __run__current_projects "install"       "$@";}
-build() {          __run__current_projects "build"         "$@";}
-pack() {           __run__current_projects "pack"          "$@";}
-test() {           __run__current_projects "test"          "$@";}
-reinstall() {      __run__current_projects "reinstall"   "$@";}
-rebuild() {        __run__current_projects "rebuild"   "$@";}
-retest() {         __run__current_projects "retest"    "$@";}
-repack() {         __run__current_projects "repack"    "$@";}
+#############################################################
+## 其他任务
+#############################################################
 
 npmjs() {
   login() {
@@ -124,9 +167,9 @@ npmjs() {
 
 status() {
   echo "## workspaces:"
-  printf "  %s\n" "${__project_array[@]}"
+  printf "  %s\n" "${__all_workspaces[@]}"
   echo "## packages:"
-  printf "  %s\n" "$(_dir_to_package_name "${__project_array[@]}")"
+  printf "  %s\n" "$(_dir_to_package_name "${__all_workspaces[@]}")"
   echo "## out ip:"
   echo "  $(curl ipinfo.io/ip 2>/dev/null)"
 }
@@ -146,6 +189,11 @@ pref() {
     node --cpu-prof "$(which pnpm)" run echo
   }
 }
+
+
+#############################################################
+## 脚本入口
+#############################################################
 
 # 守卫语句，当'source ./sha'执行，脚本被当类库导入时，$0为bash或zsh等值
 # 即当类库引用时不执行后续命令式入口代码
