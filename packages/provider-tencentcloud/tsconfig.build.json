@@ -1,6 +1,6 @@
 // build阶段 配置
 {
-  "extends": ["../../tsconfig.base.build.json","./tsconfig.json"],
+  "extends": ["./tsconfig.json","../../tsconfig.base.build.json"],
 
   // 继承根目录的共享配置
   "compilerOptions": {

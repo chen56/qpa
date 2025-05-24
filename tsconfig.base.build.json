@@ -9,6 +9,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
 
   "compilerOptions": {
-    "removeComments": true,
+    // 此项在开发配置中为了便于跨项目导航，设成了bundler
+    "moduleResolution": "node16",
+    "module": "node16",
+    "target": "ES2015",
   }
 }

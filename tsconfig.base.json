@@ -9,7 +9,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": ["@tsconfig/recommended/tsconfig.json"],
   "compilerOptions": {
-    /**********************************************************************************
+    /*
     ## 🈲️禁止在tsconfig.base.json 的选项
 
     - baseUrl和paths
@@ -22,66 +22,91 @@
     假设本文件配置 outDir:'./dist', 从 packages/cli 项目看变成: outDir: '../../dist'，这只会造成混乱.
 
     下面都是子项目可以继承的
-    ***********************************************************************************/
 
-    /**********************************************************************************
+    */
 
-    ## module 选项
-    ***********************************************************************************/
+
+
+    /*
+
+    --------------------------------------------------------------------------------------------------------
+
+    ## 影响开发的选项
+
+    本质上tsconfig主要为开发服务，因为类库打包用rollup/bun/webpack等其他工具
+    */
     // 允许项目被references
     "composite": true,
 //    // 本配置默认先被dev环境继承，即各子项目的：./tsconfig.json，不需要build，只开发使用
 //    "noEmit": true,
 
     "allowImportingTsExtensions": true,
+
+    /**
+    ### moduleResolution
+
+    主要影响 TypeScript 编译器在你的库内部如何查找依赖，以及打包工具在构建你的库时如何解析模块。
+    它不会直接影响库的消费者在自己的项目中使用库时，他们的 TypeScript 编译器或运行时如何解析库。
+
+    **重要** webstorm mono项目导航问题：
+    moduleResolution设为(nodenext/node16),ide 跨项目 "Declaration or Usages"时，都会跳转到 dist/*.d.ts 类型定义文件，
+    除非删掉dist目录才能正确跳转到源文件，设置为(bundler/node/node10)就能正确导航到源文件。
+    目前的解释是nodenext/node16会严格遵守ES规范，解析模块时会优先使用package.json exports 字段中的 types 定义，
+    从而指向 .d.ts 文件。其他模块解析策略可能没有这种严格优先级，导致 paths 映射到源文件时能够生效。
+    bundler(typescript5引入) 策略可能是一个折衷，因为它旨在平衡打包工具和开发体验。
+    */
+    "moduleResolution": "bundler",
+
+
+
+    /*
+    --------------------------------------------------------------------------------------------------------
+
+    ## 影响输出的选项，即影响lib消费者的选项
+
+    */
+
+    // module选项直接定义了库的输出格式。它决定了库的 .js 文件中，import 和 export 语句的形式。
+    "module": "ES2015",
+    "target": "ES2015",
+
     "emitDeclarationOnly": true,
     "sourceMap": true,
     "declaration": true,
-    // 启用 ES Modules 与 CommonJS 的互操作
+
     // 当 esModuleInterop 设置为 true 时，TypeScript 编译后的代码会处理好 ES Modules 和 CommonJS 模块之间的差异，让默认导入正常工作。
-//    "esModuleInterop": true,
-//        "types": [
-//          "vitest/importMeta"
-//        ],
-    /*
-    ## Bundler mode
-    */
-    // Node.js 项目：如果使用 CommonJS，选 node；如果使用 ES Modules，选 node16 或 nodenext。
-    // 前端项目：使用打包工具时，选 bundler。
-    // 旧项目：可以考虑 classic，不过建议升级到现代解析策略。
-    "moduleResolution": "bundler",
-    // 生成模块代码的规范。NodeNext (或 ESNext) 与 Bun 的 ESM 模块系统对齐。
-    "module": "es2022",
-    "target": "es2022",
+    "esModuleInterop": true,
+
+    // 强制将项目中的所有 .ts、.tsx、.js、.jsx 文件都视为独立的 ECMAScript 模块, 默认会自动侦测
+    // 防止typescript认为一个文件是全局脚本，而把其内部变量都注册到全局空间
+    "moduleDetection": "force",
+
     // 同: /// <reference lib="ES2022" />
     // 取值：https://github.com/microsoft/TypeScript/tree/main/src/lib
     "lib": [
       "ES2022"
     ],
+
+    "removeComments": true,
+
     /*
-    ## lint
+    --------------------------------------------------------------------------------------------------------
+    ## lint & 约束
     */
-    // 开启 strict: true 能让 TypeScript 编译器执行更严格的类型检查，如 strictNullChecks、strictFunctionTypes 等
-
-
-    /**********************************************************************************
-    ## lint , 编译约束
-    ***********************************************************************************/
-
-    "useUnknownInCatchVariables":true,
+    // ### strict:true
+    // 能让 TypeScript 编译器执行更严格的类型检查，如 strictNullChecks、strictFunctionTypes 等
     "strict": true,
+    "useUnknownInCatchVariables":true,
     "skipLibCheck": true,
     // 在不同操作系统里，文件系统对文件名大小写的处理方式不同，像 Windows 不区分大小写，而 Linux 和 macOS 区分。
     // 这个配置项能确保在 TypeScript 项目里，引用文件时使用的文件名大小写与实际文件一致，避免因大小写不一致引发的问题。
     "forceConsistentCasingInFileNames": true,
-    // 强制将项目中的所有 .ts、.tsx、.js、.jsx 文件都视为独立的 ECMAScript 模块, 默认会自动侦测
-    // 防止typescript认为一个文件是全局脚本，而把其内部变量都注册到全局空间
-//    "moduleDetection": "force",
-    /**********************************************************************************
+
+    /*
+    --------------------------------------------------------------------------------------------------------
     ## debug use
-    ***********************************************************************************/
+    */
 
     "traceResolution": false
-
   },
 }
