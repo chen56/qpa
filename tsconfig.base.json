@@ -45,8 +45,10 @@
     /**
     ### moduleResolution
 
-    主要影响 TypeScript 编译器在你的库内部如何查找依赖，以及打包工具在构建你的库时如何解析模块。
-    它不会直接影响库的消费者在自己的项目中使用库时，他们的 TypeScript 编译器或运行时如何解析库。
+    主要影响
+    - TypeScript 编译器在你的库内部如何查找依赖，以及打包工具在构建你的库时如何解析模块。
+      它不会直接影响库的消费者在自己的项目中使用库时，他们的 TypeScript 编译器或运行时如何解析库。
+    - 影响webstorm的自动修复import, 比如自动import为 x/index.js 或x/index.ts
 
     **重要** webstorm mono项目导航问题：
     moduleResolution设为(nodenext/node16),ide 跨项目 "Declaration or Usages"时，都会跳转到 dist/*.d.ts 类型定义文件，
@@ -54,6 +56,7 @@
     目前的解释是nodenext/node16会严格遵守ES规范，解析模块时会优先使用package.json exports 字段中的 types 定义，
     从而指向 .d.ts 文件。其他模块解析策略可能没有这种严格优先级，导致 paths 映射到源文件时能够生效。
     bundler(typescript5引入) 策略可能是一个折衷，因为它旨在平衡打包工具和开发体验。
+
     */
     "moduleResolution": "bundler",
 
@@ -63,7 +66,6 @@
     --------------------------------------------------------------------------------------------------------
 
     ## 影响输出的选项，即影响lib消费者的选项
-
     */
 
     // module选项直接定义了库的输出格式。它决定了库的 .js 文件中，import 和 export 语句的形式。

@@ -22,15 +22,16 @@ export class Cli{
   }
 
   static of(config:Config):Cli{
-    const root = new _RootCommand();
+    const cli = new Cli(config,new _RootCommand());
+
 // --- 注册子命令 ---
 // 调用每个子命令的注册函数，并将主 root 实例传递进去
-    apply.default(root);
-    destroy.default(root);
-    plan.default(root);
-    papa.default(root);
+    apply.default(cli,cli.rootCommand);
+    destroy.default(cli,cli.rootCommand);
+    plan.default(cli,cli.rootCommand);
+    papa.default(cli,cli.rootCommand);
 
-    return new Cli(config,root);
+    return cli;
   }
 }
 

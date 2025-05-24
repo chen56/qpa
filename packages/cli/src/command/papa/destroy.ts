@@ -3,13 +3,14 @@ import {GlobalOptions, loadPlannedConfig} from '../common.ts';
 
 import type {Command} from "commander";
 import {Project} from "@qpa/core";
+import {Cli} from "src/index.ts";
 
 interface Options extends GlobalOptions {
 }
 
 // 导出一个函数，用于注册 plan 子命令
 // 接受父命令 (通常是 program 实例) 作为参数
-export default function registerCommand(parentCommand: Command): void {
+export default function registerCommand(cli: Cli, parentCommand: Command): void {
     // 在父命令上创建 'plan' 子命令
     parentCommand.command('destroy <config>')
         .description('destroy all Configured Resources and Deconfigured Resources')

@@ -1,3 +1,4 @@
+import { Cli } from 'src/index.ts';
 import type {GlobalOptions} from './common.ts';
 import {loadDirectConfig} from './common.ts';
 import {Config} from "@qpa/core";
@@ -9,7 +10,7 @@ interface Options extends GlobalOptions {
 
 // 导出一个函数，用于注册 apply 子命令
 // 接受父命令 (通常是 program 实例) 作为参数
-export default function registerCommand(parentCommand: Command): void {
+export default function registerCommand(cli: Cli, parentCommand: Command): void {
     // 在父命令上创建 'apply' 子命令
     parentCommand.command('plan <configPath>')
         .description('plan config')
