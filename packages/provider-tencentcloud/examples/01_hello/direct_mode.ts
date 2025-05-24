@@ -1,22 +1,21 @@
 import 'dotenv/config';
 import {Project,Config} from "@qpa/core";
 import {Cli} from "@qpa/cli";
-import {allowServices, TencentCloudProvider} from "../../src/index.ts";
-import {TencentCloudDirectFactory} from "../../src/index.ts";
+import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 const cli=Cli.of(Config.directMode({
-    project: new Project({
+    project: {
         name: "test",
-    }),
+    },
     setup: async (project: Project): Promise<void> => {
-        const tencentCloudProvider = new TencentCloudProvider(project, {
+        const tc = TencentCloud.direct({
+            project:project,
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,
                 secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
             },
-            allowedResourceServices: allowServices
         });
-        const tc = new TencentCloudDirectFactory(tencentCloudProvider);
+
         const vpc = await tc.vpc.vpc({
             name: "main",
             spec: {

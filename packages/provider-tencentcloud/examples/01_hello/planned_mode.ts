@@ -1,8 +1,7 @@
 // noinspection JSUnusedGlobalSymbols
 import {Config, Project} from "@qpa/core";
 
-import {allowServices, TencentCloudPlannedFactory} from "../../src/index.ts";
-import { TencentCloudProvider } from "../../src/index.ts";
+import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 
 export default Config.plannedMode({
@@ -11,18 +10,15 @@ export default Config.plannedMode({
     }),
     setup: async (project: Project): Promise<void> => {
 
-        const tencentCloudProvider = new TencentCloudProvider(project, {
+        const tc = TencentCloud.direct({
+            project: project,
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,
                 secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
             },
-            allowedResourceServices: allowServices
         });
 
-        let tc: TencentCloudPlannedFactory;
-        tc = new TencentCloudPlannedFactory(tencentCloudProvider);
-
-        tc.vpc.vpc({
+        await tc.vpc.vpc({
             name: "main",
             spec: {
                 Region: "ap-guangzhou",

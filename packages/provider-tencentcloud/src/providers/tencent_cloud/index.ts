@@ -14,6 +14,5 @@ export {
 export {
     TencentCloudPlannedFactory,
     TencentCloudDirectFactory,
-    allowServices
 } from './factory.ts';
 

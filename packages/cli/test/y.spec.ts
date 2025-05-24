@@ -7,9 +7,9 @@ import {Cli} from "src/index.ts";
 describe('study undefined', () => {
     it('可选链操作符（Optional Chaining Operator）返回值类型：T|undefined', () => {
         const cli=Cli.of(Config.directMode({
-            project: new Project({
+            project: {
                 name: "test",
-            }),
+            },
             setup: async (project: Project): Promise<void> => {
                 console.log(project.name)
             }

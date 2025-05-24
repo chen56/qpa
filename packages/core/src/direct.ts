@@ -1,4 +1,3 @@
-
 export class PaPaResource<SPEC, STATE> {
     public readonly name: string;
 
@@ -64,7 +63,8 @@ export class Config {
         if (!props.project.name) {
             throw new Error('Missing required project name');
         }
-        this.project = props.project;
+
+        this.project = new Project(props.project);
         this._setup = props.setup
     }
 
@@ -81,8 +81,9 @@ export class Config {
     }
 }
 
-export interface ConfigProps  {
-    project: Project;
+export interface ConfigProps {
+    // project: Project;
+    project: { name: string };
     setup: ConfigSetup;
 }
 
