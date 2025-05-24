@@ -1,7 +1,7 @@
 import type {GlobalOptions} from '../common.ts';
 import {loadPlannedConfig} from '../common.ts';
 import type {Command} from "commander";
-import {Project} from "@qpa/core";
+import {PlannedProject} from "@qpa/core";
 import { Cli } from 'src/index.ts';
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
@@ -20,7 +20,7 @@ export default function registerCommand(cli: Cli, parentCommand: Command): void 
                 console.log(`${new Date().toISOString()} - apply <${config}>.`);
                 console.log(`Options:`, options);
             }
-            const resourceSpace: Project = await loadPlannedConfig(config,options);
+            const resourceSpace: PlannedProject = await loadPlannedConfig(config,options);
             await resourceSpace.apply();
         });
 }

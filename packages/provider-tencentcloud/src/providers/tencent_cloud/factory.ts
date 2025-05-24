@@ -2,14 +2,13 @@ import {VpcDirectFactory, VpcPlannedFactory} from "./vpc/factory.ts";
 import { VpcService } from "./vpc/vpc.ts";
 import { VpcClients } from "./vpc/_common.ts";
 import {ResourceType, TencentCloudProvider, TencentCloudResourceService} from "./provider.ts";
-import {Project} from "@qpa/core";
+import {PlannedProject} from "@qpa/core";
 
 export abstract class TencentCloud {
     protected constructor(readonly provider: TencentCloudProvider) {
     }
 
-
-    static direct(param: { credential: { secretId: string; secretKey: string }; project: Project }) {
+    static direct(param: { credential: { secretId: string; secretKey: string }; project: PlannedProject }) {
         const tencentCloudProvider = new TencentCloudProvider(param.project, {
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,

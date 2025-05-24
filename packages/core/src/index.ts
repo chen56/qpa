@@ -7,7 +7,7 @@
  * */
 
 export {
-    Config, Project, Provider, StatePart, SpecPart, PaPaResource, ResourceService, Constants, AppliedResource
-} from "./direct.ts"
+    Config, PlannedProject, Provider, StatePart, SpecPart, PaPaResource, ResourceService, Constants, AppliedResource
+} from "src/plan.ts"
 
-export type {SpecPartProps} from './direct.ts'
+export type {SpecPartProps} from 'src/plan.ts'

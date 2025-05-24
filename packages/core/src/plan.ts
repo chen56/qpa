@@ -52,10 +52,10 @@ export enum _ConfigMode {
     Planned
 }
 
-export type ConfigSetup = (project: Project) => Promise<void>;
+export type ConfigSetup = (project: PlannedProject) => Promise<void>;
 
 export class Config {
-    public project: Project;
+    public project: PlannedProject;
     public _setup: ConfigSetup;
 
     private constructor(public readonly _configMode: _ConfigMode, props: ConfigProps) {
@@ -64,7 +64,7 @@ export class Config {
             throw new Error('Missing required project name');
         }
 
-        this.project = new Project(props.project);
+        this.project = new PlannedProject(props.project);
         this._setup = props.setup
     }
 
@@ -149,14 +149,14 @@ export interface ResourceProps<SPEC, STATE> extends SpecPartProps<SPEC> {
 }
 
 export abstract class Provider {
-    protected constructor(readonly project: Project) {
+    protected constructor(readonly project: PlannedProject) {
         project._providers.push(this);
     }
 
     abstract loadAll(): Promise<StatePart<unknown>[]>;
 }
 
-export class Project {
+export class PlannedProject {
     _providers: Providers = new Providers();
     _configuredResources: ConfiguredResources = new ConfiguredResources();
     _deconfiguredResources: DeconfiguredResources = new DeconfiguredResources();

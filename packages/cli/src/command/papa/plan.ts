@@ -1,7 +1,7 @@
 import type {GlobalOptions} from '../common.ts';
 import {loadPlannedConfig} from '../common.ts';
 import type {Command} from "commander";
-import {Project} from "@qpa/core";
+import {PlannedProject} from "@qpa/core";
 import {Cli} from "src/index.ts";
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
@@ -19,7 +19,7 @@ export default function registerCommand(cli: Cli, parentCommand: Command): void 
             if (options.verbose) {
                 console.log('%s - apply <%s> options: %O',new Date().toISOString(),config, options);
             }
-            const project: Project = await loadPlannedConfig(config,options);
+            const project: PlannedProject = await loadPlannedConfig(config,options);
             await project.refresh();
             for (const r of project._configuredResources) {
                 console.log('configuredResource[%s]: %O',project._configuredResources.length,{

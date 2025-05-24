@@ -1,7 +1,7 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {describe, expect, it} from "vitest";
-import {Config, Project} from "@qpa/core";
+import {Config, PlannedProject} from "@qpa/core";
 import {Cli} from "src/index.ts";
 
 describe('study undefined', () => {
@@ -10,7 +10,7 @@ describe('study undefined', () => {
             project: {
                 name: "test",
             },
-            setup: async (project: Project): Promise<void> => {
+            setup: async (project: PlannedProject): Promise<void> => {
                 console.log(project.name)
             }
         } ));

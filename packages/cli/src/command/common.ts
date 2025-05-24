@@ -1,4 +1,4 @@
-import {Config, Project} from "@qpa/core";
+import {Config, PlannedProject} from "@qpa/core";
 import process from "node:process";
 import path from "node:path";
 import fs from "node:fs";
@@ -25,7 +25,7 @@ export async function loadDirectConfig(configPath: string, options:GlobalOptions
 
     return configModule.default;
 }
-export async function loadPlannedConfig(config: string, options:GlobalOptions): Promise<Project> {
+export async function loadPlannedConfig(config: string, options:GlobalOptions): Promise<PlannedProject> {
     const currentWorkingDirectory: string = process.cwd();
     const configPath = path.resolve(currentWorkingDirectory, config);
     if(options.verbose){

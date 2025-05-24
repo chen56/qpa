@@ -1,12 +1,12 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {describe, expect, it} from "vitest";
-import {Project} from "@qpa/core";
+import {PlannedProject} from "@qpa/core";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 describe('手工运行的测试', () => {
     it('direct mode destory', () => {
-        let project=new Project({name:"test"});
+        let project=new PlannedProject({name:"test"});
 
         const tc = TencentCloud.direct({
             project:project,
