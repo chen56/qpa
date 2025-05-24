@@ -138,6 +138,14 @@ version() {
   push() {  git push origin --tags  "$@" ; }
 }
 
+pref() {
+  hello() {
+    # 生成的 ./*.cpuprofile 文件
+    #    Chrome 浏览器 > 打开开发者工具 > 导航到 "Performance" (性能) 面板 > 点击面板左上角加载图标 (一个向上的箭头)
+    #。      >  加载生成的.cpuprofile文件
+    node --cpu-prof "$(which pnpm)" run echo
+  }
+}
 
 # 守卫语句，当'source ./sha'执行，脚本被当类库导入时，$0为bash或zsh等值
 # 即当类库引用时不执行后续命令式入口代码

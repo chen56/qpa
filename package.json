@@ -38,7 +38,8 @@
     "packages/*"
   ],
   "scripts": {
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "echo": "echo hello"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.4",
