@@ -7,7 +7,7 @@
  * */
 
 export {
-    Config, PlannedProject, LazyResource
+    Config, LazyProject, LazyResource
 } from "src/lazy.ts"
 
 export {Provider} from "src/service.ts";

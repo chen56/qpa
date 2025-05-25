@@ -1,14 +1,14 @@
 // noinspection JSUnusedGlobalSymbols
-import {Config, PlannedProject} from "@qpa/core";
+import {Config, LazyProject} from "@qpa/core";
 
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 
 export default Config.plannedMode({
-    project: new PlannedProject({
+    project: new LazyProject({
         name: "test",
     }),
-    setup: async (project: PlannedProject): Promise<void> => {
+    setup: async (project: LazyProject): Promise<void> => {
 
         const tc = TencentCloud.direct({
             project: project,

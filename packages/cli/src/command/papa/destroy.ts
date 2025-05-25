@@ -2,7 +2,7 @@
 import {GlobalOptions, loadPlannedConfig} from '../common.ts';
 
 import type {Command} from "commander";
-import {PlannedProject} from "@qpa/core";
+import {LazyProject} from "@qpa/core";
 import {Cli} from "src/index.ts";
 
 interface Options extends GlobalOptions {
@@ -17,7 +17,7 @@ export default function registerCommand(cli: Cli, parentCommand: Command): void 
         // 原代码 action signature 接收了 name 参数，但 command 定义没有 arguments。
         // 如果 plan 不需要 arguments, 只需接收 options。这里修正为只接收 options。
         .action(async (config: string,options:Options) => {
-            const resourceSpace: PlannedProject = await loadPlannedConfig(config,options);
+            const resourceSpace: LazyProject = await loadPlannedConfig(config,options);
             await resourceSpace.destroy();
         });
 }

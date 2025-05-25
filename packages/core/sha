@@ -23,7 +23,7 @@ _load_nodejs_group_defaults
 ##########################################
 
 builds() {
-  # bun build direct_mode.ts --outfile dist/index.js
+  # bun build eager_mode.ts --outfile dist/index.js
   all() {
     clean
     mkdir -p ./dist

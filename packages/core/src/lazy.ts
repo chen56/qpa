@@ -1,94 +1,7 @@
 import {Provider, ResourceService, SpecPart, ISpecPartProps, StatusPart} from "src/service.ts";
 
 
-export interface ILazyResourceProps<SPEC, STATUS> extends ISpecPartProps<SPEC> {
-    service: ResourceService<SPEC, STATUS>;
-}
-
-export class LazyResource<SPEC, STATUS> {
-    public readonly name: string;
-
-    _statuses = new Array<STATUS>();
-    readonly service: ResourceService<SPEC, STATUS>;
-    private readonly specPart: SpecPart<SPEC>;
-
-    public constructor(readonly provider: Provider, props: ILazyResourceProps<SPEC, STATUS>) {
-        const sameName = provider.project._configuredResources.find(r => r.name === props.name);
-        if (sameName) {
-            throw new Error(`资源名称重复:${props.name}`);
-        }
-
-        this.name = props.name;
-        this.specPart = new SpecPart(props);
-        this.service = props.service;
-
-        this.provider.project._configuredResources.push(this);
-    }
-
-    public get spec(): SPEC {
-        return this.specPart.spec;
-    }
-
-    get statuses(): STATUS[] {
-        return this._statuses;
-    }
-
-    async create(): Promise<StatusPart<STATUS>> {
-        return this.service.create(this.specPart);
-    }
-
-    async destroy(): Promise<void> {
-        return this.service.destroy(this);
-    }
-
-    async refresh(): Promise<void> {
-        return this.service.refresh(this);
-    }
-}
-
-/**internal use*/
-export enum _ConfigMode {
-    Direct,
-    Planned
-}
-
-export type ConfigSetup = (project: PlannedProject) => Promise<void>;
-
-export class Config {
-    public project: PlannedProject;
-    public _setup: ConfigSetup;
-
-    private constructor(public readonly _configMode: _ConfigMode, props: IConfigProps) {
-        // 这里可以添加配置验证逻辑
-        if (!props.project.name) {
-            throw new Error('Missing required project name');
-        }
-
-        this.project = new PlannedProject(props.project);
-        this._setup = props.setup
-    }
-
-    public setup(): Promise<void> {
-        return this._setup(this.project);
-    }
-
-    static directMode(props: IConfigProps) {
-        return new Config(_ConfigMode.Direct, props);
-    }
-
-    static plannedMode(props: IConfigProps) {
-        return new Config(_ConfigMode.Planned, props);
-    }
-}
-
-export interface IConfigProps {
-    // project: Project;
-    project: { name: string };
-    setup: ConfigSetup;
-}
-
-
-export class PlannedProject {
+export class LazyProject {
     _providers: Providers = new Providers();
     _configuredResources: ConfiguredResources = new ConfiguredResources();
     _deconfiguredResources: DeconfiguredResources = new DeconfiguredResources();
@@ -152,6 +65,94 @@ export class PlannedProject {
         }
     }
 }
+
+
+export interface ILazyResourceProps<SPEC, STATUS> extends ISpecPartProps<SPEC> {
+    service: ResourceService<SPEC, STATUS>;
+}
+
+export class LazyResource<SPEC, STATUS> {
+    public readonly name: string;
+
+    _statuses = new Array<STATUS>();
+    readonly service: ResourceService<SPEC, STATUS>;
+    private readonly specPart: SpecPart<SPEC>;
+
+    public constructor(readonly provider: Provider, props: ILazyResourceProps<SPEC, STATUS>) {
+        const sameName = provider.project._configuredResources.find(r => r.name === props.name);
+        if (sameName) {
+            throw new Error(`资源名称重复:${props.name}`);
+        }
+
+        this.name = props.name;
+        this.specPart = new SpecPart(props);
+        this.service = props.service;
+
+        this.provider.project._configuredResources.push(this);
+    }
+
+    public get spec(): SPEC {
+        return this.specPart.spec;
+    }
+
+    get statuses(): STATUS[] {
+        return this._statuses;
+    }
+
+    async create(): Promise<StatusPart<STATUS>> {
+        return this.service.create(this.specPart);
+    }
+
+    async destroy(): Promise<void> {
+        return this.service.destroy(this);
+    }
+
+    async refresh(): Promise<void> {
+        return this.service.refresh(this);
+    }
+}
+
+/**internal use*/
+export enum _ConfigMode {
+    Direct,
+    Planned
+}
+
+export type ConfigSetup = (project: LazyProject) => Promise<void>;
+
+export class Config {
+    public project: LazyProject;
+    public _setup: ConfigSetup;
+
+    private constructor(public readonly _configMode: _ConfigMode, props: IConfigProps) {
+        // 这里可以添加配置验证逻辑
+        if (!props.project.name) {
+            throw new Error('Missing required project name');
+        }
+
+        this.project = new LazyProject(props.project);
+        this._setup = props.setup
+    }
+
+    public setup(): Promise<void> {
+        return this._setup(this.project);
+    }
+
+    static directMode(props: IConfigProps) {
+        return new Config(_ConfigMode.Direct, props);
+    }
+
+    static plannedMode(props: IConfigProps) {
+        return new Config(_ConfigMode.Planned, props);
+    }
+}
+
+export interface IConfigProps {
+    // project: Project;
+    project: { name: string };
+    setup: ConfigSetup;
+}
+
 
 class ConfiguredResources extends Array<LazyResource<unknown, unknown>> {
     constructor(...args: LazyResource<unknown, unknown>[]) {

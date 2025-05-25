@@ -1,4 +1,4 @@
-import {PlannedProject, LazyResource} from "src/lazy.ts";
+import {LazyProject, LazyResource} from "src/lazy.ts";
 
 export const Service = {
     tagNames: {
@@ -44,7 +44,7 @@ export abstract class ResourceService<SPEC, STATUS> {
 }
 
 export abstract class Provider {
-    protected constructor(readonly project: PlannedProject) {
+    protected constructor(readonly project: LazyProject) {
         project._providers.push(this);
     }
 
