@@ -1,4 +1,4 @@
-import {Project} from "./service.ts";
+import {Project} from "./core.ts";
 
 export type EagerApply = (project: EagerProject) => Promise<void>;
 

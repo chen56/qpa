@@ -1,5 +1,5 @@
 export const xxx="xxx";
 
-import {Project, Service} from 'src/service.ts'
+import {Constants} from '../core.ts'
 
-console.log(Service.tagNames.project )
+console.log(Constants.tagNames.project )

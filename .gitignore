@@ -141,6 +141,7 @@ dist
 .idea/
 !.idea/.gitignore
 !.idea/codeStyles/codeStyleConfig.xml
+!.idea/codeStyles/Project.xml
 !.idea/dictionaries/project.xml
 !.idea/inspectionProfiles/Project_Default.xml
 

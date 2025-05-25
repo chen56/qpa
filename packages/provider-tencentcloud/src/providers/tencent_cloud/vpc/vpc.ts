@@ -3,7 +3,7 @@ import {
     Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceTag as tc_ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Service, LazyResource, SpecPart, StatusPart} from "@qpa/core";
+import {Constants, LazyResource, SpecPart, StatusPart} from "@qpa/core";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import { VpcClients } from "./_common.ts";
 
@@ -62,8 +62,8 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
             DnsServers: specPart.spec.DnsServers,
             DomainName: specPart.spec.DomainName,
             Tags: [...(specPart.spec.Tags ?? []),
-                {Key: Service.tagNames.project, Value: this.provider.project.name},
-                {Key: Service.tagNames.resource, Value: specPart.name},
+                {Key: Constants.tagNames.project, Value: this.provider.project.name},
+                {Key: Constants.tagNames.resource, Value: specPart.name},
             ],
         });
         const vpcId = vpcResponse.Vpc?.VpcId;
@@ -89,8 +89,8 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
             // VpcIds: resource.statuses.map(s => s.VpcId!)!,
             // 按标签过滤
             Filters: [
-                {Name: `tag:${(Service.tagNames.project)}`, Values: [this.provider.project.name]},
-                {Name: `tag:${(Service.tagNames.resource)}`, Values: [resource.name]},
+                {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.provider.project.name]},
+                {Name: `tag:${(Constants.tagNames.resource)}`, Values: [resource.name]},
             ],
         };
         const client = this.clients.getClient(resource.spec.Region);
@@ -101,7 +101,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
     _tcVpcSet2VpcState(region :string,tc_vpcSet?: tc_Vpc[]): StatusPart<VpcState>[] {
         const result=new Array<StatusPart<VpcState>>;
         for (const vpc of tc_vpcSet??[]) {
-            const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Service.tagNames.resource)?.Value;
+            const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
             if (!resourceName) {
                 // 没找到qpa_key的是问题资源，暂时不管
                 continue;

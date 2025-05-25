@@ -1,4 +1,4 @@
-import {Project, Provider, ResourceService, SpecPart, StatusPart} from "./service";
+import {Project, Provider, ResourceService, SpecPart, StatusPart} from "./core.ts";
 
 export class LazyProject extends Project {
     _configuredResources: ConfiguredResources = new ConfiguredResources();
