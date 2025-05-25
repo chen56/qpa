@@ -1,5 +1,9 @@
 import {LazyResource} from "./lazy.ts";
 
+export interface ResourceScope{
+  get name():string;
+}
+
 
 export abstract class Project {
   name: string;
@@ -56,6 +60,7 @@ export class SpecPart<SPEC> {
   }
 }
 
+// todo ResourceService 应该是一个接口，而不是一个抽象类，完全可以由Provider实现
 export abstract class ResourceService<SPEC, STATUS> {
   abstract create(resource: SpecPart<SPEC>): Promise<StatusPart<STATUS>>;
 

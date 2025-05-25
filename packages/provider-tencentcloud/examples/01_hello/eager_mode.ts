@@ -2,26 +2,29 @@ import {EagerProject} from "@qpa/core";
 import {Cli} from "@qpa/cli";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
+
+
 const cli = Cli.eager(EagerProject.of({
-    name: "test",
-    setup: async (project: EagerProject): Promise<void> => {
-        const tc = TencentCloud.eagerMode({
-            project: project,
-            credential: {
-                secretId: process.env.TENCENTCLOUD_SECRET_ID!,
-                secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
-            },
-        });
-        const vpc = await tc.vpc.vpc({
-            name: "main",
-            spec: {
-                Region: "ap-guangzhou",
-                VpcName: "test-vpc",
-                CidrBlock: '10.0.0.0/16',
-            }
-        });
-        console.log("vpc:", vpc.spec, vpc.status)
-    }
+  name: "test",
+  setup: async (project: EagerProject): Promise<void> => {
+    const tc = TencentCloud.eagerMode({
+      project: project,
+      scope: TencentCloud.createTagBaseScope({name: "test"}),
+      credential: {
+        secretId: process.env.TENCENTCLOUD_SECRET_ID!,
+        secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
+      },
+    });
+    const vpc = await tc.vpc.vpc({
+      name: "main",
+      spec: {
+        Region: "ap-guangzhou",
+        VpcName: "test-vpc",
+        CidrBlock: '10.0.0.0/16',
+      }
+    });
+    console.log("vpc:", vpc.spec, vpc.status)
+  }
 }));
 // --- 解析命令行参数 ---
 // parse() 会解析 process.argv

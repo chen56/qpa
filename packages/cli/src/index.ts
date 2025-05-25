@@ -18,8 +18,8 @@ export class Cli {
   private constructor(readonly project: EagerProject, readonly rootCommand: Command) {
   }
 
-  static eager(config: EagerProject): Cli {
-    const cli = new Cli(config, new _RootCommand());
+  static eager(project: EagerProject): Cli {
+    const cli = new Cli(project, new _RootCommand());
 
 // --- 注册子命令 ---
 // 调用每个子命令的注册函数，并将主 root 实例传递进去
