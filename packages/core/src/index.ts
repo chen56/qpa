@@ -16,7 +16,7 @@ export type {ISpecPartProps} from "./service.ts";
 export {Project} from "./service.ts";
 
 export {
-    Config, LazyProject, LazyResource
+    ConfigTodoRemove, LazyProject, LazyResource
 } from "./lazy.ts"
 
 

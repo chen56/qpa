@@ -1,4 +1,4 @@
-import {Config, LazyProject} from "@qpa/core";
+import {ConfigTodoRemove, LazyProject} from "@qpa/core";
 import process from "node:process";
 import path from "node:path";
 import fs from "node:fs";
@@ -8,7 +8,7 @@ export interface GlobalOptions {
     verbose?: boolean;
 }
 
-export async function loadDirectConfig(configPath: string, options:GlobalOptions): Promise<Config> {
+export async function loadDirectConfig(configPath: string, options:GlobalOptions): Promise<ConfigTodoRemove> {
     const currentWorkingDirectory: string = process.cwd();
     configPath = path.resolve(currentWorkingDirectory, configPath);
     if(options.verbose){
@@ -19,8 +19,8 @@ export async function loadDirectConfig(configPath: string, options:GlobalOptions
         throw new Error(`config file ${configPath} not found`);
     })();
     const configModule = await import(configPath);
-    // if(!(configModule.default instanceof Config)){
-    //     throw new Error(`Module '${configPath}' does not export a default Config, Please use: export default Config.directMode()/Config.plannedMode, config:${JSON.stringify(config)}`);
+    // if(!(configModule.default instanceof ConfigTodoRemove)){
+    //     throw new Error(`Module '${configPath}' does not export a default ConfigTodoRemove, Please use: export default ConfigTodoRemove.directMode()/ConfigTodoRemove.plannedMode, config:${JSON.stringify(config)}`);
     // }
 
     return configModule.default;

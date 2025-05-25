@@ -1,10 +1,10 @@
 // noinspection JSUnusedGlobalSymbols
-import {Config, LazyProject} from "@qpa/core";
+import {ConfigTodoRemove, LazyProject} from "@qpa/core";
 
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 
-export default Config.plannedMode({
+export default ConfigTodoRemove.plannedMode({
     project: new LazyProject({
         name: "test",
     }),

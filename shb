@@ -160,6 +160,8 @@ info() {         __for_each_workspace __current_workspaces "info"    "$@";}
 # 任务的覆盖顺序为：全局>组>workspace
 _load_all_group_defaults() {
   exec() { _run "$@"; }
+  clean() {         _run rm -rf build dist out ;}
+  clean_all() {     _run rm -rf build dist out node_modules pnpm-lock.yaml;}
 }
 
 

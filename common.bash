@@ -23,13 +23,13 @@ fi
 # Usage:   _run <some cmd>
 # Example: _run docker compose up
 #
-# 假设你的./sake 脚本里有个函数： 
-# up() { 
+# 假设你的./sake 脚本里有个函数：
+# up() {
 #   _run docker compose up;  # ./sake 的 22行
-# } 
+# }
 # 运行`./sake up`后打印日志：
 # 🔵 ./sake:22 up() ▶︎【/home/ubuntu/current_work_dir$ docker compose up】
-# 你可以清晰的看到: 
+# 你可以清晰的看到:
 #   - 在脚本的哪一行: ./sake:22
 #   - 哪个函数: up()
 #   - 在哪个工作目录: /home/ubuntu/current_work_dir
@@ -77,8 +77,6 @@ _normal_path() {
 
 # 打开npm命令组
 _load_nodejs_group_defaults() {
-  clean() {         _run rm -rf build dist out ;}
-  clean_all() {     _run rm -rf build dist out node_modules;}
   test() { _run vitest run ./test ;}
   install() { _run pnpm install;  }
   build() {
@@ -99,11 +97,11 @@ _load_nodejs_group_defaults() {
          _run pnpm pack --pack-destination ./build/
         _run tar -xzf ./build/*.tgz -C "./build"
   }
-
   reinstall() {   clean;    install;  }
   rebuild() {     clean;    install; build;  }
   retest() {      rebuild;  test;  }
   repack() {      retest;   pack;  }
+
 
   info() { _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"; }
   main() {  _run pnpm exec tsx src/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}

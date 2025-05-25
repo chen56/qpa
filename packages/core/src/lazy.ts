@@ -1,4 +1,4 @@
-import {Project, Provider, ResourceService, SpecPart, StatusPart} from "./service.ts";
+import {Project, Provider, ResourceService, SpecPart, StatusPart} from "./service";
 
 export class LazyProject extends Project {
     _configuredResources: ConfiguredResources = new ConfiguredResources();
@@ -113,7 +113,7 @@ export enum _ConfigMode {
 
 export type ConfigSetup = (project: LazyProject) => Promise<void>;
 
-export class Config {
+export class ConfigTodoRemove {
     public project: LazyProject;
     public _setup: ConfigSetup;
 
@@ -132,11 +132,11 @@ export class Config {
     }
 
     static directMode(props: IConfigProps) {
-        return new Config(_ConfigMode.Direct, props);
+        return new ConfigTodoRemove(_ConfigMode.Direct, props);
     }
 
     static plannedMode(props: IConfigProps) {
-        return new Config(_ConfigMode.Planned, props);
+        return new ConfigTodoRemove(_ConfigMode.Planned, props);
     }
 }
 
