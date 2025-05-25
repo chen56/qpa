@@ -3,7 +3,7 @@ import {
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceTag as tc_ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Constants, LazyResource, SpecPart, StatusPart} from "@qpa/core";
+import {Constants, SpecPart, StatePart} from "@qpa/core";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {VpcClients} from "./_common.ts";
 
@@ -11,24 +11,24 @@ export interface VpcSpec extends tc_CreateVpcRequest {
   Region: string;
 }
 
-export interface VpcStatus extends tc_Vpc {
+export interface VpcState extends tc_Vpc {
   Region: string;
 }
 
 /**
  */
-export class VpcService extends TaggableResourceService<VpcSpec, VpcStatus> {
+export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   static resourceType: ResourceType = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc"})
 
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
 
-  async loadByTags(resourceTags: tc_ResourceTag[]): Promise<StatusPart<VpcStatus>[]> {
+  async loadByTags(resourceTags: tc_ResourceTag[]): Promise<StatePart<VpcState>[]> {
     type Region = string;
     const regions = new Map<Region, tc_ResourceTag[]>
 
-    const result = new Array<StatusPart<VpcStatus>>();
+    const result = new Array<StatePart<VpcState>>();
     for (const t of resourceTags) {
       if (!t.ResourceRegion) continue;
       if (!t.ResourceId) continue;
@@ -53,7 +53,7 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcStatus> {
     return result;
   }
 
-  async create(specPart: SpecPart<VpcSpec>): Promise<StatusPart<VpcStatus>> {
+  async create(specPart: SpecPart<VpcSpec>): Promise<StatePart<VpcState>> {
     const client = this.clients.getClient(specPart.spec.Region);
     const vpcResponse = await client.CreateVpc({
       VpcName: specPart.spec.VpcName,
@@ -71,23 +71,23 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcStatus> {
       throw new Error("创建 VPC 失败，未返回 VpcId");
     }
     console.log(`VPC 创建成功，ID: ${vpcId}`);
-    // todo 应该先检查STATUS[]有效性
+    // todo 应该先检查STATE[]有效性
     return this._tcVpcSet2VpcState(specPart.spec.Region, [vpcResponse.Vpc!])![0];
   }
 
-  async destroy(...statusParts: StatusPart<VpcStatus>[]): Promise<void> {
-    for (const part of statusParts) {
-      const status = part.status;
-      const client = this.clients.getClient(status.Region);
-      console.log(`VPC删除，VpcId: ${status.VpcId}`);
-      await client.DeleteVpc({VpcId: status.VpcId!})
-      console.log(`VPC删除成功，VpcId: ${status.VpcId}`);
+  async destroy(...stateParts: StatePart<VpcState>[]): Promise<void> {
+    for (const part of stateParts) {
+      const state = part.state;
+      const client = this.clients.getClient(state.Region);
+      console.log(`VPC删除，VpcId: ${state.VpcId}`);
+      await client.DeleteVpc({VpcId: state.VpcId!})
+      console.log(`VPC删除成功，VpcId: ${state.VpcId}`);
     }
   }
 
-  async refresh(resource: SpecPart<VpcSpec>): Promise<StatusPart<VpcStatus>[]> {
+  async refresh(resource: SpecPart<VpcSpec>): Promise<StatePart<VpcState>[]> {
     const params = {
-      // VpcIds: resource.statuses.map(s => s.VpcId!)!,
+      // VpcIds: resource.STATE.map(s => s.VpcId!)!,
       // 按标签过滤
       Filters: [
         {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.provider.scope.name]},
@@ -99,20 +99,20 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcStatus> {
     return this._tcVpcSet2VpcState(resource.spec.Region, response.VpcSet).map(e => e);
   }
 
-  _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): StatusPart<VpcStatus>[] {
-    const result = new Array<StatusPart<VpcStatus>>;
+  _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): StatePart<VpcState>[] {
+    const result = new Array<StatePart<VpcState>>;
     for (const vpc of tc_vpcSet ?? []) {
       const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
       if (!resourceName) {
         // 没找到qpa_key的是问题资源，暂时不管
         continue;
       }
-      const toState: VpcStatus = {
+      const toState: VpcState = {
         ...vpc,
         // 如果有自己的字段
         Region: region
       };
-      result.push(new StatusPart(resourceName, toState));
+      result.push(new StatePart(resourceName, toState));
     }
     return result;
   }

@@ -1,19 +1,19 @@
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {LazyResource, SpecPart, StatusPart} from "@qpa/core";
+import {SpecPart, StatePart} from "@qpa/core";
 import { TaggableResourceService, TencentCloudProvider } from "../provider.ts";
-import { VpcStatus } from "../vpc/vpc.ts";
+import { VpcState } from "../vpc/vpc.ts";
 
 
 class CvmSpec{
 
 }
-class CvmStatus{
+class CvmState{
 
 }
 /**
  */
-export class CvmInstanceService extends TaggableResourceService<CvmSpec,CvmStatus> {
+export class CvmInstanceService extends TaggableResourceService<CvmSpec,CvmState> {
     readonly serviceType: string = "vpc";
     readonly resourcePrefix: string = "vpc";
 
@@ -32,22 +32,22 @@ export class CvmInstanceService extends TaggableResourceService<CvmSpec,CvmStatu
         return this.cvmClients.get(region)!;
     }
 
-    loadByTags(resourceTags: ResourceTag[]): Promise<StatusPart<CvmStatus>[]> {
+    loadByTags(resourceTags: ResourceTag[]): Promise<StatePart<CvmState>[]> {
         throw Error(`CvmInstanceService.load not impl: ${resourceTags}`)
     }
 
-    create(resource: SpecPart<CvmSpec>): Promise<StatusPart<VpcStatus>> {
+    create(resource: SpecPart<CvmSpec>): Promise<StatePart<VpcState>> {
         console.log(resource)
         throw new Error("not implements")
     }
 
-    destroy(...resource: StatusPart<CvmStatus>[]): Promise<void> {
+    destroy(...resource: StatePart<CvmState>[]): Promise<void> {
         console.log(resource)
 
         throw new Error("not implements")
     }
 
-    refresh(specPart: SpecPart<CvmSpec>): Promise<StatusPart<CvmStatus>[]> {
+    refresh(specPart: SpecPart<CvmSpec>): Promise<StatePart<CvmState>[]> {
         console.log(specPart)
         throw new Error("not implements")
     }

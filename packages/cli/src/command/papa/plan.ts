@@ -25,13 +25,13 @@ export default function registerCommand(cli: Cli, parentCommand: Command): void 
                 console.log('configuredResource[%s]: %O',project._configuredResources.length,{
                     key:r.name,
                     spec:r.spec,
-                    statuses:r.statuses,
+                    STATE:r.STATE,
                 });
             }
             for (const r of project._deconfiguredResources) {
                 console.log('deconfiguredResource[%s]: %O',project._deconfiguredResources.length,{
                     key:r.name,
-                    STATUSs:r.status,
+                    STATEs:r.state,
                 });
             }
         });

@@ -3,7 +3,7 @@ import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {
   Constants,
-  StatusPart,
+  StatePart,
   Provider,
   ResourceService,
   BaseResourceScope
@@ -32,7 +32,7 @@ export class TencentCloudTagBaseResourceScope extends TencentCloudResourceScope 
 }
 
 
-export abstract class TencentCloudResourceService<SPEC, STATUS> extends ResourceService<SPEC, STATUS> {
+export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
 
 }
 
@@ -42,8 +42,8 @@ export interface TencentCloudCredential extends tc_Credential {
 /**
  * 支持tag的资源 Taggable
  */
-export abstract class TaggableResourceService<SPEC, STATUS> extends TencentCloudResourceService<SPEC, STATUS> {
-  abstract loadByTags(resourceTags: ResourceTag[]): Promise<StatusPart<STATUS>[]>;
+export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudResourceService<SPEC, STATE> {
+  abstract loadByTags(resourceTags: ResourceTag[]): Promise<StatePart<STATE>[]>;
 }
 
 /**
@@ -145,7 +145,7 @@ export class TencentCloudProvider extends Provider {
     return result;
   }
 
-  async listProvisionedResources(): Promise<StatusPart<unknown>[]> {
+  async listProvisionedResources(): Promise<StatePart<unknown>[]> {
     //todo scope base filter
     const projectName = this.scope.name;
     const gen = Paging.queryPage<ResourceTag>(async (offset) => {
@@ -178,7 +178,7 @@ export class TencentCloudProvider extends Provider {
       v.push(row);
     }
 
-    const result = new Array<StatusPart<unknown>>();
+    const result = new Array<StatePart<unknown>>();
     for (const [resourceType, tagResources] of type_tags) {
       const resourceService = this._resourceServices.get(resourceType);
       if (!resourceService) {

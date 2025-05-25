@@ -9,11 +9,6 @@ const tc = TencentCloud.createEagerFactory({
     secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
   },
 });
-const x={
-  a:"",
-  b:"",
-  c:"",
-}
 
 const project = EagerProject.of({
 
@@ -26,7 +21,7 @@ const project = EagerProject.of({
         CidrBlock: '10.0.0.0/16',
       }
     });
-    console.log("vpc:", vpc.spec, vpc.status)
+    console.log("vpc:", vpc.spec, vpc.state)
     console.log("project:", project)
   }
 });

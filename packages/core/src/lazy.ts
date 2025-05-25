@@ -1,4 +1,4 @@
-import {Project, Provider, ResourceService, SpecPart, StatusPart} from "./core.ts";
+import {Project, Provider, ResourceService, SpecPart, StatePart} from "./core.ts";
 
 export class LazyProject extends Project {
   _providers: Providers = new Providers();
@@ -15,21 +15,21 @@ export class LazyProject extends Project {
   }
 
   async refresh(): Promise<void> {
-    // clear old status
+    // clear old state
     for (const configured of this._configuredResources) {
-      configured.statuses.length = 0;
+      configured.STATE.length = 0;
     }
     this._deconfiguredResources.length = 0;
 
-    // load new status
+    // load new state
     for (const provider of this._providers) {
-      const statuses: StatusPart<unknown>[] = await provider.listProvisionedResources();
-      for (const status of statuses) {
-        const configured = this._configuredResources.find(e => e.name === status.name);
+      const STATE: StatePart<unknown>[] = await provider.listProvisionedResources();
+      for (const state of STATE) {
+        const configured = this._configuredResources.find(e => e.name === state.name);
         if (configured) {
-          configured.statuses.push(status);
+          configured.STATE.push(state);
         } else {
-          this._deconfiguredResources.push(status);
+          this._deconfiguredResources.push(state);
         }
       }
     }
@@ -38,11 +38,11 @@ export class LazyProject extends Project {
   async apply() {
     await this.refresh();
     for (const resource of this._configuredResources) {
-      if (resource.statuses.length > 1) {
-        throw new Error(`TODO 暂时提示错误，后续要分开为专门的error对象，资源数量超过1个，需要手工处理:${JSON.stringify(resource.statuses, null, 2)}`);
+      if (resource.STATE.length > 1) {
+        throw new Error(`TODO 暂时提示错误，后续要分开为专门的error对象，资源数量超过1个，需要手工处理:${JSON.stringify(resource.STATE, null, 2)}`);
       }
-      if (resource.statuses.length == 1) {
-        console.log(`资源已存在:${JSON.stringify(resource.statuses)}`);
+      if (resource.STATE.length == 1) {
+        console.log(`资源已存在:${JSON.stringify(resource.STATE)}`);
         return;
       }
       await resource.create();
@@ -61,18 +61,18 @@ export class LazyProject extends Project {
 }
 
 
-export class LazyResource<SPEC, STATUS> {
+export class LazyResource<SPEC, STATE> {
   public readonly name: string;
 
-  _statuses:StatusPart<STATUS>[] = [];
-  readonly service: ResourceService<SPEC, STATUS>;
+  _STATE:StatePart<STATE>[] = [];
+  readonly service: ResourceService<SPEC, STATE>;
   private readonly specPart: SpecPart<SPEC>;
 
   public constructor(readonly provider: Provider, props: {
     /** in a resource type, name is unique ,like k8s name/terraform name field*/
     name: string;
     spec: SPEC;
-    service: ResourceService<SPEC, STATUS>;
+    service: ResourceService<SPEC, STATE>;
   }) {
     this.name = props.name;
     this.specPart = new SpecPart(props);
@@ -83,20 +83,20 @@ export class LazyResource<SPEC, STATUS> {
     return this.specPart.spec;
   }
 
-  get statuses(): StatusPart<STATUS>[] {
-    return this._statuses;
+  get STATE(): StatePart<STATE>[] {
+    return this._STATE;
   }
 
-  async create(): Promise<StatusPart<STATUS>> {
+  async create(): Promise<StatePart<STATE>> {
     return this.service.create(this.specPart);
   }
 
   async destroy(): Promise<void> {
-    return this.service.destroy(...this._statuses);
+    return this.service.destroy(...this._STATE);
   }
 
   async reload(): Promise<void> {
-    this._statuses=await this.service.refresh(this);
+    this._STATE=await this.service.refresh(this);
   }
 }
 
@@ -153,8 +153,8 @@ class ConfiguredResources extends Array<LazyResource<unknown, unknown>> {
   }
 }
 
-class DeconfiguredResources extends Array<StatusPart<unknown>> {
-  constructor(...args: StatusPart<unknown>[]) {
+class DeconfiguredResources extends Array<StatePart<unknown>> {
+  constructor(...args: StatePart<unknown>[]) {
     super(...args); // 调用 Array(...items: T[]) 构造形式
   }
 }

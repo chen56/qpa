@@ -1,5 +1,5 @@
 import {LazyResource, ISpecPartProps, RealizedResource, SpecPart, LazyProject} from "@qpa/core";
-import {VpcSpec, VpcService, VpcStatus} from "./vpc.ts";
+import {VpcSpec, VpcService, VpcState} from "./vpc.ts";
 import {TencentCloudProvider} from "../provider.ts";
 
 /**
@@ -14,10 +14,10 @@ export class VpcEagerFactory {
     const service = this.provider._getService(VpcService.resourceType) as VpcService;
     let spec = new SpecPart<VpcSpec>(props);
 
-    // todo get status first
-    const STATUS = await service.create(spec);
+    // todo get state first
+    const STATE = await service.create(spec);
 
-    return new RealizedResource(spec, STATUS);
+    return new RealizedResource(spec, STATE);
   }
 }
 
@@ -27,8 +27,8 @@ export class VpcEagerFactory {
 export class VpcLazyFactory {
   constructor(readonly project: LazyProject, readonly provider: TencentCloudProvider) {
   }
-  vpc(props: ISpecPartProps<VpcSpec>): LazyResource<VpcSpec, VpcStatus> {
-    const result = new LazyResource<VpcSpec, VpcStatus>(this.provider, {
+  vpc(props: ISpecPartProps<VpcSpec>): LazyResource<VpcSpec, VpcState> {
+    const result = new LazyResource<VpcSpec, VpcState>(this.provider, {
       ...props,
       service: this.provider._getService(VpcService.resourceType) as VpcService,
     });
