@@ -1,4 +1,4 @@
-import {PlanningResource, SpecPartProps, RealizedResource, SpecPart} from "@qpa/core";
+import {PlanningResource, ISpecPartProps, RealizedResource, SpecPart} from "@qpa/core";
 import {Vpc, VpcService, VpcState} from "./vpc.ts";
 import { TencentCloudProvider } from "../provider.ts";
 
@@ -10,7 +10,7 @@ export class VpcDirectFactory{
     constructor(readonly provider: TencentCloudProvider) {
     }
 
-    async vpc(props: SpecPartProps<Vpc>) {
+    async vpc(props: ISpecPartProps<Vpc>) {
         const service= this.provider._getService(VpcService.resourceType) as VpcService;
         let spec  = new SpecPart<Vpc>(props);
 
@@ -27,7 +27,7 @@ export class VpcPlannedFactory {
     constructor(readonly provider: TencentCloudProvider) {
     }
 
-    vpc(props: SpecPartProps<Vpc>) {
+    vpc(props: ISpecPartProps<Vpc>) {
         return new PlanningResource<Vpc, VpcState>(this.provider, {
             ...props,
             service:this.provider._getService(VpcService.resourceType) as VpcService,

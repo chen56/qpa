@@ -1,7 +1,7 @@
-import {Provider, ResourceService, SpecPart, SpecPartProps, StatusPart} from "src/service.ts";
+import {Provider, ResourceService, SpecPart, ISpecPartProps, StatusPart} from "src/service.ts";
 
 
-export interface PlanningResourceProps<SPEC, STATUS> extends SpecPartProps<SPEC> {
+export interface IPlanningResourceProps<SPEC, STATUS> extends ISpecPartProps<SPEC> {
     service: ResourceService<SPEC, STATUS>;
 }
 
@@ -12,7 +12,7 @@ export class PlanningResource<SPEC, STATUS> {
     readonly service: ResourceService<SPEC, STATUS>;
     private readonly specPart: SpecPart<SPEC>;
 
-    public constructor(readonly provider: Provider, props: PlanningResourceProps<SPEC, STATUS>) {
+    public constructor(readonly provider: Provider, props: IPlanningResourceProps<SPEC, STATUS>) {
         const sameName = provider.project._configuredResources.find(r => r.name === props.name);
         if (sameName) {
             throw new Error(`资源名称重复:${props.name}`);
@@ -58,7 +58,7 @@ export class Config {
     public project: PlannedProject;
     public _setup: ConfigSetup;
 
-    private constructor(public readonly _configMode: _ConfigMode, props: ConfigProps) {
+    private constructor(public readonly _configMode: _ConfigMode, props: IConfigProps) {
         // 这里可以添加配置验证逻辑
         if (!props.project.name) {
             throw new Error('Missing required project name');
@@ -72,16 +72,16 @@ export class Config {
         return this._setup(this.project);
     }
 
-    static directMode(props: ConfigProps) {
+    static directMode(props: IConfigProps) {
         return new Config(_ConfigMode.Direct, props);
     }
 
-    static plannedMode(props: ConfigProps) {
+    static plannedMode(props: IConfigProps) {
         return new Config(_ConfigMode.Planned, props);
     }
 }
 
-export interface ConfigProps {
+export interface IConfigProps {
     // project: Project;
     project: { name: string };
     setup: ConfigSetup;

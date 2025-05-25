@@ -19,7 +19,7 @@ export class StatusPart<STATUS> {
     }
 }
 
-export interface SpecPartProps<SPEC> {
+export interface ISpecPartProps<SPEC> {
     /** in a resource type, name is unique ,like k8s name/terraform name field*/
     name: string;
     spec: SPEC;
@@ -29,7 +29,7 @@ export class SpecPart<SPEC> {
     readonly name: string;
     readonly spec: SPEC
 
-    constructor(props: SpecPartProps<SPEC>) {
+    constructor(props: ISpecPartProps<SPEC>) {
         this.name = props.name;
         this.spec = props.spec;
     }
