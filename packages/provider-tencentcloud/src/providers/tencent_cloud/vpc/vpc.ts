@@ -3,7 +3,7 @@ import {
     Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceTag as tc_ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Service, PlanningResource, SpecPart, StatusPart} from "@qpa/core";
+import {Service, LazyResource, SpecPart, StatusPart} from "@qpa/core";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import { VpcClients } from "./_common.ts";
 
@@ -75,7 +75,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
         return this._tcVpcSet2VpcState(specPart.spec.Region,[vpcResponse.Vpc!])![0];
     }
 
-    async destroy(resource: PlanningResource<Vpc, VpcState>): Promise<void> {
+    async destroy(resource: LazyResource<Vpc, VpcState>): Promise<void> {
         const client = this.clients.getClient(resource.spec.Region);
         for (const STATUS of resource.statuses) {
             console.log(`VPC删除，VpcId: ${STATUS.VpcId}`);
@@ -84,7 +84,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
         }
     }
 
-    async refresh(resource: PlanningResource<Vpc, VpcState>): Promise<void> {
+    async refresh(resource: LazyResource<Vpc, VpcState>): Promise<void> {
         const params = {
             // VpcIds: resource.statuses.map(s => s.VpcId!)!,
             // 按标签过滤

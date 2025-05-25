@@ -1,6 +1,6 @@
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {PlanningResource, SpecPart, StatusPart} from "@qpa/core";
+import {LazyResource, SpecPart, StatusPart} from "@qpa/core";
 import { TaggableResourceService, TencentCloudProvider } from "../provider.ts";
 import { VpcState } from "../vpc/vpc.ts";
 
@@ -41,13 +41,13 @@ export class CvmInstanceService extends TaggableResourceService<Cvm,CvmState> {
         throw new Error("not implements")
     }
 
-    destroy(resource: PlanningResource<Cvm, CvmState>): Promise<void> {
+    destroy(resource: LazyResource<Cvm, CvmState>): Promise<void> {
         console.log(resource)
 
         throw new Error("not implements")
     }
 
-    refresh(resource: PlanningResource<Cvm, CvmState>): Promise<void> {
+    refresh(resource: LazyResource<Cvm, CvmState>): Promise<void> {
         console.log(resource)
 
         throw new Error("not implements")

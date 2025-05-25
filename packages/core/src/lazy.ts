@@ -1,18 +1,18 @@
 import {Provider, ResourceService, SpecPart, ISpecPartProps, StatusPart} from "src/service.ts";
 
 
-export interface IPlanningResourceProps<SPEC, STATUS> extends ISpecPartProps<SPEC> {
+export interface ILazyResourceProps<SPEC, STATUS> extends ISpecPartProps<SPEC> {
     service: ResourceService<SPEC, STATUS>;
 }
 
-export class PlanningResource<SPEC, STATUS> {
+export class LazyResource<SPEC, STATUS> {
     public readonly name: string;
 
     _statuses = new Array<STATUS>();
     readonly service: ResourceService<SPEC, STATUS>;
     private readonly specPart: SpecPart<SPEC>;
 
-    public constructor(readonly provider: Provider, props: IPlanningResourceProps<SPEC, STATUS>) {
+    public constructor(readonly provider: Provider, props: ILazyResourceProps<SPEC, STATUS>) {
         const sameName = provider.project._configuredResources.find(r => r.name === props.name);
         if (sameName) {
             throw new Error(`资源名称重复:${props.name}`);
@@ -153,8 +153,8 @@ export class PlannedProject {
     }
 }
 
-class ConfiguredResources extends Array<PlanningResource<unknown, unknown>> {
-    constructor(...args: PlanningResource<unknown, unknown>[]) {
+class ConfiguredResources extends Array<LazyResource<unknown, unknown>> {
+    constructor(...args: LazyResource<unknown, unknown>[]) {
         super(...args); // 调用 Array(...items: T[]) 构造形式
     }
 }
