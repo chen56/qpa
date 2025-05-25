@@ -16,6 +16,6 @@ describe('手工运行的测试', () => {
         secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
       },
     });
-    expect(tc.provider.project.name).toBe("test");
+    expect(tc.provider.scope.name).toBe("test");
   });
 });

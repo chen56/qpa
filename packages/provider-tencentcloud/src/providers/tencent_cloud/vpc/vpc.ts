@@ -62,7 +62,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
             DnsServers: specPart.spec.DnsServers,
             DomainName: specPart.spec.DomainName,
             Tags: [...(specPart.spec.Tags ?? []),
-                {Key: Constants.tagNames.project, Value: this.provider.project.name},
+                {Key: Constants.tagNames.project, Value: this.provider.scope.name},
                 {Key: Constants.tagNames.resource, Value: specPart.name},
             ],
         });
@@ -89,7 +89,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
             // VpcIds: resource.statuses.map(s => s.VpcId!)!,
             // 按标签过滤
             Filters: [
-                {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.provider.project.name]},
+                {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.provider.scope.name]},
                 {Name: `tag:${(Constants.tagNames.resource)}`, Values: [resource.name]},
             ],
         };

@@ -1,6 +1,6 @@
 import {LazyResource} from "./lazy.ts";
 
-export interface ResourceScope{
+export interface IResourceScope {
   get name():string;
 }
 
