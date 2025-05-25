@@ -1,4 +1,4 @@
-import {PlannedProject, PlannedResource, SpecPart, StatePart} from "src/plan.ts";
+import {PlannedProject, PlannedResource, SpecPart, StatusPart} from "src/lazy.ts";
 
 export const Service = {
     tagNames: {
@@ -7,12 +7,12 @@ export const Service = {
     },
 } as const;
 
-export abstract class ResourceService<SPEC, STATE> {
-    abstract create(resource: SpecPart<SPEC>): Promise<StatePart<STATE>>;
+export abstract class ResourceService<SPEC, STATUS> {
+    abstract create(resource: SpecPart<SPEC>): Promise<StatusPart<STATUS>>;
 
-    abstract destroy(resource: PlannedResource<SPEC, STATE>): Promise<void>;
+    abstract destroy(resource: PlannedResource<SPEC, STATUS>): Promise<void>;
 
-    abstract refresh(resource: PlannedResource<SPEC, STATE>): Promise<void> ;
+    abstract refresh(resource: PlannedResource<SPEC, STATUS>): Promise<void> ;
 }
 
 export abstract class Provider {
@@ -20,6 +20,6 @@ export abstract class Provider {
         project._providers.push(this);
     }
 
-    abstract loadAll(): Promise<StatePart<unknown>[]>;
+    abstract loadAll(): Promise<StatusPart<unknown>[]>;
 }
 

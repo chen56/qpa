@@ -3,7 +3,7 @@ import {
     Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceTag as tc_ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Service, PlannedResource, SpecPart, StatePart} from "@qpa/core";
+import {Service, PlannedResource, SpecPart, StatusPart} from "@qpa/core";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import { VpcClients } from "./_common.ts";
 
@@ -24,11 +24,11 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
         super();
     }
 
-    async loadByTags(resourceTags: tc_ResourceTag[]): Promise<StatePart<VpcState>[]> {
+    async loadByTags(resourceTags: tc_ResourceTag[]): Promise<StatusPart<VpcState>[]> {
         type Region=string;
         const regions = new Map<Region, tc_ResourceTag[]>
 
-        const result = new Array<StatePart<VpcState>>();
+        const result = new Array<StatusPart<VpcState>>();
         for (const t of resourceTags) {
             if (!t.ResourceRegion) continue;
             if (!t.ResourceId) continue;
@@ -53,7 +53,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
         return result;
     }
 
-    async create(specPart: SpecPart<Vpc>): Promise<StatePart<VpcState>> {
+    async create(specPart: SpecPart<Vpc>): Promise<StatusPart<VpcState>> {
         const client = this.clients.getClient(specPart.spec.Region);
         const vpcResponse = await client.CreateVpc({
             VpcName: specPart.spec.VpcName,
@@ -71,22 +71,22 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
             throw new Error("创建 VPC 失败，未返回 VpcId");
         }
         console.log(`VPC 创建成功，ID: ${vpcId}`);
-        // todo 应该先检查state[]有效性
+        // todo 应该先检查STATUS[]有效性
         return this._tcVpcSet2VpcState(specPart.spec.Region,[vpcResponse.Vpc!])![0];
     }
 
     async destroy(resource: PlannedResource<Vpc, VpcState>): Promise<void> {
         const client = this.clients.getClient(resource.spec.Region);
-        for (const state of resource.states) {
-            console.log(`VPC删除，VpcId: ${state.VpcId}`);
-            await client.DeleteVpc({VpcId: state.VpcId!})
-            console.log(`VPC删除成功，VpcId: ${state.VpcId}`);
+        for (const STATUS of resource.statuses) {
+            console.log(`VPC删除，VpcId: ${STATUS.VpcId}`);
+            await client.DeleteVpc({VpcId: STATUS.VpcId!})
+            console.log(`VPC删除成功，VpcId: ${STATUS.VpcId}`);
         }
     }
 
     async refresh(resource: PlannedResource<Vpc, VpcState>): Promise<void> {
         const params = {
-            // VpcIds: resource.states.map(s => s.VpcId!)!,
+            // VpcIds: resource.statuses.map(s => s.VpcId!)!,
             // 按标签过滤
             Filters: [
                 {Name: `tag:${(Service.tagNames.project)}`, Values: [this.provider.project.name]},
@@ -95,11 +95,11 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
         };
         const client = this.clients.getClient(resource.spec.Region);
         const response = await client.DescribeVpcs(params);
-        resource._states = this._tcVpcSet2VpcState(resource.spec.Region, response.VpcSet).map(e=>e.state);
+        resource._statuses = this._tcVpcSet2VpcState(resource.spec.Region, response.VpcSet).map(e=>e.status);
     }
 
-    _tcVpcSet2VpcState(region :string,tc_vpcSet?: tc_Vpc[]): StatePart<VpcState>[] {
-        const result=new Array<StatePart<VpcState>>;
+    _tcVpcSet2VpcState(region :string,tc_vpcSet?: tc_Vpc[]): StatusPart<VpcState>[] {
+        const result=new Array<StatusPart<VpcState>>;
         for (const vpc of tc_vpcSet??[]) {
             const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Service.tagNames.resource)?.Value;
             if (!resourceName) {
@@ -111,7 +111,7 @@ export class VpcService extends TaggableResourceService<Vpc,VpcState> {
                 // 如果有自己的字段
                 Region: region
             };
-            result.push(new StatePart(resourceName, toState));
+            result.push(new StatusPart(resourceName, toState));
         }
         return result;
     }

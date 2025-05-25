@@ -1,4 +1,4 @@
-import {PlannedResource, SpecPartProps, AppliedResource, SpecPart} from "@qpa/core";
+import {PlannedResource, SpecPartProps, RealizedResource, SpecPart} from "@qpa/core";
 import {Vpc, VpcService, VpcState} from "./vpc.ts";
 import { TencentCloudProvider } from "../provider.ts";
 
@@ -14,10 +14,10 @@ export class VpcDirectFactory{
         const service= this.provider._getService(VpcService.resourceType) as VpcService;
         let spec  = new SpecPart<Vpc>(props);
 
-        // todo get state first
-        const state = await service.create(spec);
+        // todo get status first
+        const STATUS = await service.create(spec);
 
-        return new AppliedResource(spec,state);
+        return new RealizedResource(spec,STATUS);
     }
 }
 /**

@@ -23,7 +23,7 @@ const cli = Cli.of(Config.directMode({
                 CidrBlock: '10.0.0.0/16',
             }
         });
-        console.log("vpc:", vpc.spec, vpc.state)
+        console.log("vpc:", vpc.spec, vpc.status)
     }
 }));
 // --- 解析命令行参数 ---

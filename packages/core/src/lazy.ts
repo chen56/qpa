@@ -1,13 +1,13 @@
 import {Provider, ResourceService} from "src/service.ts";
 
-export class PlannedResource<SPEC, STATE> {
+export class PlannedResource<SPEC, STATUS> {
     public readonly name: string;
 
-    _states = new Array<STATE>();
-    readonly service: ResourceService<SPEC, STATE>;
+    _statuses = new Array<STATUS>();
+    readonly service: ResourceService<SPEC, STATUS>;
     private readonly specPart: SpecPart<SPEC>;
 
-    public constructor(readonly provider: Provider, props: ResourceProps<SPEC, STATE>) {
+    public constructor(readonly provider: Provider, props: ResourceProps<SPEC, STATUS>) {
         const sameName = provider.project._configuredResources.find(r => r.name === props.name);
         if (sameName) {
             throw new Error(`资源名称重复:${props.name}`);
@@ -24,11 +24,11 @@ export class PlannedResource<SPEC, STATE> {
         return this.specPart.spec;
     }
 
-    get states(): STATE[] {
-        return this._states;
+    get statuses(): STATUS[] {
+        return this._statuses;
     }
 
-    async create(): Promise<StatePart<STATE>> {
+    async create(): Promise<StatusPart<STATUS>> {
         return this.service.create(this.specPart);
     }
 
@@ -85,8 +85,8 @@ export interface ConfigProps {
 /**
  * 加载中的资源，是资源加载的临时数据，
  */
-export class StatePart<STATE> {
-    constructor(readonly name: string, readonly state: STATE) {
+export class StatusPart<STATUS> {
+    constructor(readonly name: string, readonly status: STATUS) {
     }
 
     destroy() {
@@ -111,8 +111,8 @@ export interface SpecPartProps<SPEC> {
     spec: SPEC;
 }
 
-export interface ResourceProps<SPEC, STATE> extends SpecPartProps<SPEC> {
-    service: ResourceService<SPEC, STATE>;
+export interface ResourceProps<SPEC, STATUS> extends SpecPartProps<SPEC> {
+    service: ResourceService<SPEC, STATUS>;
 }
 
 export class PlannedProject {
@@ -135,21 +135,21 @@ export class PlannedProject {
     }
 
     async refresh(): Promise<void> {
-        // clear old state
+        // clear old status
         for (const configured of this._configuredResources) {
-            configured.states.length = 0;
+            configured.statuses.length = 0;
         }
         this._deconfiguredResources.length = 0;
 
-        // load new state
+        // load new status
         for (const provider of this._providers) {
-            const states: StatePart<unknown>[] = await provider.loadAll();
-            for (const state of states) {
-                const configured = this._configuredResources.find(e => e.name === state.name);
+            const statuses: StatusPart<unknown>[] = await provider.loadAll();
+            for (const status of statuses) {
+                const configured = this._configuredResources.find(e => e.name === status.name);
                 if (configured) {
-                    configured.states.push(state.state);
+                    configured.statuses.push(status.status);
                 } else {
-                    this._deconfiguredResources.push(state);
+                    this._deconfiguredResources.push(status);
                 }
             }
         }
@@ -158,11 +158,11 @@ export class PlannedProject {
     async apply() {
         await this.refresh();
         for (const resource of this._configuredResources) {
-            if (resource.states.length > 1) {
-                throw new Error(`TODO 暂时提示错误，后续要分开为专门的error对象，资源数量超过1个，需要手工处理:${JSON.stringify(resource.states, null, 2)}`);
+            if (resource.statuses.length > 1) {
+                throw new Error(`TODO 暂时提示错误，后续要分开为专门的error对象，资源数量超过1个，需要手工处理:${JSON.stringify(resource.statuses, null, 2)}`);
             }
-            if (resource.states.length == 1) {
-                console.log(`资源已存在:${JSON.stringify(resource.states)}`);
+            if (resource.statuses.length == 1) {
+                console.log(`资源已存在:${JSON.stringify(resource.statuses)}`);
                 return;
             }
             await resource.create();
@@ -186,8 +186,8 @@ class ConfiguredResources extends Array<PlannedResource<unknown, unknown>> {
     }
 }
 
-class DeconfiguredResources extends Array<StatePart<unknown>> {
-    constructor(...args: StatePart<unknown>[]) {
+class DeconfiguredResources extends Array<StatusPart<unknown>> {
+    constructor(...args: StatusPart<unknown>[]) {
         super(...args); // 调用 Array(...items: T[]) 构造形式
     }
 }
