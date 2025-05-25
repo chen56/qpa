@@ -1,0 +1,45 @@
+# EditorConfig is awesome: https://editorconfig.org
+
+# 表示这是根配置，EditorConfig 会从这里往上查找，直到找到根配置或文件系统的根目录
+root = true
+
+# 匹配所有文件
+[*]
+# 使用空格进行缩进
+indent_style = space
+# 缩进大小为 2 个空格
+indent_size = 4
+# 使用 utf-8 编码
+charset = utf-8
+# 在文件末尾保留一个空行
+end_of_line = lf
+# 移除行尾的空格
+trim_trailing_whitespace = true
+# 不插入最终的新行（可以设置为 true 来强制插入）
+insert_final_newline = false
+
+# 匹配 JavaScript 和 TypeScript 文件
+[*.{js,ts,jsx,tsx}]
+# 缩进大小为 2 个空格 (可以覆盖上面的全局设置)
+indent_size = 2
+
+# 匹配 Markdown 文件
+[*.md]
+# 对于 Markdown 文件，可能更倾向于使用 tab 缩进
+indent_style = tab
+# tab 的宽度设置为 4 个空格的宽度
+tab_width = 4
+# 移除行尾的空格
+trim_trailing_whitespace = false
+# 不插入最终的新行
+insert_final_newline = false
+
+# 匹配 JSON 文件
+[*.json]
+# 缩进大小为 2 个空格
+indent_size = 2
+
+# 匹配 YAML 文件
+[*.yaml]
+# 缩进大小为 2 个空格
+indent_size = 2
