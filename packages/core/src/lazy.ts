@@ -23,7 +23,7 @@ export class LazyProject extends Project {
 
     // load new status
     for (const provider of this._providers) {
-      const statuses: StatusPart<unknown>[] = await provider.loadAll();
+      const statuses: StatusPart<unknown>[] = await provider.listConfiguredResourceStatuses();
       for (const status of statuses) {
         const configured = this._configuredResources.find(e => e.name === status.name);
         if (configured) {
@@ -64,7 +64,7 @@ export class LazyProject extends Project {
 export class LazyResource<SPEC, STATUS> {
   public readonly name: string;
 
-  _statuses = new Array<StatusPart<STATUS>>();
+  _statuses:StatusPart<STATUS>[] = [];
   readonly service: ResourceService<SPEC, STATUS>;
   private readonly specPart: SpecPart<SPEC>;
 
@@ -95,8 +95,8 @@ export class LazyResource<SPEC, STATUS> {
     return this.service.destroy(...this._statuses);
   }
 
-  async refresh(): Promise<void> {
-    return this.service.refresh(this);
+  async reload(): Promise<void> {
+    this._statuses=await this.service.refresh(this);
   }
 }
 

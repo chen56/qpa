@@ -85,7 +85,7 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcStatus> {
     }
   }
 
-  async refresh(resource: LazyResource<VpcSpec, VpcStatus>): Promise<void> {
+  async refresh(resource: SpecPart<VpcSpec>): Promise<StatusPart<VpcStatus>[]> {
     const params = {
       // VpcIds: resource.statuses.map(s => s.VpcId!)!,
       // 按标签过滤
@@ -96,7 +96,7 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcStatus> {
     };
     const client = this.clients.getClient(resource.spec.Region);
     const response = await client.DescribeVpcs(params);
-    resource._statuses = this._tcVpcSet2VpcState(resource.spec.Region, response.VpcSet).map(e => e);
+    return this._tcVpcSet2VpcState(resource.spec.Region, response.VpcSet).map(e => e);
   }
 
   _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): StatusPart<VpcStatus>[] {

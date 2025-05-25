@@ -1,4 +1,3 @@
-import {LazyResource} from "./lazy.ts";
 
 export abstract class BaseResourceScope {
 }
@@ -48,15 +47,23 @@ export class SpecPart<SPEC> {
 }
 
 export abstract class ResourceService<SPEC, STATUS> {
-  abstract create(resource: SpecPart<SPEC>): Promise<StatusPart<STATUS>>;
+  abstract create(specPart: SpecPart<SPEC>): Promise<StatusPart<STATUS>>;
 
-  abstract destroy(...resource: StatusPart<STATUS>[]): Promise<void>;
+  abstract destroy(...statusParts: StatusPart<STATUS>[]): Promise<void>;
 
-  abstract refresh(resource: LazyResource<SPEC, STATUS>): Promise<void> ;
+  /**
+   * @return 可能返回多个实际的同名云资源，因为一个资源可能被非正常的多次创建，重复问题留给上层程序判断解决
+   */
+  abstract refresh(specPart: SpecPart<SPEC>): Promise<StatusPart<STATUS>[]> ;
 }
 
 export abstract class Provider {
-  abstract loadAll(): Promise<StatusPart<unknown>[]>;
+  /**
+   * 查询出ResourceScope内的所有的已存在资源
+   *
+   * @return 获取查询出ResourceScope内的所有的资源状态
+   */
+  abstract listConfiguredResourceStatuses(): Promise<StatusPart<unknown>[]>;
 }
 
 export class RealizedResource<SPEC, STATUS> {

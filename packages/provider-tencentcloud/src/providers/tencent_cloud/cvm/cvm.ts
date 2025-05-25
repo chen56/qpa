@@ -47,9 +47,8 @@ export class CvmInstanceService extends TaggableResourceService<CvmSpec,CvmStatu
         throw new Error("not implements")
     }
 
-    refresh(resource: LazyResource<CvmSpec, CvmStatus>): Promise<void> {
-        console.log(resource)
-
+    refresh(specPart: SpecPart<CvmSpec>): Promise<StatusPart<CvmStatus>[]> {
+        console.log(specPart)
         throw new Error("not implements")
     }
 
