@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import {xxx} from "../src/common.ts";
+import {xxx} from "src/internal/_common.ts";
 import {PlannedProject} from "src/lazy.ts";
 
 // Edit an assertion and save to see HMR in action

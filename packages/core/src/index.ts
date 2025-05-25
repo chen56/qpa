@@ -7,13 +7,15 @@
  * */
 
 export {
-    Config, PlannedProject, StatusPart, SpecPart, PlannedResource
+    Config, PlannedProject, PlanningResource
 } from "src/lazy.ts"
 
-export type {SpecPartProps} from 'src/lazy.ts'
 export {Provider} from "src/service.ts";
 export {ResourceService} from "src/service.ts";
 export {Service} from "src/service.ts";
 
 
-export {RealizedResource} from "src/eager.ts";
+export {RealizedResource} from "src/service.ts";
+export {SpecPart} from "src/service.ts";
+export {StatusPart} from "src/service.ts";
+export {SpecPartProps} from "src/service.ts";

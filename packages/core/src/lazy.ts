@@ -1,13 +1,18 @@
-import {Provider, ResourceService} from "src/service.ts";
+import {Provider, ResourceService, SpecPart, SpecPartProps, StatusPart} from "src/service.ts";
 
-export class PlannedResource<SPEC, STATUS> {
+
+export interface PlanningResourceProps<SPEC, STATUS> extends SpecPartProps<SPEC> {
+    service: ResourceService<SPEC, STATUS>;
+}
+
+export class PlanningResource<SPEC, STATUS> {
     public readonly name: string;
 
     _statuses = new Array<STATUS>();
     readonly service: ResourceService<SPEC, STATUS>;
     private readonly specPart: SpecPart<SPEC>;
 
-    public constructor(readonly provider: Provider, props: ResourceProps<SPEC, STATUS>) {
+    public constructor(readonly provider: Provider, props: PlanningResourceProps<SPEC, STATUS>) {
         const sameName = provider.project._configuredResources.find(r => r.name === props.name);
         if (sameName) {
             throw new Error(`资源名称重复:${props.name}`);
@@ -82,38 +87,6 @@ export interface ConfigProps {
     setup: ConfigSetup;
 }
 
-/**
- * 加载中的资源，是资源加载的临时数据，
- */
-export class StatusPart<STATUS> {
-    constructor(readonly name: string, readonly status: STATUS) {
-    }
-
-    destroy() {
-
-    }
-}
-
-export class SpecPart<SPEC> {
-    readonly name: string;
-    readonly spec: SPEC
-
-    constructor(props: SpecPartProps<SPEC>) {
-        this.name = props.name;
-        this.spec = props.spec;
-    }
-}
-
-
-export interface SpecPartProps<SPEC> {
-    /** in a resource type, name is unique ,like k8s name/terraform name field*/
-    name: string;
-    spec: SPEC;
-}
-
-export interface ResourceProps<SPEC, STATUS> extends SpecPartProps<SPEC> {
-    service: ResourceService<SPEC, STATUS>;
-}
 
 export class PlannedProject {
     _providers: Providers = new Providers();
@@ -180,8 +153,8 @@ export class PlannedProject {
     }
 }
 
-class ConfiguredResources extends Array<PlannedResource<unknown, unknown>> {
-    constructor(...args: PlannedResource<unknown, unknown>[]) {
+class ConfiguredResources extends Array<PlanningResource<unknown, unknown>> {
+    constructor(...args: PlanningResource<unknown, unknown>[]) {
         super(...args); // 调用 Array(...items: T[]) 构造形式
     }
 }
