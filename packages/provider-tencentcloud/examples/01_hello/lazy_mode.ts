@@ -5,20 +5,16 @@ import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 
 export default ConfigTodoRemove.plannedMode({
-  project: new LazyProject({
-    name: "test",
-  }),
   setup: async (project: LazyProject): Promise<void> => {
 
-    const tc = TencentCloud.eagerMode({
-      project: project,
+    const tc = TencentCloud.createEagerFactory({
       scope: TencentCloud.createTagBaseScope({name: "test"}),
       credential: {
         secretId: process.env.TENCENTCLOUD_SECRET_ID!,
         secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
       },
     });
-
+    console.log("project:",project)
     await tc.vpc.vpc({
       name: "main",
       spec: {

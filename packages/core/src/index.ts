@@ -14,7 +14,7 @@ export {SpecPart} from "./core.ts";
 export {StatusPart} from "./core.ts";
 export type {ISpecPartProps} from "./core.ts";
 export {Project} from "./core.ts";
-export type {IResourceScope} from "./core.ts";
+export {BaseResourceScope} from "./core.ts";
 
 export {
     ConfigTodoRemove, LazyProject, LazyResource

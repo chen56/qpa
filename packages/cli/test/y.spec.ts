@@ -7,11 +7,10 @@ import {Cli} from "src/index.ts";
 describe('study undefined', () => {
     it('可选链操作符（Optional Chaining Operator）返回值类型：T|undefined', () => {
         const cli=Cli.eager(EagerProject.of({
-            name: "test",
             setup: async (project: EagerProject): Promise<void> => {
-                console.log(project.name)
+                console.log(project)
             }
         } ));
-        expect(cli.project.name).toBe("test");
+        expect(cli.project._providers.length).toBe(0);
     });
 });

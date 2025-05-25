@@ -6,5 +6,5 @@ import {LazyProject} from "src/lazy.ts";
 
 test('Squared', () => {
     expect(xxx).toBe("xxx")
-    expect(new LazyProject({name:"test"}).name).toBe("test")
+    expect(new LazyProject()._providers.length).toBe(0)
 })

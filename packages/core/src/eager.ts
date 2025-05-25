@@ -6,10 +6,9 @@ export class EagerProject extends Project{
     public _apply: EagerApply;
 
     private constructor(props: {
-        name: string;
         setup: EagerApply;
     }) {
-        super({name: props.name});
+        super();
 
         this._apply = props.setup
     }
@@ -19,7 +18,6 @@ export class EagerProject extends Project{
     }
 
     static of(props: {
-        name: string;
         setup: EagerApply;
     }) {
         return new EagerProject(props);

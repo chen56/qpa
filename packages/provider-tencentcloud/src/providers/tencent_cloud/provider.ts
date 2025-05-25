@@ -6,9 +6,31 @@ import {
   StatusPart,
   Provider,
   ResourceService,
-  Project, IResourceScope
+  BaseResourceScope
 } from "@qpa/core";
 import {Paging} from "../../internal/common.ts";
+
+/**
+ * @internal
+ */
+export class TencentCloudResourceScope extends BaseResourceScope {
+  name: string;
+
+  constructor(props: { name: string; }) {
+    super();
+    this.name = props.name;
+  }
+}
+
+/**
+ * @internal
+ */
+export class TencentCloudTagBaseResourceScope extends TencentCloudResourceScope {
+  constructor(props: { name: string; }) {
+    super({name: props.name})
+  }
+}
+
 
 export abstract class TencentCloudResourceService<SPEC, STATUS> extends ResourceService<SPEC, STATUS> {
 
@@ -61,10 +83,6 @@ export class ResourceType {
     if (props.resourcePrefix && props.resourcePrefix.trim() === '') {
       throw new Error('ResourcePrefix must be a non-empty string');
     }
-    //
-    // if (typeof props.createService !== 'function') {
-    //     throw new Error('CreateService must be a function');
-    // }
 
     const result = new ResourceType(props.serviceType, props.resourcePrefix);
     const key = result.toString();
@@ -101,16 +119,16 @@ export class ResourceType {
 export interface TencentCloudProviderProps {
   readonly credential: TencentCloudCredential;
   allowedResourceServices: (provider: TencentCloudProvider) => Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
-  scope: IResourceScope;
+  scope: TencentCloudResourceScope;
 }
 
 export class TencentCloudProvider extends Provider {
   private readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
   private tagClient!: TagClient;
   public credential!: TencentCloudCredential;
-  scope:IResourceScope;
-  constructor(readonly project: Project, readonly props: TencentCloudProviderProps) {
-    super(project);
+  scope:TencentCloudResourceScope;
+  constructor(readonly props: TencentCloudProviderProps) {
+    super();
 
     this.credential = props.credential;
     this.scope=props.scope;

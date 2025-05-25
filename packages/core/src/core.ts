@@ -1,21 +1,13 @@
 import {LazyResource} from "./lazy.ts";
 
-export interface IResourceScope {
-  get name():string;
+export abstract class BaseResourceScope {
 }
 
 
 export abstract class Project {
-  name: string;
   _providers: Providers = new Providers();
 
-  protected constructor(props: { name: string; }) {
-    // 这里可以添加配置验证逻辑
-    if (!props.name) {
-      throw new Error('Missing required project name');
-    }
-
-    this.name = props.name;
+  protected constructor() {
   }
 }
 
@@ -50,11 +42,7 @@ export class SpecPart<SPEC> {
   readonly name: string;
   readonly spec: SPEC
 
-  constructor(props: {
-    /** in a resource type, name is unique ,like k8s name/terraform name field*/
-    name: string;
-    spec: SPEC;
-  }) {
+  constructor(props: ISpecPartProps<SPEC>) {
     this.name = props.name;
     this.spec = props.spec;
   }
@@ -70,10 +58,6 @@ export abstract class ResourceService<SPEC, STATUS> {
 }
 
 export abstract class Provider {
-  protected constructor(readonly project: Project) {
-    project._providers.push(this);
-  }
-
   abstract loadAll(): Promise<StatusPart<unknown>[]>;
 }
 

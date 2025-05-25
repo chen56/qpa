@@ -1,29 +1,14 @@
 import {VpcEagerFactory, VpcLazyFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
 import {VpcClients} from "./vpc/_common.ts";
-import {ResourceType, TencentCloudProvider, TencentCloudResourceService} from "./provider.ts";
-import {Project, IResourceScope} from "@qpa/core";
+import {
+  ResourceType,
+  TencentCloudProvider, TencentCloudResourceScope,
+  TencentCloudResourceService,
+  TencentCloudTagBaseResourceScope
+} from "./provider.ts";
+import {LazyProject} from "@qpa/core";
 
-
-/**
- * @internal
- */
-class TencentCloudResourceScope implements IResourceScope {
-  name: string;
-
-  constructor(props: { name: string; }) {
-    this.name = props.name;
-  }
-}
-
-/**
- * @internal
- */
-class TencentCloudTagBaseResourceScope extends TencentCloudResourceScope {
-  constructor(props: { name: string; }) {
-    super({name: props.name})
-  }
-}
 
 /**
  * @public
@@ -42,12 +27,11 @@ export abstract class TencentCloud {
   /**
    * @public
    */
-  static eagerMode(props: {
+  static createEagerFactory(props: {
     credential: { secretId: string; secretKey: string };
-    project: Project;
     scope: TencentCloudResourceScope;
-  }): EagerModeTencentCloudFactory {
-    const tencentCloudProvider = new TencentCloudProvider(props.project, {
+  }): EagerTencentCloudFactory {
+    const provider = new TencentCloudProvider({
       credential: {
         secretId: process.env.TENCENTCLOUD_SECRET_ID!,
         secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
@@ -55,7 +39,7 @@ export abstract class TencentCloud {
       allowedResourceServices: _allowServices,
       scope: props.scope,
     });
-    return new EagerModeTencentCloudFactory(tencentCloudProvider);
+    return new EagerTencentCloudFactory(provider);
   }
 }
 
@@ -63,7 +47,7 @@ export abstract class TencentCloud {
  * 工厂方法类
  * 命名模式：[Provider][Mode]Factory
  */
-export class EagerModeTencentCloudFactory extends TencentCloud {
+export class EagerTencentCloudFactory extends TencentCloud {
   readonly vpc: VpcEagerFactory;
 
   constructor(readonly provider: TencentCloudProvider) {
@@ -79,9 +63,9 @@ export class EagerModeTencentCloudFactory extends TencentCloud {
 export class LazyModeTencentCloudFactory extends TencentCloud {
   readonly vpc: VpcLazyFactory;
 
-  constructor(readonly provider: TencentCloudProvider) {
+  constructor(readonly project: LazyProject,readonly provider: TencentCloudProvider) {
     super(provider);
-    this.vpc = new VpcLazyFactory(this.provider);
+    this.vpc = new VpcLazyFactory(this.project,this.provider);
   }
 }
 
