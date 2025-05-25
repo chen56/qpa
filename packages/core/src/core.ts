@@ -5,7 +5,6 @@ export abstract class BaseResourceScope {
 
 
 export abstract class Project {
-  _providers: Providers = new Providers();
 
   protected constructor() {
   }
@@ -48,7 +47,6 @@ export class SpecPart<SPEC> {
   }
 }
 
-// todo ResourceService 应该是一个接口，而不是一个抽象类，完全可以由Provider实现
 export abstract class ResourceService<SPEC, STATUS> {
   abstract create(resource: SpecPart<SPEC>): Promise<StatusPart<STATUS>>;
 
@@ -81,8 +79,3 @@ export class RealizedResource<SPEC, STATUS> {
   }
 }
 
-export class Providers extends Array<Provider> {
-  constructor(...args: Provider[]) {
-    super(...args); // 调用 Array(...items: T[]) 构造形式
-  }
-}

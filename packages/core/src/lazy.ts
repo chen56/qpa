@@ -1,6 +1,8 @@
 import {Project, Provider, ResourceService, SpecPart, StatusPart} from "./core.ts";
 
 export class LazyProject extends Project {
+  _providers: Providers = new Providers();
+
   _configuredResources: ConfiguredResources = new ConfiguredResources();
   _deconfiguredResources: DeconfiguredResources = new DeconfiguredResources();
 
@@ -157,3 +159,8 @@ class DeconfiguredResources extends Array<StatusPart<unknown>> {
   }
 }
 
+export class Providers extends Array<Provider> {
+  constructor(...args: Provider[]) {
+    super(...args); // 调用 Array(...items: T[]) 构造形式
+  }
+}
