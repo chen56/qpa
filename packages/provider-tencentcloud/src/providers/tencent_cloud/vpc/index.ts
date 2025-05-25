@@ -4,4 +4,4 @@ export type {
 } from './vpc.ts'
 export {VpcService,} from './vpc.js'
 
-export {VpcDirectFactory, VpcPlannedFactory} from './factory.ts'
+export {VpcEagerFactory, VpcLazyFactory} from './factory.ts'

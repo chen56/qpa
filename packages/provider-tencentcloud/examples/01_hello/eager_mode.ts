@@ -1,13 +1,11 @@
 import 'dotenv/config';
-import {LazyProject, Config} from "@qpa/core";
+import {EagerProject} from "@qpa/core";
 import {Cli} from "@qpa/cli";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
-const cli = Cli.of(Config.directMode({
-    project: {
-        name: "test",
-    },
-    setup: async (project: LazyProject): Promise<void> => {
+const cli = Cli.eager(EagerProject.of({
+    name: "test",
+    setup: async (project: EagerProject): Promise<void> => {
         const tc = TencentCloud.direct({
             project: project,
             credential: {

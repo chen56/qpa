@@ -4,9 +4,9 @@ import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20
 import {
     Service,
     StatusPart,
-    LazyProject,
     Provider,
-    ResourceService
+    ResourceService,
+    Project
 } from "@qpa/core";
 import {Paging} from "../../internal/common.ts";
 
@@ -108,7 +108,7 @@ export class TencentCloudProvider extends Provider {
     private tagClient!: TagClient;
     public credential!: TencentCloudCredential;
 
-    constructor(readonly project: LazyProject, readonly props: TencentCloudProviderProps) {
+    constructor(readonly project: Project, readonly props: TencentCloudProviderProps) {
         super(project);
 
         this.credential = props.credential;

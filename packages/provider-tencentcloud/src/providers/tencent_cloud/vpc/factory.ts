@@ -6,7 +6,7 @@ import { TencentCloudProvider } from "../provider.ts";
  * 工厂方法类
  * 命名方式[ServiceType][Mode]Factory
  */
-export class VpcDirectFactory{
+export class VpcEagerFactory {
     constructor(readonly provider: TencentCloudProvider) {
     }
 
@@ -23,7 +23,7 @@ export class VpcDirectFactory{
 /**
  * 工厂方法类
  */
-export class VpcPlannedFactory {
+export class VpcLazyFactory {
     constructor(readonly provider: TencentCloudProvider) {
     }
 

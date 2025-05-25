@@ -1,8 +1,5 @@
-import {GlobalOptions, loadDirectConfig} from './common.ts';
-// import type {Project} from "@/index";
+import {GlobalOptions} from './common.ts';
 import type {Command} from "commander";
-// import {Config} from "@qpa/core/src/index.js";
-import {Config} from "@qpa/core";
 import { Cli } from 'src/index.ts';
 // 定义 apply 子命令选项的接口 (继承全局选项)
 interface ApplyOptions extends GlobalOptions {
@@ -20,10 +17,6 @@ export default function registerCommand(cli: Cli, parentCommand: Command): void 
                 console.log(`${new Date().toISOString()} - apply <${configPath}>.`);
                 console.log(`Options:`, options);
             }
-            const config: Config = await loadDirectConfig(configPath, options);
-            await config.setup()
-            await config.project.refresh();
-            const project = config.project;
-            await project.apply();
+            await cli.project.apply();
         });
 }

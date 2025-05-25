@@ -1,23 +1,15 @@
-import {Provider, ResourceService, SpecPart, ISpecPartProps, StatusPart} from "src/service.ts";
+import {Project, Provider, ResourceService, SpecPart, StatusPart} from "src/service.ts";
 
-
-export class LazyProject {
-    _providers: Providers = new Providers();
+export class LazyProject extends Project {
     _configuredResources: ConfiguredResources = new ConfiguredResources();
     _deconfiguredResources: DeconfiguredResources = new DeconfiguredResources();
-    name: string;
 
     /**
      * key: 这个key非常重要，是云资源工作空间的唯一标识，用于区分不同的云资源工作空间
      * 所有资源都在此key下，资源的创建和删除依赖它
      */
     constructor(props: { name: string }) {
-        // 这里可以添加配置验证逻辑
-        if (!props.name) {
-            throw new Error('Missing required project name');
-        }
-
-        this.name = props.name;
+        super({name: props.name});
     }
 
     async refresh(): Promise<void> {
@@ -67,10 +59,6 @@ export class LazyProject {
 }
 
 
-export interface ILazyResourceProps<SPEC, STATUS> extends ISpecPartProps<SPEC> {
-    service: ResourceService<SPEC, STATUS>;
-}
-
 export class LazyResource<SPEC, STATUS> {
     public readonly name: string;
 
@@ -78,8 +66,14 @@ export class LazyResource<SPEC, STATUS> {
     readonly service: ResourceService<SPEC, STATUS>;
     private readonly specPart: SpecPart<SPEC>;
 
-    public constructor(readonly provider: Provider, props: ILazyResourceProps<SPEC, STATUS>) {
-        const sameName = provider.project._configuredResources.find(r => r.name === props.name);
+    public constructor(readonly provider: Provider, props: {
+        /** in a resource type, name is unique ,like k8s name/terraform name field*/
+        name: string;
+        spec: SPEC;
+        service: ResourceService<SPEC, STATUS>;
+    }) {
+        const project=provider.project as LazyProject;
+        const sameName = project._configuredResources.find(r => r.name === props.name);
         if (sameName) {
             throw new Error(`资源名称重复:${props.name}`);
         }
@@ -88,9 +82,8 @@ export class LazyResource<SPEC, STATUS> {
         this.specPart = new SpecPart(props);
         this.service = props.service;
 
-        this.provider.project._configuredResources.push(this);
+        project._configuredResources.push(this);
     }
-
     public get spec(): SPEC {
         return this.specPart.spec;
     }
@@ -162,12 +155,6 @@ class ConfiguredResources extends Array<LazyResource<unknown, unknown>> {
 
 class DeconfiguredResources extends Array<StatusPart<unknown>> {
     constructor(...args: StatusPart<unknown>[]) {
-        super(...args); // 调用 Array(...items: T[]) 构造形式
-    }
-}
-
-class Providers extends Array<Provider> {
-    constructor(...args: Provider[]) {
         super(...args); // 调用 Array(...items: T[]) 构造形式
     }
 }
