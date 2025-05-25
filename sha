@@ -20,8 +20,13 @@ _load_nodejs_group_defaults
 # app cmd script
 # 独立于项目组的特殊命令
 ##########################################
-clean() {
-  _run rm -rf build dist node_modules
+info() {
+  echo "## workspaces:"
+  printf "  %s\n" "${__all_workspaces[@]}"
+  echo "## packages:"
+#  printf "  %s\n" "$(_dir_to_package_name "${__all_workspaces[@]}")"
+#  echo "## out ip:"
+#  echo "  $(curl ipinfo.io/ip 2>/dev/null)"
 }
 
 ##########################################

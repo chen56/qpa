@@ -1,4 +1,6 @@
-export class PaPaResource<SPEC, STATE> {
+import {Provider, ResourceService} from "src/service.ts";
+
+export class PlannedResource<SPEC, STATE> {
     public readonly name: string;
 
     _states = new Array<STATE>();
@@ -38,13 +40,6 @@ export class PaPaResource<SPEC, STATE> {
         return this.service.refresh(this);
     }
 }
-
-export const Constants = {
-    tagNames: {
-        resource: "qpa_name",
-        project: "qpa_project_name",
-    },
-} as const;
 
 /**internal use*/
 export enum _ConfigMode {
@@ -109,34 +104,6 @@ export class SpecPart<SPEC> {
     }
 }
 
-export class AppliedResource<SPEC, STATE> {
-    public readonly name: string;
-
-    constructor(private readonly specPart: SpecPart<SPEC>, private readonly statePart: StatePart<STATE>) {
-        this.name = statePart.name;
-    }
-
-    get spec() {
-        return this.specPart.spec;
-    }
-
-    get state() {
-        return this.statePart.state;
-    }
-
-    destroy() {
-        this.statePart.destroy();
-    }
-}
-
-
-export abstract class ResourceService<SPEC, STATE> {
-    abstract create(resource: SpecPart<SPEC>): Promise<StatePart<STATE>>;
-
-    abstract destroy(resource: PaPaResource<SPEC, STATE>): Promise<void>;
-
-    abstract refresh(resource: PaPaResource<SPEC, STATE>): Promise<void> ;
-}
 
 export interface SpecPartProps<SPEC> {
     /** in a resource type, name is unique ,like k8s name/terraform name field*/
@@ -146,14 +113,6 @@ export interface SpecPartProps<SPEC> {
 
 export interface ResourceProps<SPEC, STATE> extends SpecPartProps<SPEC> {
     service: ResourceService<SPEC, STATE>;
-}
-
-export abstract class Provider {
-    protected constructor(readonly project: PlannedProject) {
-        project._providers.push(this);
-    }
-
-    abstract loadAll(): Promise<StatePart<unknown>[]>;
 }
 
 export class PlannedProject {
@@ -221,8 +180,8 @@ export class PlannedProject {
     }
 }
 
-class ConfiguredResources extends Array<PaPaResource<unknown, unknown>> {
-    constructor(...args: PaPaResource<unknown, unknown>[]) {
+class ConfiguredResources extends Array<PlannedResource<unknown, unknown>> {
+    constructor(...args: PlannedResource<unknown, unknown>[]) {
         super(...args); // 调用 Array(...items: T[]) 构造形式
     }
 }

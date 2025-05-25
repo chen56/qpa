@@ -1,4 +1,4 @@
-import {PaPaResource, SpecPartProps, AppliedResource, SpecPart} from "@qpa/core";
+import {PlannedResource, SpecPartProps, AppliedResource, SpecPart} from "@qpa/core";
 import {Vpc, VpcService, VpcState} from "./vpc.ts";
 import { TencentCloudProvider } from "../provider.ts";
 
@@ -28,7 +28,7 @@ export class VpcPlannedFactory {
     }
 
     vpc(props: SpecPartProps<Vpc>) {
-        return new PaPaResource<Vpc, VpcState>(this.provider, {
+        return new PlannedResource<Vpc, VpcState>(this.provider, {
             ...props,
             service:this.provider._getService(VpcService.resourceType) as VpcService,
         });

@@ -150,7 +150,9 @@ reinstall() {      __for_each_workspace __current_workspaces "reinstall" "$@";}
 rebuild() {        __for_each_workspace __current_workspaces "rebuild"   "$@";}
 retest() {         __for_each_workspace __current_workspaces "retest"    "$@";}
 repack() {         __for_each_workspace __current_workspaces "repack"    "$@";}
+info() {         __for_each_workspace __current_workspaces "info"    "$@";}
 
+echo "$( set-e; ls ssssfsd )"
 
 #############################################################
 ## 任务的默认实现
@@ -174,14 +176,6 @@ npmjs() {
   }
 }
 
-status() {
-  echo "## workspaces:"
-  printf "  %s\n" "${__all_workspaces[@]}"
-  echo "## packages:"
-#  printf "  %s\n" "$(_dir_to_package_name "${__all_workspaces[@]}")"
-  echo "## out ip:"
-  echo "  $(curl ipinfo.io/ip 2>/dev/null)"
-}
 
 version() {
   info() { npm version --workspaces "$@"; }

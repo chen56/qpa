@@ -122,8 +122,8 @@ _load_nodejs_group_defaults() {
         _run tar -xzf ./build/*.tgz -C "./build"
   }
 
-  reinstall() {   clean_all;        install;  }
-  rebuild() {     clean_all;        install; build;  }
+  reinstall() {   clean;    install;  }
+  rebuild() {     clean;    install; build;  }
   retest() {      rebuild;  test;  }
   repack() {      retest;   pack;  }
 

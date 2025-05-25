@@ -2,7 +2,7 @@ import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs
 import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {
-    Constants,
+    Service,
     StatePart,
     PlannedProject,
     Provider,
@@ -131,7 +131,7 @@ export class TencentCloudProvider extends Provider {
             const limit = 100;
             const resp = await this._getTagClient().DescribeResourcesByTags({
                 TagFilters: [{
-                    TagKey: Constants.tagNames.project,
+                    TagKey: Service.tagNames.project,
                     TagValue: [projectName]
                 }],
                 Limit: limit, // 分页大小
