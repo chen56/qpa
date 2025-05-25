@@ -16,7 +16,7 @@ importers:
         version: 1.0.8
       '@types/node':
         specifier: ^22.15.3
-        version: 22.15.19
+        version: 22.15.21
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.32.1
         version: 8.32.1(@typescript-eslint/parser@8.32.1(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3))(eslint@9.27.0(jiti@2.4.2))(typescript@5.8.3)
@@ -40,13 +40,13 @@ importers:
         version: 5.8.3
       vite:
         specifier: ^6.3.5
-        version: 6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
+        version: 6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)
       vite-tsconfig-paths:
         specifier: ^5.1.4
-        version: 5.1.4(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4))
+        version: 5.1.4(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4))
       vitest:
         specifier: ^3.1.3
-        version: 3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
+        version: 3.1.4(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)
 
   packages/cli:
     dependencies:
@@ -80,7 +80,7 @@ importers:
         version: 16.5.0
       tencentcloud-sdk-nodejs:
         specifier: ^4.0.973
-        version: 4.1.41
+        version: 4.1.44
 
   packages/provider-tencentcloud:
     dependencies:
@@ -95,7 +95,7 @@ importers:
         version: 16.5.0
       tencentcloud-sdk-nodejs:
         specifier: ^4.0.973
-        version: 4.1.41
+        version: 4.1.44
 
 packages:
 
@@ -504,8 +504,8 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@22.15.19':
-    resolution: {integrity: sha512-3vMNr4TzNQyjHcRZadojpRaD9Ofr6LsonZAoQ+HMUa/9ORTPoxVIw0e0mpqWpdjj8xybyCM+oKOUH2vwFu/oEw==}
+  '@types/node@22.15.21':
+    resolution: {integrity: sha512-EV/37Td6c+MgKAbkcLG6vqZ2zEYHD7bvSrzqqs2RIhbA6w3x+Dqz8MZM3sP6kGTeLrdoOgKZe+Xja7tUB2DNkQ==}
 
   '@typescript-eslint/eslint-plugin@8.32.1':
     resolution: {integrity: sha512-6u6Plg9nP/J1GRpe/vcjjabo6Uc5YQPAMxsgQyGC/I0RuukiG1wIe3+Vtg3IrSCVJDmqK3j8adrtzXSENRtFgg==}
@@ -1315,8 +1315,8 @@ packages:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
     engines: {node: '>=8'}
 
-  tencentcloud-sdk-nodejs@4.1.41:
-    resolution: {integrity: sha512-loH7Mdzqd2FznW/KSyiLQT7pV/UuFN56xDIbP7hG2C6qlDsoNt7M6UXdCiDlEjm9K+bE7O+HhbbpPXt5ZSyybw==}
+  tencentcloud-sdk-nodejs@4.1.44:
+    resolution: {integrity: sha512-kDrPxXYhLzANXJyt6tPEoAtRxEUUX7XErmdr4B1jp57yYuTRguAbJYbFD/1zy8EmTaqLOJp1hgFRaZ2G2uDgiw==}
     engines: {node: '>=10'}
 
   term-size@2.2.1:
@@ -1888,7 +1888,7 @@ snapshots:
 
   '@types/node@12.20.55': {}
 
-  '@types/node@22.15.19':
+  '@types/node@22.15.21':
     dependencies:
       undici-types: 6.21.0
 
@@ -1976,13 +1976,13 @@ snapshots:
       chai: 5.2.0
       tinyrainbow: 2.0.0
 
-  '@vitest/mocker@3.1.4(vite@6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4))':
+  '@vitest/mocker@3.1.4(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4))':
     dependencies:
       '@vitest/spy': 3.1.4
       estree-walker: 3.0.3
       magic-string: 0.30.17
     optionalDependencies:
-      vite: 6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
+      vite: 6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)
 
   '@vitest/pretty-format@3.1.4':
     dependencies:
@@ -2712,7 +2712,7 @@ snapshots:
     dependencies:
       has-flag: 4.0.0
 
-  tencentcloud-sdk-nodejs@4.1.41:
+  tencentcloud-sdk-nodejs@4.1.44:
     dependencies:
       form-data: 3.0.3
       get-stream: 6.0.1
@@ -2786,13 +2786,13 @@ snapshots:
 
   uuid@9.0.1: {}
 
-  vite-node@3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4):
+  vite-node@3.1.4(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4):
     dependencies:
       cac: 6.7.14
       debug: 4.4.1
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
+      vite: 6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -2807,18 +2807,18 @@ snapshots:
       - tsx
       - yaml
 
-  vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)):
+  vite-tsconfig-paths@5.1.4(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)):
     dependencies:
       debug: 4.4.1
       globrex: 0.1.2
       tsconfck: 3.1.5(typescript@5.8.3)
     optionalDependencies:
-      vite: 6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
+      vite: 6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)
     transitivePeerDependencies:
       - supports-color
       - typescript
 
-  vite@6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4):
+  vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4):
     dependencies:
       esbuild: 0.25.4
       fdir: 6.4.4(picomatch@4.0.2)
@@ -2827,15 +2827,15 @@ snapshots:
       rollup: 4.41.0
       tinyglobby: 0.2.13
     optionalDependencies:
-      '@types/node': 22.15.19
+      '@types/node': 22.15.21
       fsevents: 2.3.3
       jiti: 2.4.2
       tsx: 4.19.4
 
-  vitest@3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4):
+  vitest@3.1.4(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4):
     dependencies:
       '@vitest/expect': 3.1.4
-      '@vitest/mocker': 3.1.4(vite@6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4))
+      '@vitest/mocker': 3.1.4(vite@6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4))
       '@vitest/pretty-format': 3.1.4
       '@vitest/runner': 3.1.4
       '@vitest/snapshot': 3.1.4
@@ -2852,11 +2852,11 @@ snapshots:
       tinyglobby: 0.2.13
       tinypool: 1.0.2
       tinyrainbow: 2.0.0
-      vite: 6.3.5(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
-      vite-node: 3.1.4(@types/node@22.15.19)(jiti@2.4.2)(tsx@4.19.4)
+      vite: 6.3.5(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)
+      vite-node: 3.1.4(@types/node@22.15.21)(jiti@2.4.2)(tsx@4.19.4)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 22.15.19
+      '@types/node': 22.15.21
     transitivePeerDependencies:
       - jiti
       - less

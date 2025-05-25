@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import {EagerProject} from "@qpa/core";
 import {Cli} from "@qpa/cli";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";

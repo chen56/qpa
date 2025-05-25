@@ -6,21 +6,20 @@
  * - Unmanaged Resources: 非管理资源, 即脱离IAC工具，由其他工具或手工创建的资源。
  * */
 
-export {Provider} from "src/service.ts";
-export {ResourceService} from "src/service.ts";
-export {Service} from "src/service.ts";
-export {RealizedResource} from "src/service.ts";
-export {SpecPart} from "src/service.ts";
-export {StatusPart} from "src/service.ts";
-export type {ISpecPartProps} from "src/service.ts";
-export {Project} from "src/service.ts";
+export {Provider} from "./service.ts";
+export {ResourceService} from "./service.ts";
+export {Service} from "./service.ts";
+export {RealizedResource} from "./service.ts";
+export {SpecPart} from "./service.ts";
+export {StatusPart} from "./service.ts";
+export type {ISpecPartProps} from "./service.ts";
+export {Project} from "./service.ts";
 
 export {
     Config, LazyProject, LazyResource
-} from "src/lazy.ts"
+} from "./lazy.ts"
 
 
-export {
-    EagerProject,EagerApply
-} from "src/eager.ts"
+export {EagerProject} from "./eager.ts"
+export type {EagerApply} from "./eager.ts"
 

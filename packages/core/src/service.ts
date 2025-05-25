@@ -1,4 +1,4 @@
-import {LazyResource} from "src/lazy.ts";
+import {LazyResource} from "./lazy.ts";
 
 
 export abstract class Project{

@@ -70,7 +70,7 @@
 
     // module选项直接定义了库的输出格式。它决定了库的 .js 文件中，import 和 export 语句的形式。
     "module": "ES2022",
-    "target": "ES2015",
+    "target": "ES2022",
 
     "emitDeclarationOnly": true,
     "sourceMap": true,

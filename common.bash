@@ -84,7 +84,7 @@ _load_nodejs_group_defaults() {
   build() {
         mkdir -p ./dist
     #    _run npx tsc --noEmit
-        _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/index.ts
+        _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/*.ts
 
 #    npm install --save-dev esbuild
 
