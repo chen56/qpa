@@ -152,8 +152,6 @@ retest() {         __for_each_workspace __current_workspaces "retest"    "$@";}
 repack() {         __for_each_workspace __current_workspaces "repack"    "$@";}
 info() {         __for_each_workspace __current_workspaces "info"    "$@";}
 
-echo "$( set-e; ls ssssfsd )"
-
 #############################################################
 ## 任务的默认实现
 #############################################################

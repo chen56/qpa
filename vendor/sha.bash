@@ -1,14 +1,44 @@
 #!/usr/bin/env bash
-set -o errtrace  # -E trap inherited in sub script
-set -o errexit   # -e
-set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
-set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
+
+# sha.bash对bash环境目前影响是：
+#   - 捕获打印错误(trap "_sha_on_error" ERR)
+#   - 设置了nullglob行为，防止错误的数组值(shopt -s nullglob)
+
+
+# sha.bash消费者请选用以下关键参数，sha.bash默认不开启这些参数，尽量不影响bash默认环境
+#set -o errtrace  # -E trap inherited in sub script
+#set -o errexit   # -e
+#set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
+#set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 #set -o nounset # -u: 当尝试使用未定义的变量时，立即报错并退出脚本。这有助于防止因变量拼写错误或未初始化导致的意外行为。
                 #  don't use it ,it is crazy, 
                 #   1.bash version is diff Behavior 
                 #   2.we need like this: ${arr[@]+"${arr[@]}"}
                 #   3.影响使用此lib的脚本
-           
+
+# nullglob选项默认off时：
+# -------------------------.bash
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=([0]="./no_exists_dir/*/sha")
+# -------------------------
+# 没有匹配到任何文件时，包含字符串字面量，这不是我们要的
+#
+# 而打开nullglob后：
+# -------------------------.bash
+# shopt -s nullglob
+# bash-5.2$ a=(./no_exists_dir/*/sha)
+# bash-5.2$ declare -p a
+# declare -a a=()
+# -------------------------s
+# 空数组!这是我们想要的
+shopt -s nullglob
+
+
+
+
+
+
 _sha_real_path() {  [[ $1 = /* ]] && echo "$1" || echo "$PWD/${1#./}" ; }
 
 # 所有找到的子命令列表，不清理，用于每次注册子命令时判断是否为新命令，key是函数名，value是函数内容
@@ -21,9 +51,6 @@ declare _sha_cmd_exclude=("_*" "fn_*" "sha") # 示例前缀数组
 
 # 系统命令列表, 用于判断我们的命令名是否和系统命令冲突
 declare -A _sha_sys_commands
-
-
-
 
 ##################################################################################################
 ### 业务无关的common函数，比如数组、日志等
@@ -495,5 +522,5 @@ _sha_register_sys_commands() {
 #######################################
 ## 入口
 #######################################
-trap "_sha_on_error" ERR
+#trap "_sha_on_error" ERR
 _sha_register_sys_commands

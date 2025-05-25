@@ -1,26 +1,4 @@
 #!/usr/bin/env bash
-set -o errtrace  # -E trap inherited in sub script
-set -o errexit   # -e
-set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
-set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
-
-# nullglob选项默认off时：
-# -------------------------.bash
-# bash-5.2$ a=(./no_exists_dir/*/sha)
-# bash-5.2$ declare -p a
-# declare -a a=([0]="./no_exists_dir/*/sha")
-# -------------------------
-# 没有匹配到任何文件时，包含字符串字面量，这不是我们要的
-#
-# 而打开nullglob后：
-# -------------------------.bash
-# shopt -s nullglob
-# bash-5.2$ a=(./no_exists_dir/*/sha)
-# bash-5.2$ declare -p a
-# declare -a a=()
-# -------------------------s
-# 空数组!这是我们想要的
-shopt -s nullglob
 
 # On Mac OS, readlink -f doesn't work, so use._real_path get the real path of the file
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
