@@ -63,7 +63,7 @@ export abstract class Provider {
    *
    * @return 获取查询出ResourceScope内的所有的资源状态
    */
-  abstract listConfiguredResourceStatuses(): Promise<StatusPart<unknown>[]>;
+  abstract listProvisionedResources(): Promise<StatusPart<unknown>[]>;
 }
 
 export class RealizedResource<SPEC, STATUS> {

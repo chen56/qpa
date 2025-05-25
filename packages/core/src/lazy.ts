@@ -23,7 +23,7 @@ export class LazyProject extends Project {
 
     // load new status
     for (const provider of this._providers) {
-      const statuses: StatusPart<unknown>[] = await provider.listConfiguredResourceStatuses();
+      const statuses: StatusPart<unknown>[] = await provider.listProvisionedResources();
       for (const status of statuses) {
         const configured = this._configuredResources.find(e => e.name === status.name);
         if (configured) {

@@ -145,7 +145,7 @@ export class TencentCloudProvider extends Provider {
     return result;
   }
 
-  async listConfiguredResourceStatuses(): Promise<StatusPart<unknown>[]> {
+  async listProvisionedResources(): Promise<StatusPart<unknown>[]> {
     //todo scope base filter
     const projectName = this.scope.name;
     const gen = Paging.queryPage<ResourceTag>(async (offset) => {
