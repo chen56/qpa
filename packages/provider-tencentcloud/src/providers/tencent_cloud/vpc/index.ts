@@ -1,6 +1,6 @@
 
 export type {
-    Vpc, VpcState
+    VpcSpec, VpcStatus
 } from './vpc.ts'
 export {VpcService,} from './vpc.js'
 

@@ -27,7 +27,7 @@ export class LazyProject extends Project {
       for (const status of statuses) {
         const configured = this._configuredResources.find(e => e.name === status.name);
         if (configured) {
-          configured.statuses.push(status.status);
+          configured.statuses.push(status);
         } else {
           this._deconfiguredResources.push(status);
         }
@@ -64,7 +64,7 @@ export class LazyProject extends Project {
 export class LazyResource<SPEC, STATUS> {
   public readonly name: string;
 
-  _statuses = new Array<STATUS>();
+  _statuses = new Array<StatusPart<STATUS>>();
   readonly service: ResourceService<SPEC, STATUS>;
   private readonly specPart: SpecPart<SPEC>;
 
@@ -83,7 +83,7 @@ export class LazyResource<SPEC, STATUS> {
     return this.specPart.spec;
   }
 
-  get statuses(): STATUS[] {
+  get statuses(): StatusPart<STATUS>[] {
     return this._statuses;
   }
 
@@ -92,7 +92,7 @@ export class LazyResource<SPEC, STATUS> {
   }
 
   async destroy(): Promise<void> {
-    return this.service.destroy(this);
+    return this.service.destroy(...this._statuses);
   }
 
   async refresh(): Promise<void> {

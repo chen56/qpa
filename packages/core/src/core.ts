@@ -50,7 +50,7 @@ export class SpecPart<SPEC> {
 export abstract class ResourceService<SPEC, STATUS> {
   abstract create(resource: SpecPart<SPEC>): Promise<StatusPart<STATUS>>;
 
-  abstract destroy(resource: LazyResource<SPEC, STATUS>): Promise<void>;
+  abstract destroy(...resource: StatusPart<STATUS>[]): Promise<void>;
 
   abstract refresh(resource: LazyResource<SPEC, STATUS>): Promise<void> ;
 }
