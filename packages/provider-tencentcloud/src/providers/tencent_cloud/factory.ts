@@ -8,7 +8,7 @@ export abstract class TencentCloud {
     protected constructor(readonly provider: TencentCloudProvider) {
     }
 
-    static direct(props: { credential: { secretId: string; secretKey: string }; project: Project }) {
+    static eagerMode(props: { credential: { secretId: string; secretKey: string }; project: Project }) {
         const tencentCloudProvider = new TencentCloudProvider(props.project, {
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,
@@ -16,14 +16,14 @@ export abstract class TencentCloud {
             },
             allowedResourceServices: _allowServices
         });
-        return new TencentCloudDirectFactory(tencentCloudProvider);
+        return new EagerModeTencentCloudFactory(tencentCloudProvider);
     }
 }
 /**
  * 工厂方法类
  * 命名模式：[Provider][Mode]Factory
  */
-export class TencentCloudDirectFactory extends TencentCloud{
+export class EagerModeTencentCloudFactory extends TencentCloud{
     readonly vpc: VpcEagerFactory;
 
     constructor(readonly provider: TencentCloudProvider) {
@@ -35,7 +35,7 @@ export class TencentCloudDirectFactory extends TencentCloud{
 /**
  * 工厂方法类
  */
-export class TencentCloudPlannedFactory extends TencentCloud {
+export class LazyModeTencentCloudFactory extends TencentCloud {
     readonly vpc: VpcLazyFactory;
 
     constructor(readonly provider: TencentCloudProvider) {

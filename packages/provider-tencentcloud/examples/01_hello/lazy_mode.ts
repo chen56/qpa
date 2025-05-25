@@ -10,7 +10,7 @@ export default ConfigTodoRemove.plannedMode({
     }),
     setup: async (project: LazyProject): Promise<void> => {
 
-        const tc = TencentCloud.direct({
+        const tc = TencentCloud.eagerMode({
             project: project,
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,

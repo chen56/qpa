@@ -5,7 +5,7 @@ import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 const cli = Cli.eager(EagerProject.of({
     name: "test",
     setup: async (project: EagerProject): Promise<void> => {
-        const tc = TencentCloud.direct({
+        const tc = TencentCloud.eagerMode({
             project: project,
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,

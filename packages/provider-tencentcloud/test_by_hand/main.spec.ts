@@ -5,10 +5,10 @@ import {LazyProject} from "@qpa/core";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 describe('手工运行的测试', () => {
-    it('direct mode destory', () => {
+    it('Eager mode destroy', () => {
         let project=new LazyProject({name:"test"});
 
-        const tc = TencentCloud.direct({
+        const tc = TencentCloud.eagerMode({
             project:project,
             credential: {
                 secretId: process.env.TENCENTCLOUD_SECRET_ID!,

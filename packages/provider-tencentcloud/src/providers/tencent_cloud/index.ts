@@ -12,7 +12,7 @@ export {
 
 // 2. 为重要的类型添加类型导出
 export {
-    TencentCloudPlannedFactory,
-    TencentCloudDirectFactory,
+    LazyModeTencentCloudFactory,
+    EagerModeTencentCloudFactory,
 } from './factory.ts';
 
