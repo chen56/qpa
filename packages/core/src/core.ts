@@ -29,25 +29,16 @@ export class StatePart<STATE> {
   }
 }
 
-export interface SpecPartProps<SPEC> {
-  /** in a resource type, name is unique ,like k8s name/terraform name field*/
-  name: string;
-  spec: SPEC;
-}
 
 /**
  * Declared Resources‘s Specification Part
  *
  * 指资源的配置部分，即渴望的状态 (Desired State)
  */
-export class SpecPart<SPEC> {
-  readonly name: string;
-  readonly spec: SPEC
-
-  constructor(props: SpecPartProps<SPEC>) {
-    this.name = props.name;
-    this.spec = props.spec;
-  }
+export interface SpecPart<SPEC> {
+  /** in a resource type, name is unique ,like k8s name/terraform name field*/
+  name: string;
+  spec: SPEC;
 }
 
 export abstract class ResourceService<SPEC, STATE> {

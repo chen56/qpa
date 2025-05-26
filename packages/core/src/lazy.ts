@@ -75,7 +75,7 @@ export class LazyResource<SPEC, STATE> {
     service: ResourceService<SPEC, STATE>;
   }) {
     this.name = props.name;
-    this.specPart = new SpecPart(props);
+    this.specPart = props;
     this.service = props.service;
   }
 
