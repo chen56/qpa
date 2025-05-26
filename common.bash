@@ -75,8 +75,17 @@ _normal_path() {
 #
 #}
 
+# 全局，所有workspace的默认任务/命令集
+# 任务的覆盖顺序为：全局>组>workspace
+_load_all_group_defaults() {
+  exec() { _run "$@"; }
+  clean() {         _run rm -rf build dist out ;}
+  clean_all() {     _run rm -rf build dist out node_modules pnpm-lock.yaml;}
+}
+
 # 打开npm命令组
 _load_nodejs_group_defaults() {
+  _load_all_group_defaults
   test() { _run vitest run ./test ;}
   install() { _run pnpm install;  }
   build() {

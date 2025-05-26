@@ -3,11 +3,10 @@ import {VpcService} from "./vpc/vpc.ts";
 import {VpcClients} from "./vpc/_common.ts";
 import {
   ResourceType,
-  TencentCloudProvider, TencentCloudResourceScope,
-  TencentCloudResourceService,
-  TencentCloudTagBaseResourceScope
+  TencentCloudProvider, TencentCloudResourceService
 } from "./provider.ts";
 import {LazyProject} from "@qpa/core";
+import {ScopeProps} from "./scope.ts";
 
 
 /**
@@ -17,19 +16,13 @@ export abstract class TencentCloud {
   protected constructor(readonly provider: TencentCloudProvider) {
   }
 
-  /**
-   * @public
-   */
-  static createTagBaseScope(props: { name: string; }) {
-    return new TencentCloudTagBaseResourceScope(props);
-  }
 
   /**
    * @public
    */
   static createEagerFactory(props: {
     credential: { secretId: string; secretKey: string };
-    scope: TencentCloudResourceScope;
+    scope: ScopeProps;
   }): EagerTencentCloudFactory {
     const provider = new TencentCloudProvider({
       credential: {
@@ -54,7 +47,6 @@ export class EagerTencentCloudFactory extends TencentCloud {
     super(provider);
     this.vpc = new VpcEagerFactory(this.provider);
   }
-
 }
 
 /**

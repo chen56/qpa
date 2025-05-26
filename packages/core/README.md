@@ -12,14 +12,14 @@ IAC(Infrastructure as Code)角度看，Resource有以下概念：
 
 - 非托管资源(Unmanaged Resources) : 未被IAC工具管理的外部资源
 - 托管资源(Managed Resources) : 由IAC工具管理的资源
-  - 声明资源(Declared Resources) : 配置代码中定义的资源(期望状态)
+  - 声明资源(Declared/Configured Resources) : 配置代码中定义的资源(期望状态)
     - 待创建资源(Pending Provision Resources) : 已声明但未创建的资源
-    - 已创建资源(Provisioned Resources) : 已声明且成功创建的资源
+    - 已存在资源(Real/Existing/Live Resources) : 统括所有实际存在的资源
       - 一致资源(In-Sync Resources) : 期望状态与实际状态一致
       - 漂移资源(Drifted Resources) : 期望状态与实际状态不一致
         - 属性有差异的资源(Differing Resources) : 配置中声明的属性与实际状态不一致的资源
 		- 重复资源(): 出现重复创建故障的多个实际资源
-  - 已解除声明资源(Undeclared Resources) : 曾声明但已从配置中移除的资源
+  - 已解除声明资源(Undeclared/Deconfigured Resources) : 曾声明但已从配置中移除的资源
     - 待删除资源（Pending Deletion Resources）
   - 忽略资源(ignore resource) ,比如配置中已删除，但无法成功删除的实际资源，可以暂时标记为ignore
 
@@ -33,6 +33,17 @@ Actual Resources: 云平台上真实存在的资源（无论是否被 IaC 工具
 
 资源管理范围/边界(Managed Resource Scope):  QPA项目不存本地状态，只用云上的Tag等技术来圈定管理范围。
 
+已存在资源(Existing Resources)的服务状态
+- Pending
+- 运行中(Running)
+- 停止中(Stopping)
+- 已停止(Stopped)
+
+Execution Plan (执行计划)，详细列出将要 
+- _create (创建)
+- update-in-place (原地更新)
+- replace (销毁重建)
+- destroy (销毁) 的资源
 
 ### 详细状态
 
@@ -66,3 +77,6 @@ Deletion
 - Pending Deletion Resources
 	- Orphaned/Ghost Resources（孤立/幽灵资源），有异议，有人解释为无法删除的资源，即iac工具已无法跟踪的资源
 
+## QPA 过程式配置的概念裁剪
+
+单一事实来源: QPA不像Terraform一样在本地保留state文件，而是以云上资源状态为唯一状态事实来源，比如通过tag标记。

@@ -3,7 +3,10 @@ import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 
 const tc = TencentCloud.createEagerFactory({
-  scope: TencentCloud.createTagBaseScope({name: "test"}),
+  scope: {
+    scopeName: "test",
+    type:"TagBaseResourceScope",
+  },
   credential: {
     secretId: process.env.TENCENTCLOUD_SECRET_ID!,
     secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
@@ -27,6 +30,7 @@ const project = EagerProject.of({
 });
 console.log("project:",project);
 
+await tc.provider.refresh();
 // const cli = Cli.eager(project);
 // --- 解析命令行参数 ---
 // parse() 会解析 process.argv

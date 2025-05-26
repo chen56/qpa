@@ -1,36 +1,7 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {
-  Constants,
-  StatePart,
-  Provider,
-  ResourceService,
-  BaseResourceScope
-} from "@qpa/core";
-import {Paging} from "../../internal/common.ts";
-
-/**
- * @internal
- */
-export class TencentCloudResourceScope extends BaseResourceScope {
-  name: string;
-
-  constructor(props: { name: string; }) {
-    super();
-    this.name = props.name;
-  }
-}
-
-/**
- * @internal
- */
-export class TencentCloudTagBaseResourceScope extends TencentCloudResourceScope {
-  constructor(props: { name: string; }) {
-    super({name: props.name})
-  }
-}
-
+import {Provider, ResourceService, StatePart,} from "@qpa/core";
+import {ScopeProps, TencentCloudResourceScope} from "./scope.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
 
@@ -43,7 +14,7 @@ export interface TencentCloudCredential extends tc_Credential {
  * 支持tag的资源 Taggable
  */
 export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudResourceService<SPEC, STATE> {
-  abstract loadByTags(resourceTags: ResourceTag[]): Promise<StatePart<STATE>[]>;
+  abstract findByTags(resourceTags: ResourceTag[]): Promise<StatePart<STATE>[]>;
 }
 
 /**
@@ -117,26 +88,33 @@ export class ResourceType {
 }
 
 export interface TencentCloudProviderProps {
-  readonly credential: TencentCloudCredential;
+  scope: ScopeProps;
+  credential: TencentCloudCredential;
   allowedResourceServices: (provider: TencentCloudProvider) => Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
-  scope: TencentCloudResourceScope;
 }
 
 export class TencentCloudProvider extends Provider {
-  private readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
-  private tagClient!: TagClient;
+  /**
+   * @internal
+   */
+  readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
   public credential!: TencentCloudCredential;
-  scope:TencentCloudResourceScope;
+  scope: TencentCloudResourceScope;
+  readonly _actualResourceStates:ActualResourceStates = new ActualResourceStates();
   constructor(readonly props: TencentCloudProviderProps) {
     super();
 
     this.credential = props.credential;
-    this.scope=props.scope;
+    this.scope = TencentCloudResourceScope.of(this,props.scope);
 
     this._resourceServices = props.allowedResourceServices(this);
     if (this._resourceServices.size === 0) {
       throw Error("请提供您项目所要支持的资源服务列表，目前您支持的资源服务列表为空")
     }
+  }
+
+  get actualResourceStates():Map<string,  StatePart<unknown>>{
+    return this._actualResourceStates;
   }
 
   _getService(type: ResourceType): TencentCloudResourceService<unknown, unknown> {
@@ -145,59 +123,8 @@ export class TencentCloudProvider extends Provider {
     return result;
   }
 
-  async listProvisionedResources(): Promise<StatePart<unknown>[]> {
-    //todo scope base filter
-    const projectName = this.scope.name;
-    const gen = Paging.queryPage<ResourceTag>(async (offset) => {
-      const limit = 100;
-      const resp = await this._getTagClient().DescribeResourcesByTags({
-        TagFilters: [{
-          TagKey: Constants.tagNames.project,
-          TagValue: [projectName]
-        }],
-        Limit: limit, // 分页大小
-        Offset: offset,
-      });
-      return {
-        totalCount: resp.TotalCount,
-        rows: resp.Rows ?? [],
-        limit: resp.Limit ?? limit,
-      };
-    });
-    const type_tags = new Map<ResourceType, ResourceTag[]>
-    for await(const row of gen) {
-      if (!row.ServiceType || !row.ResourcePrefix) continue;
-      const resourceType = ResourceType.find(row.ServiceType, row.ResourcePrefix)
-      if (!resourceType) continue;
-
-      let v = type_tags.get(resourceType);
-      if (!v) {
-        v = new Array<ResourceTag>();
-        type_tags.set(resourceType, v);
-      }
-      v.push(row);
-    }
-
-    const result = new Array<StatePart<unknown>>();
-    for (const [resourceType, tagResources] of type_tags) {
-      const resourceService = this._resourceServices.get(resourceType);
-      if (!resourceService) {
-        // 不支持类型应该异常退出吗？
-        // 不支持类型可能是以前框架支持某种类型时创建的，但当前版本不再支持
-        console.error(`not support resourceType: ${resourceType} - ${tagResources}`);
-        continue;
-      }
-
-      if (resourceService instanceof TaggableResourceService) {
-        const resources = await resourceService.loadByTags(tagResources);
-        result.push(...resources);
-      } else {
-        // tag查询的结果即然存在，说明此资源是支持tag，但当前服务类型又不是tagged的，说明版本不对，新版的代码创建了资源，又用旧版的去管理
-        throw Error(`resourceType:${resourceType} not support tag, may be your current version too old, upgrade and try`)
-      }
-
-    }
-    return result;
+  async findActualResourceStates(): Promise<StatePart<unknown>[]> {
+    return this.scope.findActualResourceStates();
   }
 
   public _getClientConfigByRegion(region: string): ClientConfig {
@@ -208,14 +135,27 @@ export class TencentCloudProvider extends Provider {
   }
 
 
-  _getTagClient(): TagClient {
-    if (!this.tagClient) {
-      this.tagClient = new TagClient({
-        credential: this.credential,
-      });
-    }
-    return this.tagClient;
+  async refresh(): Promise<void> {
+    // clear old state
+    // for (const acutal of this._actualResourceStates) {
+    //   acutal.states.length = 0;
+    // }
+    // this._deconfiguredResources.length = 0;
+    //
+    // // load new state
+    // const states: StatePart<unknown>[] = await this.provider.findActualResourceStates();
+    // for (const state of states) {
+    //   const configured = this._configuredResources.find(e => e.name === state.name);
+    //   if (configured) {
+    //     configured.states.push(state);
+    //   } else {
+    //     this._deconfiguredResources.push(state);
+    //   }
+    // }
   }
-
 }
-
+class ActualResourceStates extends Map<string,StatePart<unknown>>{
+  constructor() {
+    super();
+  }
+}

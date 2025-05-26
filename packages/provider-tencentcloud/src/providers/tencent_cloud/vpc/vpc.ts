@@ -24,7 +24,7 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
     super();
   }
 
-  async loadByTags(resourceTags: tc_ResourceTag[]): Promise<StatePart<VpcState>[]> {
+  async findByTags(resourceTags: tc_ResourceTag[]): Promise<StatePart<VpcState>[]> {
     type Region = string;
     const regions = new Map<Region, tc_ResourceTag[]>
 
@@ -75,7 +75,7 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
     return this._tcVpcSet2VpcState(specPart.spec.Region, [vpcResponse.Vpc!])![0];
   }
 
-  async destroy(...stateParts: StatePart<VpcState>[]): Promise<void> {
+  async delete(...stateParts: StatePart<VpcState>[]): Promise<void> {
     for (const part of stateParts) {
       const state = part.state;
       const client = this.clients.getClient(state.Region);
@@ -85,9 +85,9 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
     }
   }
 
-  async refresh(resource: SpecPart<VpcSpec>): Promise<StatePart<VpcState>[]> {
+  async load(resource: SpecPart<VpcSpec>): Promise<StatePart<VpcState>[]> {
     const params = {
-      // VpcIds: resource.STATE.map(s => s.VpcId!)!,
+      // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤
       Filters: [
         {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.provider.scope.name]},

@@ -17,17 +17,17 @@ export class LazyProject extends Project {
   async refresh(): Promise<void> {
     // clear old state
     for (const configured of this._configuredResources) {
-      configured.STATE.length = 0;
+      configured.states.length = 0;
     }
     this._deconfiguredResources.length = 0;
 
     // load new state
     for (const provider of this._providers) {
-      const STATE: StatePart<unknown>[] = await provider.listProvisionedResources();
+      const STATE: StatePart<unknown>[] = await provider.findActualResourceStates();
       for (const state of STATE) {
         const configured = this._configuredResources.find(e => e.name === state.name);
         if (configured) {
-          configured.STATE.push(state);
+          configured.states.push(state);
         } else {
           this._deconfiguredResources.push(state);
         }
@@ -38,11 +38,11 @@ export class LazyProject extends Project {
   async apply() {
     await this.refresh();
     for (const resource of this._configuredResources) {
-      if (resource.STATE.length > 1) {
-        throw new Error(`TODO 暂时提示错误，后续要分开为专门的error对象，资源数量超过1个，需要手工处理:${JSON.stringify(resource.STATE, null, 2)}`);
+      if (resource.states.length > 1) {
+        throw new Error(`TODO 暂时提示错误，后续要分开为专门的error对象，资源数量超过1个，需要手工处理:${JSON.stringify(resource.states, null, 2)}`);
       }
-      if (resource.STATE.length == 1) {
-        console.log(`资源已存在:${JSON.stringify(resource.STATE)}`);
+      if (resource.states.length == 1) {
+        console.log(`资源已存在:${JSON.stringify(resource.states)}`);
         return;
       }
       await resource.create();
@@ -64,7 +64,7 @@ export class LazyProject extends Project {
 export class LazyResource<SPEC, STATE> {
   public readonly name: string;
 
-  _STATE:StatePart<STATE>[] = [];
+  _states:StatePart<STATE>[] = [];
   readonly service: ResourceService<SPEC, STATE>;
   private readonly specPart: SpecPart<SPEC>;
 
@@ -83,8 +83,8 @@ export class LazyResource<SPEC, STATE> {
     return this.specPart.spec;
   }
 
-  get STATE(): StatePart<STATE>[] {
-    return this._STATE;
+  get states(): StatePart<STATE>[] {
+    return this._states;
   }
 
   async create(): Promise<StatePart<STATE>> {
@@ -92,11 +92,11 @@ export class LazyResource<SPEC, STATE> {
   }
 
   async destroy(): Promise<void> {
-    return this.service.destroy(...this._STATE);
+    return this.service.delete(...this._states);
   }
 
   async reload(): Promise<void> {
-    this._STATE=await this.service.refresh(this);
+    this._states=await this.service.load(this);
   }
 }
 
@@ -112,7 +112,7 @@ export class ConfigTodoRemove {
   public project: LazyProject;
   public _setup: ConfigSetup;
 
-  private constructor(public readonly _configMode: _ConfigMode, props: IConfigProps) {
+  private constructor(public readonly _configMode: _ConfigMode, props: ConfigProps) {
     this.project = new LazyProject();
     this._setup = props.setup
   }
@@ -121,16 +121,16 @@ export class ConfigTodoRemove {
     return this._setup(this.project);
   }
 
-  static directMode(props: IConfigProps) {
+  static directMode(props: ConfigProps) {
     return new ConfigTodoRemove(_ConfigMode.Direct, props);
   }
 
-  static plannedMode(props: IConfigProps) {
+  static plannedMode(props: ConfigProps) {
     return new ConfigTodoRemove(_ConfigMode.Planned, props);
   }
 }
 
-export interface IConfigProps {
+export interface ConfigProps {
   setup: ConfigSetup;
 }
 

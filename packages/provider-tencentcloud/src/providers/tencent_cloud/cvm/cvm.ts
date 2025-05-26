@@ -32,7 +32,7 @@ export class CvmInstanceService extends TaggableResourceService<CvmSpec,CvmState
         return this.cvmClients.get(region)!;
     }
 
-    loadByTags(resourceTags: ResourceTag[]): Promise<StatePart<CvmState>[]> {
+    findByTags(resourceTags: ResourceTag[]): Promise<StatePart<CvmState>[]> {
         throw Error(`CvmInstanceService.load not impl: ${resourceTags}`)
     }
 
@@ -41,13 +41,13 @@ export class CvmInstanceService extends TaggableResourceService<CvmSpec,CvmState
         throw new Error("not implements")
     }
 
-    destroy(...resource: StatePart<CvmState>[]): Promise<void> {
+    delete(...resource: StatePart<CvmState>[]): Promise<void> {
         console.log(resource)
 
         throw new Error("not implements")
     }
 
-    refresh(specPart: SpecPart<CvmSpec>): Promise<StatePart<CvmState>[]> {
+    load(specPart: SpecPart<CvmSpec>): Promise<StatePart<CvmState>[]> {
         console.log(specPart)
         throw new Error("not implements")
     }
