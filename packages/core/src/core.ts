@@ -72,13 +72,11 @@ export abstract class Provider {
 
 export class RealizedResource<SPEC, STATE> {
   public readonly name: string;
+  public readonly spec: SPEC;
 
-  constructor(private readonly specPart: SpecPart<SPEC>, private readonly statePart: StatePart<STATE>) {
+  constructor(specPart: SpecPart<SPEC>, private readonly statePart: StatePart<STATE>) {
     this.name = statePart.name;
-  }
-
-  get spec() {
-    return this.specPart.spec;
+    this.spec=specPart.spec;
   }
 
   get state() {
@@ -86,7 +84,7 @@ export class RealizedResource<SPEC, STATE> {
   }
 
   destroy() {
-    this.statePart.destroy();
+    throw new Error("Method not implemented.");
   }
 }
 
