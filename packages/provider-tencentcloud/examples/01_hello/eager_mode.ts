@@ -1,5 +1,4 @@
 import {Project} from "@qpa/core";
-import { exit } from "process";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
@@ -19,14 +18,17 @@ const tc=TencentCloud.createFactory(project,{
   },
 });
 await project.refresh();
+console.log('list all resource');
+
 for (const r of project.resourceInstances) {
   console.log('project.resourceInstances[%s]: %O',project.resourceInstances.length,{
     key:r.name,
     state:r.state,
   });
 }
+console.log('list all resource end');
 
-await project.destroy();
+// await project.destroy();
 await project.apply(async project=>{
   const vpc = await tc.vpc.vpc({
     name: "main",
@@ -36,8 +38,9 @@ await project.apply(async project=>{
       CidrBlock: '10.0.0.0/16',
     }
   });
-  console.log("vpc:", vpc.expected,vpc.actualInstance)
-  console.log("project:", project.resourceInstances.map(e=>e.state))
+  console.log("created vpc:", vpc.actualInstance.toJson())
+  console.log('list all resource');
+  console.log("project:", project.resourceInstances.map(e=>e.name))
 });
-exit(0);
+// exit(0);
 

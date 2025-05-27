@@ -37,7 +37,10 @@ export class Project extends BaseProject {
   }
 
   private async __cleanup(): Promise<void> {
-
+    for (const provider of this.providers) {
+      await provider.refresh();
+      await provider.cleanup();
+    }
   }
 
   /**

@@ -1,6 +1,6 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Provider, ResourceService, ResourceInstance, Project,} from "@qpa/core";
+import {Provider, ResourceService, ResourceInstance, Project, Resource,} from "@qpa/core";
 import {TagService} from "./tag_service.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
@@ -92,6 +92,11 @@ export interface TencentCloudProviderProps {
   allowedResourceServices: (provider: TencentCloudProvider) => Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
 }
 
+/**
+ * 这里的方法不应该被客户程序直接执行，应该通过Project.apply()等执行
+ *
+ * todo 还未考虑如何把api和spi隔离开
+ */
 export class TencentCloudProvider extends Provider {
   /**
    * @internal
@@ -99,6 +104,7 @@ export class TencentCloudProvider extends Provider {
   readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
   public credential!: TencentCloudCredential;
   _resourceInstances: ResourceInstances = new ResourceInstances();
+  _resources: Resources = new Resources();
   private tagService: TagService;
 
   /**
@@ -151,11 +157,29 @@ export class TencentCloudProvider extends Provider {
       region: region,
     }
   }
-
+  /**
+   * **SPI 方法**，不应被客户程序执行
+   */
   async refresh(): Promise<void> {
     this._resourceInstances = new ResourceInstances(...await this.findResourceInstances());
   }
 
+  /**
+   * **SPI 方法**，不应被客户程序执行
+   */
+  async cleanup(): Promise<void> {
+    const undeclaredResourcePendingToDelete= this._resourceInstances.filter(e=>{
+      const declared=this._resources.get(e.name);
+      return !declared;
+    });
+    // todo 需要按类型顺序删除
+    for (const instance of undeclaredResourcePendingToDelete) {
+      await instance.destroy();
+    }
+  }
+  /**
+   * **SPI 方法**，不应被客户程序执行
+   */
   async destroy(): Promise<void> {
     for (const instance of this._resourceInstances) {
       await instance.destroy();
@@ -168,4 +192,9 @@ class ResourceInstances extends Array<ResourceInstance<unknown>> {
   constructor(...args: ResourceInstance<unknown>[]) {
     super(...args); // 调用 Array(...items: T[]) 构造形式
   }
+}
+class Resources extends Map<string,Resource<unknown, unknown>> {
+constructor(...args: [string, Resource<unknown, unknown>][]) {
+  super(args);
+}
 }

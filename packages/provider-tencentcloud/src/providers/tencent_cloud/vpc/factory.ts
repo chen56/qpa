@@ -10,13 +10,15 @@ export class VpcEagerFactory {
   constructor(readonly provider: TencentCloudProvider) {
   }
 
-  async vpc(config: ResourceConfig<VpcSpec>) {
+  async vpc(expected: ResourceConfig<VpcSpec>) {
     const service = this.provider._getService(VpcService.resourceType) as VpcService;
-    let actual = await service.load(config);
+    let actual = await service.load(expected);
     if(actual.length==0){
-      actual = [await service.create(config)];
+      actual = [await service.create(expected)];
     }
-    return new Resource(config, actual);
+    const result =  new Resource(expected, actual);
+    this.provider._resources.set(result.name,result);
+    return result;
   }
 }
 

@@ -71,6 +71,8 @@ export abstract class Provider {
   abstract refresh(): Promise<void>;
 
   abstract destroy(): Promise<void>;
+
+  abstract cleanup(): Promise<void>;
 }
 
 /**
@@ -82,20 +84,30 @@ export abstract class Provider {
  */
 export class Resource<SPEC, STATE> {
 
+  // todo actual要改为单数，集合放到核心api有点难以理解和应用，这个类就应该是完整的
   constructor(readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
     if(actual.length==0){
       throw new Error("Resource为非惰性资源，创建Resource必须提供对应云上实例");
     }
+    for (const instance of actual) {
+      if(expected.name!==instance.name){
+        throw new Error(`expected.name(${expected.name})必须和实际资源实例的name(${instance.name})一致`);
+      }
+    }
+  }
+
+  /**
+   * name 是区分资源的关键, 我们会把name 用tag的形式打在每个实际的资源上, 以此对齐声明的资源配置和实际资源实例
+   */
+  get name():string{
+    return this.expected.name;
   }
 
   get actualInstance() {
     if (this.actual.length != 1) {
-      throw new Error(`正常资源应该对应云上1个云上实际实例，但现在有[${this.actual.length}]个,请检查:${this.actual.map(it => (it.toJson()))}`);
+      throw new Error(`正常资源应该对应云上1个云上实际实例，但现在有${this.actual.length}个,请检查:${this.actual.map(it => (it.toJson()))}`);
     }
     return this.actual[0];
   }
 
-  destroy() {
-    throw new Error("Method not implemented.");
-  }
 }
