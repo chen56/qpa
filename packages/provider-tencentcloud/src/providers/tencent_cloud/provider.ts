@@ -1,6 +1,6 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Provider, ResourceService, ResourceInstance,} from "@qpa/core";
+import {Provider, ResourceService, ResourceInstance, Project,} from "@qpa/core";
 import {ScopeProps, TencentCloudResourceScope} from "./scope.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
@@ -100,20 +100,37 @@ export class TencentCloudProvider extends Provider {
   readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
   public credential!: TencentCloudCredential;
   scope: TencentCloudResourceScope;
-  readonly _actualResourceStates:ActualResourceStates = new ActualResourceStates();
-  constructor(readonly props: TencentCloudProviderProps) {
+  readonly _actualResourceStates: ActualResourceStates = new ActualResourceStates();
+
+
+  /**
+   * @private
+   */
+  private constructor(readonly project: Project, readonly props: TencentCloudProviderProps) {
     super();
 
     this.credential = props.credential;
-    this.scope = TencentCloudResourceScope.of(this,props.scope);
+    this.scope = TencentCloudResourceScope.of(this, props.scope);
 
     this._resourceServices = props.allowedResourceServices(this);
     if (this._resourceServices.size === 0) {
       throw Error("请提供您项目所要支持的资源服务列表，目前您支持的资源服务列表为空")
     }
+
   }
 
-  get actualResourceStates():Map<string,  ResourceInstance<unknown>>{
+  /**
+   * 创建并注册TencentCloudProvider到Project.providers
+   * @public
+   * */
+  static of(project: Project, props: TencentCloudProviderProps): TencentCloudProvider {
+    const result = new TencentCloudProvider(project, props);
+    //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
+    project.providers.add(result);
+    return result;
+  }
+
+  get actualResourceStates(): Map<string, ResourceInstance<unknown>> {
     return this._actualResourceStates;
   }
 
@@ -154,7 +171,8 @@ export class TencentCloudProvider extends Provider {
     // }
   }
 }
-class ActualResourceStates extends Map<string,ResourceInstance<unknown>>{
+
+class ActualResourceStates extends Map<string, ResourceInstance<unknown>> {
   constructor() {
     super();
   }

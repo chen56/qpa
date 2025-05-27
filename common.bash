@@ -106,11 +106,12 @@ _load_nodejs_group_defaults() {
          _run pnpm pack --pack-destination ./build/
         _run tar -xzf ./build/*.tgz -C "./build"
   }
+  doc() { pnpm exec typedoc --tsconfig ./tsconfig.build.json --out build/docs src; }
+
   reinstall() {   clean;    install;  }
   rebuild() {     clean;    install; build;  }
   retest() {      rebuild;  test;  }
   repack() {      retest;   pack;  }
-
 
   info() { _run echo "cli: out ip: $(curl ipinfo.io/ip 2>/dev/null)"; }
   main() {  _run pnpm exec tsx src/index.ts "$@" || printf "%b\n" "------------------\n run src/index.ts, exit code($?)" ;}

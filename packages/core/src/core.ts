@@ -63,6 +63,8 @@ export abstract class Provider {
  * 一个完整的受管理资源，包括
  * - expected: 资源配置(定义期望的规格状态)
  * - actual: 对应的以资源名为映射关系的的多个同名实际资源实例(正常应该只有一个,但可能有重复create的问题资源)
+ *
+ * 资源的最终状态，LazyResource加载后也会变成完全体的Resource
  */
 export class Resource<SPEC, STATE> {
 

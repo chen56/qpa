@@ -5,7 +5,7 @@ import {
   ResourceType,
   TencentCloudProvider, TencentCloudResourceService
 } from "./provider.ts";
-import {LazyProject} from "@qpa/core";
+import {LazyProject, Project} from "@qpa/core";
 import {ScopeProps} from "./scope.ts";
 
 
@@ -20,11 +20,8 @@ export abstract class TencentCloud {
   /**
    * @public
    */
-  static createEagerFactory(props: {
-    credential: { secretId: string; secretKey: string };
-    scope: ScopeProps;
-  }): EagerTencentCloudFactory {
-    const provider = new TencentCloudProvider({
+  static createFactory(project:Project,props: { credential: { secretId: string; secretKey: string }; scope: ScopeProps }): TencentCloudFactory {
+    const provider = TencentCloudProvider.of(project,{
       credential: {
         secretId: process.env.TENCENTCLOUD_SECRET_ID!,
         secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
@@ -32,7 +29,7 @@ export abstract class TencentCloud {
       allowedResourceServices: _allowServices,
       scope: props.scope,
     });
-    return new EagerTencentCloudFactory(provider);
+    return new TencentCloudFactory(provider);
   }
 }
 
@@ -40,7 +37,7 @@ export abstract class TencentCloud {
  * 工厂方法类
  * 命名模式：[Provider][Mode]Factory
  */
-export class EagerTencentCloudFactory extends TencentCloud {
+export class TencentCloudFactory extends TencentCloud {
   readonly vpc: VpcEagerFactory;
 
   constructor(readonly provider: TencentCloudProvider) {
@@ -55,9 +52,9 @@ export class EagerTencentCloudFactory extends TencentCloud {
 export class LazyModeTencentCloudFactory extends TencentCloud {
   readonly vpc: VpcLazyFactory;
 
-  constructor(readonly project: LazyProject,readonly provider: TencentCloudProvider) {
+  constructor(readonly project: LazyProject, readonly provider: TencentCloudProvider) {
     super(provider);
-    this.vpc = new VpcLazyFactory(this.project,this.provider);
+    this.vpc = new VpcLazyFactory(this.project, this.provider);
   }
 }
 

@@ -17,6 +17,6 @@ export default function registerCommand(cli: Cli, parentCommand: Command): void 
                 console.log(`${new Date().toISOString()} - apply <${configPath}>.`);
                 console.log(`Options:`, options);
             }
-            await cli.project.apply();
+            // await cli.project.apply();
         });
 }

@@ -1,29 +1,41 @@
-import {BaseProject} from "./core.ts";
+import {BaseProject, Provider} from "./core.ts";
 
 export type EagerApply = (project: Project) => Promise<void>;
 
-export class Project extends BaseProject{
-    public _apply: EagerApply;
+interface ProjectProps {
+  name: string;
+}
 
-    private constructor(props: {
-        setup: EagerApply;
-    }) {
-        super();
+export class Project extends BaseProject {
+  public providers = new Set<Provider>();
+  public name: string;
 
-        this._apply = props.setup
-    }
+  public constructor(props: {
+    name: string;
+  }) {
+    super();
+    this.name = props.name
+  }
 
-    apply(): Promise<void> {
-        return this._apply(this);
-    }
+  static of(props: ProjectProps): Project {
+    return new Project({name: props.name});
+  }
 
-    static of(props: {
-        setup: EagerApply;
-    }) {
-        return new Project(props);
-    }
+  async apply(apply: EagerApply): Promise<void> {
+    await this.refresh();
+    await apply(this);
+    await this.__cleanup();
+  }
 
-    async destroy(): Promise<void> {
+  async refresh(): Promise<void> {
 
-    }
+  }
+
+  private async __cleanup(): Promise<void> {
+
+  }
+
+  async destroy(): Promise<void> {
+
+  }
 }

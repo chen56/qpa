@@ -146,6 +146,7 @@ install() {        __for_each_workspace __current_workspaces "install"   "$@";}
 build() {          __for_each_workspace __current_workspaces "build"     "$@";}
 pack() {           __for_each_workspace __current_workspaces "pack"      "$@";}
 test() {           __for_each_workspace __current_workspaces "test"      "$@";}
+doc() {           __for_each_workspace __current_workspaces "doc"      "$@";}
 reinstall() {      __for_each_workspace __current_workspaces "reinstall" "$@";}
 rebuild() {        __for_each_workspace __current_workspaces "rebuild"   "$@";}
 retest() {         __for_each_workspace __current_workspaces "retest"    "$@";}

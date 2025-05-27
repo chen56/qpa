@@ -2,12 +2,14 @@
 
 import {describe, expect, it} from "vitest";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
+import {Project} from "@qpa/core";
 
 describe('手工运行的测试', () => {
   it('Eager mode destroy', () => {
-    const tc = TencentCloud.createEagerFactory({
+    const project: Project = Project.of({name: "test"});
+    const tc = TencentCloud.createFactory(project,{
       scope: {
-        type:"TagBaseResourceScope",
+        type: "TagBaseResourceScope",
         scopeName: "test",
       },
       credential: {
@@ -15,6 +17,14 @@ describe('手工运行的测试', () => {
         secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
       },
     });
+
+    // project.providers.push(tc);
+    //
+    // project.refresh();
+    //
+    // project.getAcutalResoues();
+
     expect(tc.provider.scope.name).toBe("test");
   });
+
 });
