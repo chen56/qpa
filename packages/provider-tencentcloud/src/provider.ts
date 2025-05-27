@@ -183,8 +183,11 @@ export class TencentCloudProvider extends Provider {
    * **SPI 方法**，不应被客户程序执行
    */
   async destroy(): Promise<void> {
-    for (const instance of this._resourceInstances) {
+    await this.refresh();
+    const safeCopy = this._resourceInstances.slice()
+    for (const instance of safeCopy) {
       await instance.destroy();
+      this._resourceInstances.delete(instance);
     }
   }
 
@@ -195,6 +198,13 @@ class ResourceInstances extends Array<ResourceInstance<unknown>> {
     super(...args); // 调用 Array(...items: T[]) 构造形式
     //typescript原型链修复
     Object.setPrototypeOf(this, ResourceInstances.prototype);
+  }
+
+  delete(instance: ResourceInstance<unknown>) {
+    const index = this.indexOf(instance); // 查找 'banana' 的索引
+    if (index !== -1) {
+      this.splice(index, 1); // 删除该元素
+    }
   }
 }
 

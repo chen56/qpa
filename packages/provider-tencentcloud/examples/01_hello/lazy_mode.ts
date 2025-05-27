@@ -5,7 +5,7 @@
 //
 //
 // export default ConfigTodoRemove.plannedMode({
-//   setup: async (project: LazyProject): Promise<void> => {
+//   before: async (project: LazyProject): Promise<void> => {
 //
 //     const tc = TencentCloud.createFactory({
 //       scope: {
