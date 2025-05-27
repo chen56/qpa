@@ -1,11 +1,11 @@
-import {EagerProject} from "@qpa/core";
+import {Project} from "@qpa/core";
 import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 
 
 const tc = TencentCloud.createEagerFactory({
   scope: {
-    scopeName: "test",
     type:"TagBaseResourceScope",
+    scopeName: "test",
   },
   credential: {
     secretId: process.env.TENCENTCLOUD_SECRET_ID!,
@@ -13,9 +13,9 @@ const tc = TencentCloud.createEagerFactory({
   },
 });
 
-const project = EagerProject.of({
+const project = Project.of({
 
-  setup: async (project: EagerProject): Promise<void> => {
+  setup: async (project: Project): Promise<void> => {
     const vpc = await tc.vpc.vpc({
       name: "main",
       spec: {
@@ -24,7 +24,7 @@ const project = EagerProject.of({
         CidrBlock: '10.0.0.0/16',
       }
     });
-    console.log("vpc:", vpc.spec, vpc.state)
+    console.log("vpc:", vpc.expected, vpc.actual)
     console.log("project:", project)
   }
 });

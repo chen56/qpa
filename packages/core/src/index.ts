@@ -4,12 +4,12 @@
 export {Provider} from "./core.ts";
 export {ResourceService} from "./core.ts";
 export {Constants} from "./core.ts";
-export {RealizedResource} from "./core.ts";
-export {StatePart} from "./core.ts";
-export type {SpecPart} from "./core.ts";
-export {Project} from "./core.ts";
+export {Resource} from "./core.ts";
+export {ResourceInstance} from "./core.ts";
+export type {ResourceConfig} from "./core.ts";
+export {BaseProject} from "./core.ts";
 
-export {EagerProject} from "./eager.ts"
+export {Project} from "./eager.ts"
 export type {EagerApply} from "./eager.ts"
 
 

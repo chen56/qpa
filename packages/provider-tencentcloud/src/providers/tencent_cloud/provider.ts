@@ -1,6 +1,6 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Provider, ResourceService, StatePart,} from "@qpa/core";
+import {Provider, ResourceService, ResourceInstance,} from "@qpa/core";
 import {ScopeProps, TencentCloudResourceScope} from "./scope.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
@@ -14,7 +14,7 @@ export interface TencentCloudCredential extends tc_Credential {
  * 支持tag的资源 Taggable
  */
 export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudResourceService<SPEC, STATE> {
-  abstract findByTags(resourceTags: ResourceTag[]): Promise<StatePart<STATE>[]>;
+  abstract findByTags(resourceTags: ResourceTag[]): Promise<ResourceInstance<STATE>[]>;
 }
 
 /**
@@ -113,7 +113,7 @@ export class TencentCloudProvider extends Provider {
     }
   }
 
-  get actualResourceStates():Map<string,  StatePart<unknown>>{
+  get actualResourceStates():Map<string,  ResourceInstance<unknown>>{
     return this._actualResourceStates;
   }
 
@@ -123,7 +123,7 @@ export class TencentCloudProvider extends Provider {
     return result;
   }
 
-  async findActualResourceStates(): Promise<StatePart<unknown>[]> {
+  async findActualResourceStates(): Promise<ResourceInstance<unknown>[]> {
     return this.scope.findActualResourceStates();
   }
 
@@ -143,7 +143,7 @@ export class TencentCloudProvider extends Provider {
     // this._deconfiguredResources.length = 0;
     //
     // // load new state
-    // const states: StatePart<unknown>[] = await this.provider.findActualResourceStates();
+    // const states: ResourceInstance<unknown>[] = await this.provider.findActualResourceStates();
     // for (const state of states) {
     //   const configured = this._configuredResources.find(e => e.name === state.name);
     //   if (configured) {
@@ -154,7 +154,7 @@ export class TencentCloudProvider extends Provider {
     // }
   }
 }
-class ActualResourceStates extends Map<string,StatePart<unknown>>{
+class ActualResourceStates extends Map<string,ResourceInstance<unknown>>{
   constructor() {
     super();
   }

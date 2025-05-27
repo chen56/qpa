@@ -4,7 +4,7 @@ import * as destroy from './command/destroy.ts';
 
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
-import {EagerProject} from '@qpa/core';
+import {Project} from '@qpa/core';
 import {Command} from "commander";
 
 // 首先加载 .env 文件中的原始键值对
@@ -15,10 +15,10 @@ const myEnv = dotenv.config();
 dotenvExpand.expand(myEnv);
 
 export class Cli {
-  private constructor(readonly project: EagerProject, readonly rootCommand: Command) {
+  private constructor(readonly project: Project, readonly rootCommand: Command) {
   }
 
-  static eager(project: EagerProject): Cli {
+  static eager(project: Project): Cli {
     const cli = new Cli(project, new _RootCommand());
 
 // --- 注册子命令 ---

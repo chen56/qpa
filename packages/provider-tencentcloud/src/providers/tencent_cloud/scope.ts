@@ -1,5 +1,5 @@
 import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
-import {Constants, StatePart} from "@qpa/core";
+import {Constants, ResourceInstance} from "@qpa/core";
 import {Paging} from "../../internal/common.ts";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {TencentCloudProvider} from "@qpa/provider-tencentcloud";
@@ -11,16 +11,17 @@ export interface BaseResourceScopeProps{
    * 在这里定义为 'string'，表示它必须存在且是字符串
    */
   type: string
-  scopeName: string;
 }
 
 /**
- * 基于tag 来圈定一个项目管理资源的范围，为每个创建的资源打上tag： scopeName
+ * 基于tag 来圈定一个项目管理资源的范围，为每个创建的资源打上tag： projectName
  *
  * @public
  */
 export interface TagBaseResourceScopeProps extends BaseResourceScopeProps{
   type: 'TagBaseResourceScope';
+  scopeName: string;
+
 }
 
 /**
@@ -30,6 +31,8 @@ export interface TagBaseResourceScopeProps extends BaseResourceScopeProps{
  */
 export interface ProjectBaseResourceScopeProps extends BaseResourceScopeProps{
   type: 'ProjectBaseResourceScope';
+  projectName: string;
+
 }
 
 export type ScopeProps = TagBaseResourceScopeProps | ProjectBaseResourceScopeProps;
@@ -46,7 +49,7 @@ export abstract class TencentCloudResourceScope {
     this.name = props.name;
   }
 
-  abstract findActualResourceStates(): Promise<StatePart<unknown>[]> ;
+  abstract findActualResourceStates(): Promise<ResourceInstance<unknown>[]> ;
 
   static of(provider: TencentCloudProvider, props: ScopeProps) {
 // 使用 switch 语句对可辨识联合类型进行类型缩小
@@ -78,7 +81,7 @@ export class agBaseResourceScope extends TencentCloudResourceScope {
 
   }
 
-  async findActualResourceStates(): Promise<StatePart<unknown>[]> {
+  async findActualResourceStates(): Promise<ResourceInstance<unknown>[]> {
     //todo scope base filter
     const projectName = this.name;
     const gen = Paging.queryPage<ResourceTag>(async (offset) => {
@@ -111,7 +114,7 @@ export class agBaseResourceScope extends TencentCloudResourceScope {
       v.push(row);
     }
 
-    const result = new Array<StatePart<unknown>>();
+    const result = new Array<ResourceInstance<unknown>>();
     for (const [resourceType, tagResources] of type_tags) {
       const resourceService = this.provider._resourceServices.get(resourceType);
       if (!resourceService) {
@@ -135,11 +138,11 @@ export class agBaseResourceScope extends TencentCloudResourceScope {
 
 export class ProjectBaseResourceScope extends TencentCloudResourceScope {
   constructor(readonly provider: TencentCloudProvider, props: ProjectBaseResourceScopeProps) {
-    super({name: props.scopeName});
+    super({name: props.projectName});
     throw new Error("Not impl")
   }
 
-  async findActualResourceStates(): Promise<StatePart<unknown>[]> {
+  async findActualResourceStates(): Promise<ResourceInstance<unknown>[]> {
     throw new Error("Not impl")
   }
 }

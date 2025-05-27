@@ -1,6 +1,6 @@
-import {Project, Provider, ResourceService, SpecPart, StatePart} from "./core.ts";
+import {BaseProject, Provider, ResourceService, ResourceConfig, ResourceInstance} from "./core.ts";
 
-export class LazyProject extends Project {
+export class LazyProject extends BaseProject {
   _providers: Providers = new Providers();
 
   _configuredResources: ConfiguredResources = new ConfiguredResources();
@@ -23,7 +23,7 @@ export class LazyProject extends Project {
 
     // load new state
     for (const provider of this._providers) {
-      const actualStates: StatePart<unknown>[] = await provider.findActualResourceStates();
+      const actualStates: ResourceInstance<unknown>[] = await provider.findActualResourceStates();
       for (const state of actualStates) {
         const configured = this._configuredResources.find(e => e.name === state.name);
         if (configured) {
@@ -64,9 +64,9 @@ export class LazyProject extends Project {
 export class LazyResource<SPEC, STATE> {
   public readonly name: string;
 
-  _states:StatePart<STATE>[] = [];
+  _states:ResourceInstance<STATE>[] = [];
   readonly service: ResourceService<SPEC, STATE>;
-  private readonly specPart: SpecPart<SPEC>;
+  private readonly specPart: ResourceConfig<SPEC>;
 
   public constructor(readonly provider: Provider, props: {
     /** in a resource type, name is unique ,like k8s name/terraform name field*/
@@ -83,11 +83,11 @@ export class LazyResource<SPEC, STATE> {
     return this.specPart.spec;
   }
 
-  get states(): StatePart<STATE>[] {
+  get states(): ResourceInstance<STATE>[] {
     return this._states;
   }
 
-  async create(): Promise<StatePart<STATE>> {
+  async create(): Promise<ResourceInstance<STATE>> {
     return this.service.create(this.specPart);
   }
 
@@ -153,8 +153,8 @@ class ConfiguredResources extends Array<LazyResource<unknown, unknown>> {
   }
 }
 
-class DeconfiguredResources extends Array<StatePart<unknown>> {
-  constructor(...args: StatePart<unknown>[]) {
+class DeconfiguredResources extends Array<ResourceInstance<unknown>> {
+  constructor(...args: ResourceInstance<unknown>[]) {
     super(...args); // 调用 Array(...items: T[]) 构造形式
   }
 }

@@ -14,7 +14,7 @@ IAC(Infrastructure as Code)角度看，Resource有以下概念：
 - 托管资源(Managed Resources) : 由IAC工具管理的资源
   - 声明资源(Declared/Configured Resources) : 配置代码中定义的资源(期望状态)
     - 待创建资源(Pending Provision Resources) : 已声明但未创建的资源
-    - 已存在资源(Real/Existing/Live Resources) : 统括所有实际存在的资源
+    - 已存在资源(Actual/Real/Existing/Live Resources) : 统括所有实际存在的资源
       - 一致资源(In-Sync Resources) : 期望状态与实际状态一致
       - 漂移资源(Drifted Resources) : 期望状态与实际状态不一致
         - 属性有差异的资源(Differing Resources) : 配置中声明的属性与实际状态不一致的资源

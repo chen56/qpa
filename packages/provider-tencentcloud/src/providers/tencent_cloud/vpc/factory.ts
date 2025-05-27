@@ -1,4 +1,4 @@
-import {LazyResource, SpecPart, RealizedResource, LazyProject} from "@qpa/core";
+import {LazyResource, ResourceConfig, Resource, LazyProject} from "@qpa/core";
 import {VpcSpec, VpcService, VpcState} from "./vpc.ts";
 import {TencentCloudProvider} from "../provider.ts";
 
@@ -10,11 +10,19 @@ export class VpcEagerFactory {
   constructor(readonly provider: TencentCloudProvider) {
   }
 
-  async vpc(props: SpecPart<VpcSpec>) {
+  async vpc(config: ResourceConfig<VpcSpec>) {
     const service = this.provider._getService(VpcService.resourceType) as VpcService;
      // todo get state first
-    const state = await service.create(props);
-    return new RealizedResource(props, state);
+    let actual = await service.load(config);
+    if(actual.length==0){
+      await service.create(config);
+      actual = await service.load(config);
+      // 按理说不应该出现此状况，可能是云的资源服务bug
+      if(actual.length==0){
+        throw new Error("创建VPC失败,未知原因,可能是云资源服务bug, 请重试");
+      }
+    }
+    return new Resource(config, actual);
   }
 }
 
@@ -24,7 +32,7 @@ export class VpcEagerFactory {
 export class VpcLazyFactory {
   constructor(readonly project: LazyProject, readonly provider: TencentCloudProvider) {
   }
-  vpc(props: SpecPart<VpcSpec>): LazyResource<VpcSpec, VpcState> {
+  vpc(props: ResourceConfig<VpcSpec>): LazyResource<VpcSpec, VpcState> {
     const result = new LazyResource<VpcSpec, VpcState>(this.provider, {
       ...props,
       service: this.provider._getService(VpcService.resourceType) as VpcService,

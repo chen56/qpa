@@ -1,8 +1,8 @@
-import {Project} from "./core.ts";
+import {BaseProject} from "./core.ts";
 
-export type EagerApply = (project: EagerProject) => Promise<void>;
+export type EagerApply = (project: Project) => Promise<void>;
 
-export class EagerProject extends Project{
+export class Project extends BaseProject{
     public _apply: EagerApply;
 
     private constructor(props: {
@@ -20,9 +20,8 @@ export class EagerProject extends Project{
     static of(props: {
         setup: EagerApply;
     }) {
-        return new EagerProject(props);
+        return new Project(props);
     }
-
 
     async destroy(): Promise<void> {
 
