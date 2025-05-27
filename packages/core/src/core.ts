@@ -19,11 +19,18 @@ export const Constants = {
  * - 其他字段：云上资源从tag等提取出的QPA元信息，比如resource_name等
  */
 export class ResourceInstance<STATE> {
-  constructor(readonly name: string, readonly state: STATE) {
+  private resourceService: ResourceService<unknown, STATE>;
+
+  constructor(resourceService: ResourceService<unknown, STATE>, readonly name: string, readonly state: STATE) {
+    this.resourceService = resourceService;
   }
 
-  destroy() {
+  async destroy(): Promise<void> {
+    await this.resourceService.delete(this);
+  }
 
+  toJson() {
+    return JSON.stringify({name: this.name, state: this.state});
   }
 }
 
@@ -52,13 +59,20 @@ export abstract class ResourceService<SPEC, STATE> {
 }
 
 export abstract class Provider {
+  abstract get resourceInstances(): ResourceInstance<unknown>[];
+
   /**
    * 查询最新的 ResourceScope 内的所有的已存在资源的状态信息
    *
    * @return 获取查询出ResourceScope内的所有的资源状态
    */
-  abstract findActualResourceStates(): Promise<ResourceInstance<unknown>[]>;
+  abstract findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
+
+  abstract refresh(): Promise<void>;
+
+  abstract destroy(): Promise<void>;
 }
+
 /**
  * 一个完整的受管理资源，包括
  * - expected: 资源配置(定义期望的规格状态)
@@ -69,6 +83,16 @@ export abstract class Provider {
 export class Resource<SPEC, STATE> {
 
   constructor(readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
+    if(actual.length==0){
+      throw new Error("Resource为非惰性资源，创建Resource必须提供对应云上实例");
+    }
+  }
+
+  get actualInstance() {
+    if (this.actual.length != 1) {
+      throw new Error(`正常资源应该对应云上1个云上实际实例，但现在有[${this.actual.length}]个,请检查:${this.actual.map(it => (it.toJson()))}`);
+    }
+    return this.actual[0];
   }
 
   destroy() {

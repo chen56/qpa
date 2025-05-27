@@ -23,7 +23,7 @@ export class LazyProject extends BaseProject {
 
     // load new state
     for (const provider of this._providers) {
-      const actualStates: ResourceInstance<unknown>[] = await provider.findActualResourceStates();
+      const actualStates: ResourceInstance<unknown>[] = await provider.findResourceInstances();
       for (const state of actualStates) {
         const configured = this._configuredResources.find(e => e.name === state.name);
         if (configured) {

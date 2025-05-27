@@ -18,6 +18,7 @@ export interface VpcState extends tc_Vpc {
 /**
  */
 export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
+  // todo。resourceType这个是不是整理到一起？ ResourceTypes.vpc.vpc ResourceTypes.vpc.subnet
   static resourceType: ResourceType = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc"})
 
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
@@ -71,7 +72,6 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
       throw new Error("创建 VPC 失败，未返回 VpcId");
     }
     console.log(`VPC 创建成功，ID: ${vpcId}`);
-    // todo 应该先检查STATE[]有效性
     return this._tcVpcSet2VpcState(specPart.spec.Region, [vpcResponse.Vpc!])![0];
   }
 
@@ -112,7 +112,7 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
         // 如果有自己的字段
         Region: region
       };
-      result.push(new ResourceInstance(resourceName, toState));
+      result.push(new ResourceInstance(this,resourceName, toState));
     }
     return result;
   }

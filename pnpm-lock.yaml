@@ -102,6 +102,10 @@ importers:
       tencentcloud-sdk-nodejs:
         specifier: ^4.0.973
         version: 4.1.44
+    devDependencies:
+      dotenv-expand:
+        specifier: ^12.0.2
+        version: 12.0.2
 
 packages:
 

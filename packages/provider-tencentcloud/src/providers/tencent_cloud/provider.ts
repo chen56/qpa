@@ -1,6 +1,6 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Provider, ResourceService, ResourceInstance, Project,} from "@qpa/core";
+import {Provider, ResourceService, ResourceInstance, Project, } from "@qpa/core";
 import {ScopeProps, TencentCloudResourceScope} from "./scope.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
@@ -100,8 +100,7 @@ export class TencentCloudProvider extends Provider {
   readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
   public credential!: TencentCloudCredential;
   scope: TencentCloudResourceScope;
-  readonly _actualResourceStates: ActualResourceStates = new ActualResourceStates();
-
+  _resourceInstances: ResourceInstances = new ResourceInstances();
 
   /**
    * @private
@@ -130,8 +129,11 @@ export class TencentCloudProvider extends Provider {
     return result;
   }
 
-  get actualResourceStates(): Map<string, ResourceInstance<unknown>> {
-    return this._actualResourceStates;
+  /**
+   * 云上实际的资源实例集合
+   */
+  get resourceInstances(): ResourceInstances {
+    return this._resourceInstances;
   }
 
   _getService(type: ResourceType): TencentCloudResourceService<unknown, unknown> {
@@ -140,7 +142,7 @@ export class TencentCloudProvider extends Provider {
     return result;
   }
 
-  async findActualResourceStates(): Promise<ResourceInstance<unknown>[]> {
+  async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
     return this.scope.findActualResourceStates();
   }
 
@@ -151,29 +153,20 @@ export class TencentCloudProvider extends Provider {
     }
   }
 
-
   async refresh(): Promise<void> {
-    // clear old state
-    // for (const acutal of this._actualResourceStates) {
-    //   acutal.states.length = 0;
-    // }
-    // this._deconfiguredResources.length = 0;
-    //
-    // // load new state
-    // const states: ResourceInstance<unknown>[] = await this.provider.findActualResourceStates();
-    // for (const state of states) {
-    //   const configured = this._configuredResources.find(e => e.name === state.name);
-    //   if (configured) {
-    //     configured.states.push(state);
-    //   } else {
-    //     this._deconfiguredResources.push(state);
-    //   }
-    // }
+    this._resourceInstances= new ResourceInstances(...await this.findResourceInstances());
   }
+
+  async destroy():Promise<void>{
+    for (const instance of this._resourceInstances) {
+      await instance.destroy();
+    }
+  }
+
 }
 
-class ActualResourceStates extends Map<string, ResourceInstance<unknown>> {
-  constructor() {
-    super();
+class ResourceInstances extends Array<ResourceInstance<unknown>> {
+  constructor(...args: ResourceInstance<unknown>[]) {
+    super(...args); // 调用 Array(...items: T[]) 构造形式
   }
 }
