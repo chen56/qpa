@@ -1,5 +1,5 @@
-import {LazyResource, ResourceConfig, Resource, LazyProject} from "@qpa/core";
-import {VpcSpec, VpcService, VpcState} from "./vpc.ts";
+import {LazyProject, LazyResource, Resource, ResourceConfig} from "@qpa/core";
+import {VpcService, VpcSpec, VpcState} from "./vpc.ts";
 import {TencentCloudProvider} from "../provider.ts";
 
 /**

@@ -1,5 +1,5 @@
 import {Project} from "@qpa/core";
-import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
+import {TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 // 首先加载 .env 文件中的原始键值对

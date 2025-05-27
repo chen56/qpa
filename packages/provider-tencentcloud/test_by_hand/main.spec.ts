@@ -1,7 +1,7 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {describe, expect, it} from "vitest";
-import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
+import {TencentCloud} from "../src/factory.ts";
 import {Project} from "@qpa/core";
 
 describe('手工运行的测试', () => {

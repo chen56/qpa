@@ -1,7 +1,7 @@
 import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Constants, ResourceInstance} from "@qpa/core";
-import {Paging} from "../../../internal/common.ts";
+import {Paging} from "./common.ts";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 
 export class TagService {

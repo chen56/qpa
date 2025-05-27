@@ -1,4 +1,4 @@
-import {VpcFactory, VpcLazyFactory} from "./vpc/factory.ts";
+import {VpcFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
 import {VpcClients} from "./internal/_common.ts";
 import {
@@ -6,6 +6,7 @@ import {
   TencentCloudProvider, TencentCloudResourceService
 } from "./provider.ts";
 import {LazyProject, Project} from "@qpa/core";
+import {VpcLazyFactory} from "./vpc";
 
 
 /**
