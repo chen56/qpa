@@ -20,11 +20,13 @@ export interface VpcState extends tc_Vpc {
 export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   // todo。resourceType这个是不是整理到一起？ ResourceTypes.vpc.vpc ResourceTypes.vpc.subnet
   static resourceType: ResourceType = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc"})
-
+  // todo 这个也合并到ResourceTypes定义里去集中管理 DescribeVpcsRequest.limit
+  static maxLimit=100;
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
 
+  //todo 应该在上层就把region/分页问题解决掉，然后传进来分好类的有限数量的resourceTags，让service简单些，比如 findByTags(region:string,tc_ResourceTag[])
   async findByTags(resourceTags: tc_ResourceTag[]): Promise<ResourceInstance<VpcState>[]> {
     type Region = string;
     const regions = new Map<Region, tc_ResourceTag[]>

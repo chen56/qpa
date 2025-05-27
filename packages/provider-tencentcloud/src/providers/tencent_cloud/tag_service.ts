@@ -14,11 +14,11 @@ export class TagService {
 
   }
 
-  async findActualResourceStates(): Promise<ResourceInstance<unknown>[]> {
+  async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
     const projectName = this.provider.project.name;
-    const gen = Paging.queryPage<ResourceTag>(async (offset) => {
+    const genResourceTag = Paging.queryPage<ResourceTag>(async (offset) => {
       const limit = 100;
-      const resp = await this.tagClient.DescribeResourcesByTags({
+      const response = await this.tagClient.DescribeResourcesByTags({
         TagFilters: [{
           TagKey: Constants.tagNames.project,
           TagValue: [projectName]
@@ -27,23 +27,23 @@ export class TagService {
         Offset: offset,
       });
       return {
-        totalCount: resp.TotalCount,
-        rows: resp.Rows ?? [],
-        limit: resp.Limit ?? limit,
+        totalCount: response.TotalCount,
+        rows: response.Rows ?? [],
+        limit: response.Limit ?? limit,
       };
     });
     const type_tags = new Map<ResourceType, ResourceTag[]>
-    for await(const row of gen) {
-      if (!row.ServiceType || !row.ResourcePrefix) continue;
-      const resourceType = ResourceType.find(row.ServiceType, row.ResourcePrefix)
+    for await(const resourceTag of genResourceTag) {
+      if (!resourceTag.ServiceType || !resourceTag.ResourcePrefix) continue;
+      const resourceType = ResourceType.find(resourceTag.ServiceType, resourceTag.ResourcePrefix)
       if (!resourceType) continue;
 
-      let v = type_tags.get(resourceType);
-      if (!v) {
-        v = new Array<ResourceTag>();
-        type_tags.set(resourceType, v);
+      let tags = type_tags.get(resourceType);
+      if (!tags) {
+        tags = new Array<ResourceTag>();
+        type_tags.set(resourceType, tags);
       }
-      v.push(row);
+      tags.push(resourceTag);
     }
 
     const result = new Array<ResourceInstance<unknown>>();
@@ -57,6 +57,7 @@ export class TagService {
       }
 
       if (resourceService instanceof TaggableResourceService) {
+        // todo tagResources需要分页，也许数量超过
         const resources = await resourceService.findByTags(tagResources);
         result.push(...resources);
       } else {

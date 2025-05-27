@@ -148,7 +148,7 @@ export class TencentCloudProvider extends Provider {
   }
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
-    return this.tagService.findActualResourceStates();
+    return this.tagService.findResourceInstances();
   }
 
   public _getClientConfigByRegion(region: string): ClientConfig {
