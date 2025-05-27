@@ -2,11 +2,10 @@ import {VpcEagerFactory, VpcLazyFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
 import {VpcClients} from "./vpc/_common.ts";
 import {
-  ResourceType,
+  ResourceType, TencentCloudCredential,
   TencentCloudProvider, TencentCloudResourceService
 } from "./provider.ts";
 import {LazyProject, Project} from "@qpa/core";
-import {ScopeProps} from "./scope.ts";
 
 
 /**
@@ -16,18 +15,15 @@ export abstract class TencentCloud {
   protected constructor(readonly provider: TencentCloudProvider) {
   }
 
-
   /**
    * @public
    */
-  static createFactory(project:Project,props: { credential: { secretId: string; secretKey: string }; scope: ScopeProps }): TencentCloudFactory {
-    const provider = TencentCloudProvider.of(project,{
-      credential: {
-        secretId: process.env.TENCENTCLOUD_SECRET_ID!,
-        secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
-      },
+  static createFactory(project: Project, props: {
+    credential: TencentCloudCredential;
+  }): TencentCloudFactory {
+    const provider = TencentCloudProvider.of(project, {
+      ...props,
       allowedResourceServices: _allowServices,
-      scope: props.scope,
     });
     return new TencentCloudFactory(provider);
   }

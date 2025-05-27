@@ -1,7 +1,7 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Provider, ResourceService, ResourceInstance, Project, } from "@qpa/core";
-import {ScopeProps, TencentCloudResourceScope} from "./scope.ts";
+import {Provider, ResourceService, ResourceInstance, Project,} from "@qpa/core";
+import {TagService} from "./tag_service.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
 
@@ -88,7 +88,6 @@ export class ResourceType {
 }
 
 export interface TencentCloudProviderProps {
-  scope: ScopeProps;
   credential: TencentCloudCredential;
   allowedResourceServices: (provider: TencentCloudProvider) => Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
 }
@@ -99,8 +98,8 @@ export class TencentCloudProvider extends Provider {
    */
   readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
   public credential!: TencentCloudCredential;
-  scope: TencentCloudResourceScope;
   _resourceInstances: ResourceInstances = new ResourceInstances();
+  private tagService: TagService;
 
   /**
    * @private
@@ -109,7 +108,7 @@ export class TencentCloudProvider extends Provider {
     super();
 
     this.credential = props.credential;
-    this.scope = TencentCloudResourceScope.of(this, props.scope);
+    this.tagService = new TagService(this);
 
     this._resourceServices = props.allowedResourceServices(this);
     if (this._resourceServices.size === 0) {
@@ -143,7 +142,7 @@ export class TencentCloudProvider extends Provider {
   }
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
-    return this.scope.findActualResourceStates();
+    return this.tagService.findActualResourceStates();
   }
 
   public _getClientConfigByRegion(region: string): ClientConfig {
@@ -154,10 +153,10 @@ export class TencentCloudProvider extends Provider {
   }
 
   async refresh(): Promise<void> {
-    this._resourceInstances= new ResourceInstances(...await this.findResourceInstances());
+    this._resourceInstances = new ResourceInstances(...await this.findResourceInstances());
   }
 
-  async destroy():Promise<void>{
+  async destroy(): Promise<void> {
     for (const instance of this._resourceInstances) {
       await instance.destroy();
     }

@@ -13,10 +13,6 @@ dotenvExpand.expand(myEnv);
 const project = Project.of({name:"test"});
 
 const tc=TencentCloud.createFactory(project,{
-  scope: {
-    type: "TagBaseResourceScope",
-    scopeName: "test",
-  },
   credential: {
     secretId: process.env.TENCENTCLOUD_SECRET_ID!,
     secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,

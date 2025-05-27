@@ -7,11 +7,7 @@ import {Project} from "@qpa/core";
 describe('手工运行的测试', () => {
   it('Eager mode destroy', () => {
     const project: Project = Project.of({name: "test"});
-    const tc = TencentCloud.createFactory(project,{
-      scope: {
-        type: "TagBaseResourceScope",
-        scopeName: "test",
-      },
+    const tc = TencentCloud.createFactory(project, {
       credential: {
         secretId: process.env.TENCENTCLOUD_SECRET_ID!,
         secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
@@ -24,7 +20,7 @@ describe('手工运行的测试', () => {
     //
     // project.getAcutalResoues();
 
-    expect(tc.provider.scope.name).toBe("test");
+    expect(tc.provider.project.name).toBe("test");
   });
 
 });
