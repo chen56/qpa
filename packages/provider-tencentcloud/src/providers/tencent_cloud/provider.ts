@@ -1,7 +1,7 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Provider, ResourceService, ResourceInstance, Project, Resource,} from "@qpa/core";
-import {TagService} from "./tag_service.ts";
+import {TagService} from "./internal/_tag_service.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
 
@@ -157,6 +157,7 @@ export class TencentCloudProvider extends Provider {
       region: region,
     }
   }
+
   /**
    * **SPI 方法**，不应被客户程序执行
    */
@@ -168,8 +169,8 @@ export class TencentCloudProvider extends Provider {
    * **SPI 方法**，不应被客户程序执行
    */
   async cleanup(): Promise<void> {
-    const undeclaredResourcePendingToDelete= this._resourceInstances.filter(e=>{
-      const declared=this._resources.get(e.name);
+    const undeclaredResourcePendingToDelete = this._resourceInstances.filter(e => {
+      const declared = this._resources.get(e.name);
       return !declared;
     });
     // todo 需要按类型顺序删除
@@ -177,6 +178,7 @@ export class TencentCloudProvider extends Provider {
       await instance.destroy();
     }
   }
+
   /**
    * **SPI 方法**，不应被客户程序执行
    */
@@ -191,10 +193,16 @@ export class TencentCloudProvider extends Provider {
 class ResourceInstances extends Array<ResourceInstance<unknown>> {
   constructor(...args: ResourceInstance<unknown>[]) {
     super(...args); // 调用 Array(...items: T[]) 构造形式
+    //typescript原型链修复
+    Object.setPrototypeOf(this, ResourceInstances.prototype);
   }
 }
-class Resources extends Map<string,Resource<unknown, unknown>> {
-constructor(...args: [string, Resource<unknown, unknown>][]) {
-  super(args);
-}
+
+class Resources extends Map<string, Resource<unknown, unknown>> {
+  constructor(...args: [string, Resource<unknown, unknown>][]) {
+    super(args);
+    //typescript原型链修复
+    Object.setPrototypeOf(this, Resources.prototype);
+
+  }
 }

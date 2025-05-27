@@ -1,6 +1,6 @@
-import {VpcEagerFactory, VpcLazyFactory} from "./vpc/factory.ts";
+import {VpcFactory, VpcLazyFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
-import {VpcClients} from "./vpc/_common.ts";
+import {VpcClients} from "./internal/_common.ts";
 import {
   ResourceType, TencentCloudCredential,
   TencentCloudProvider, TencentCloudResourceService
@@ -34,11 +34,11 @@ export abstract class TencentCloud {
  * 命名模式：[Provider][Mode]Factory
  */
 export class TencentCloudFactory extends TencentCloud {
-  readonly vpc: VpcEagerFactory;
+  readonly vpc: VpcFactory;
 
   constructor(readonly provider: TencentCloudProvider) {
     super(provider);
-    this.vpc = new VpcEagerFactory(this.provider);
+    this.vpc = new VpcFactory(this.provider);
   }
 }
 
