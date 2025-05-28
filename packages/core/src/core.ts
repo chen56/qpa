@@ -12,6 +12,9 @@ export abstract class BaseProject {
 export class ResourceInstance<STATE> {
   private resourceService: ResourceService<unknown, STATE>;
 
+  /**
+   * @internal
+   */
   constructor(resourceService: ResourceService<unknown, STATE>, readonly name: string, readonly state: STATE) {
     this.resourceService = resourceService;
   }
@@ -149,19 +152,18 @@ export class Project extends BaseProject {
 
   async apply(apply: Apply): Promise<void> {
     await this.refresh();
+
     await apply(this);
-    await this.__cleanup();
+
+    // cleanup
+    for (const provider of this.providers) {
+      await provider.cleanup();
+    }
   }
 
   async refresh(): Promise<void> {
     for (const provider of this.providers) {
       await provider.refresh();
-    }
-  }
-
-  private async __cleanup(): Promise<void> {
-    for (const provider of this.providers) {
-      await provider.cleanup();
     }
   }
 

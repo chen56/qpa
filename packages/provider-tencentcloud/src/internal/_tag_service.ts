@@ -1,8 +1,9 @@
 import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Constants, ResourceInstance} from "@qpa/core";
+import {ResourceInstance} from "@qpa/core";
 import {Paging} from "./common.ts";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
+import {SpiConstants} from "@qpa/core/spi";
 
 export class TagService {
   private tagClient: TagClient;
@@ -11,7 +12,6 @@ export class TagService {
     this.tagClient = new TagClient({
       credential: provider.credential,
     });
-
   }
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
@@ -20,7 +20,7 @@ export class TagService {
       const limit = 100;
       const response = await this.tagClient.DescribeResourcesByTags({
         TagFilters: [{
-          TagKey: Constants.tagNames.project,
+          TagKey: SpiConstants.tagNames.project,
           TagValue: [projectName]
         }],
         Limit: limit, // 分页大小

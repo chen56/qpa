@@ -1,1 +1,1 @@
-export {Constants} from "./constants.ts";
+export {SpiConstants} from "./spiConstants.ts";

@@ -3,9 +3,10 @@ import {
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceTag as tc_ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Constants, ResourceConfig, ResourceInstance} from "@qpa/core";
+import {ResourceConfig, ResourceInstance} from "@qpa/core";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {VpcClients} from "../internal/_common.ts";
+import {SpiConstants} from "@qpa/core/spi";
 
 export interface VpcSpec extends tc_CreateVpcRequest {
   Region: string;
@@ -21,7 +22,8 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   // todo。resourceType这个是不是整理到一起？ ResourceTypes.vpc.vpc ResourceTypes.vpc.subnet
   static resourceType: ResourceType = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc"})
   // todo 这个也合并到ResourceTypes定义里去集中管理 DescribeVpcsRequest.limit
-  static maxLimit=100;
+  static maxLimit = 100;
+
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
@@ -65,8 +67,8 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
       DnsServers: specPart.spec.DnsServers,
       DomainName: specPart.spec.DomainName,
       Tags: [...(specPart.spec.Tags ?? []),
-        {Key: Constants.tagNames.project, Value: this.provider.project.name},
-        {Key: Constants.tagNames.resource, Value: specPart.name},
+        {Key: SpiConstants.tagNames.project, Value: this.provider.project.name},
+        {Key: SpiConstants.tagNames.resource, Value: specPart.name},
       ],
     });
     const vpcId = vpcResponse.Vpc?.VpcId;
@@ -92,8 +94,8 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
       // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤
       Filters: [
-        {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.provider.project.name]},
-        {Name: `tag:${(Constants.tagNames.resource)}`, Values: [declare.name]},
+        {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.provider.project.name]},
+        {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [declare.name]},
       ],
     };
     const client = this.clients.getClient(declare.spec.Region);
@@ -104,17 +106,13 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): ResourceInstance<VpcState>[] {
     const result = new Array<ResourceInstance<VpcState>>;
     for (const vpc of tc_vpcSet ?? []) {
-      const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
-      if (!resourceName) {
-        // 没找到qpa_key的是问题资源，暂时不管
-        continue;
-      }
+      const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === SpiConstants.tagNames.resource)?.Value;
       const toState: VpcState = {
         ...vpc,
         // 如果有自己的字段
         Region: region
       };
-      result.push(new ResourceInstance(this,resourceName, toState));
+      result.push(new ResourceInstance(this, resourceName || "", toState));
     }
     return result;
   }

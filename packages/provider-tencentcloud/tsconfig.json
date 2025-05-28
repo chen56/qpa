@@ -18,7 +18,8 @@
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
     // paths基于baseUrl
     "paths": {
-      "@qpa/*": ["../*/src"]
+      "@qpa/*": ["../*/src"],
+      "@qpa/core/spi": ["../core/src/spi"],
     },
   },
 

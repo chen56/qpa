@@ -1,5 +1,5 @@
-import {Constants} from "../spi/constants.ts";
+import {SpiConstants} from "../spi/spiConstants.ts";
 
 export const xxx="xxx";
 
-console.log(Constants.tagNames.project )
+console.log(SpiConstants.tagNames.project )
