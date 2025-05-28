@@ -18,6 +18,7 @@ const tc=TencentCloud.createFactory(project,{
   },
 });
 await project.refresh();
+await project.destroy();
 console.log('list all resource');
 
 for (const r of project.resourceInstances) {
@@ -28,10 +29,9 @@ for (const r of project.resourceInstances) {
 }
 console.log('list all resource end');
 
-// await project.destroy();
 await project.apply(async project=>{
   const vpc = await tc.vpc.vpc({
-    name: "main",
+    name: "test-vpc1",
     spec: {
       Region: "ap-guangzhou",
       VpcName: "test-vpc",
@@ -39,8 +39,21 @@ await project.apply(async project=>{
     }
   });
   console.log("created vpc:", vpc.actualInstance.toJson())
-  console.log('list all resource');
   console.log("project:", project.resourceInstances.map(e=>e.name))
+
+  const subnet=await tc.vpc.subnet({
+    name: "test-subnet1",
+    spec: {
+      Region: "ap-guangzhou",
+      Zone:"ap-guangzhou-1",
+      VpcId: vpc.actualInstance.state.VpcId!,
+      SubnetName: "test-subnet",
+      CidrBlock: '10.0.1.0/24',
+    }
+  });
+  console.log("created subnet:", subnet.actualInstance.toJson())
+
+
 });
 // exit(0);
 

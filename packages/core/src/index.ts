@@ -1,8 +1,8 @@
 /**
  * */
-export {ProjectProps} from "./core.ts";
+export type {ProjectProps} from "./core.ts";
 export {Project} from "./core.ts";
-export {Apply} from "./core.ts";
+export type {Apply} from "./core.ts";
 export {Provider} from "./core.ts";
 export {ResourceService} from "./core.ts";
 export {Resource} from "./core.ts";

@@ -143,7 +143,7 @@ export class TencentCloudProvider extends Provider {
 
   _getService(type: ResourceType): TencentCloudResourceService<unknown, unknown> {
     const result = this._resourceServices.get(type);
-    if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或禁用此资源类型`);
+    if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或放弃使用此资源类型`);
     return result;
   }
 
