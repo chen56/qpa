@@ -5,6 +5,8 @@ set -o errexit   # -e
 set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
+## 开启globstar模式，允许使用**匹配所有子目录,bash4特性，默认是关闭的
+shopt -s globstar
 
 CLI_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd "$CLI_DIR"
@@ -22,11 +24,30 @@ _load_nodejs_group_defaults
 ##########################################
 info() {
   echo "## workspaces:"
+  # shellcheck disable=SC2154
   printf "  %s\n" "${__all_workspaces[@]}"
   echo "## packages:"
 #  printf "  %s\n" "$(_dir_to_package_name "${__all_workspaces[@]}")"
 #  echo "## out ip:"
 #  echo "  $(curl ipinfo.io/ip 2>/dev/null)"
+}
+
+
+analyze() {
+    deps() {
+        ./shb clean
+        # 有点复杂，找个
+        mkdir -p build/depcruise
+        _build_depcruise() {
+            local workspace_name="$1"
+    #        _run depcruise --output-type mermaid . > build/depcruise.mermaid
+            _run depcruise --metrics --include-only "packages/$workspace_name" --output-type dot . > "build/depcruise/depcruise.$workspace_name.include-only.dot"
+            _run depcruise --metrics --focus        "packages/$workspace_name" --output-type dot . > "build/depcruise/depcruise.$workspace_name.focus.dot"
+            _run depcruise --metrics --reaches        "packages/$workspace_name" --output-type dot . > "build/depcruise/depcruise.$workspace_name.reaches.dot"
+        }
+        _build_depcruise core
+        _build_depcruise provier-tencentcloud
+    }
 }
 
 ##########################################
