@@ -1,8 +1,8 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {afterEach, beforeEach, describe, expect, it} from "vitest";
-import {VpcState} from "../src/index.ts";
-import {TextFixture} from "./fixture.ts";
+import {VpcState} from "../src";
+import {TextFixture} from "../test_by_hand/fixture.ts";
 
 describe('vpc', () => {
   const fixture = TextFixture.of();

@@ -1,5 +1,4 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Provider, ResourceService, ResourceInstance, Project, Resource,} from "@qpa/core";
 import {TagService} from "./internal/_tag_service.ts";
 
@@ -14,7 +13,8 @@ export interface TencentCloudCredential extends tc_Credential {
  * 支持tag的资源 Taggable
  */
 export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudResourceService<SPEC, STATE> {
-  abstract findByTags(resourceTags: ResourceTag[]): Promise<ResourceInstance<STATE>[]>;
+  abstract findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<STATE>[]> ;
+
 }
 
 /**
@@ -192,7 +192,6 @@ export class TencentCloudProvider extends Provider {
       this._resourceInstances.delete(instance);
     }
   }
-
 }
 
 class ResourceInstances extends Array<ResourceInstance<unknown>> {

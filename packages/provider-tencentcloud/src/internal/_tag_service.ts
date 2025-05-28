@@ -5,6 +5,8 @@ import {Paging} from "./common.ts";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
+const pageLimit = 100;
+
 export class TagService {
   private tagClient: TagClient;
 
@@ -16,53 +18,66 @@ export class TagService {
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
     const projectName = this.provider.project.name;
-    const genResourceTag = Paging.queryPage<ResourceTag>(async (offset) => {
-      const limit = 100;
+    const tagList =await Paging.list<ResourceTag>(async (offset) => {
+
       const response = await this.tagClient.DescribeResourcesByTags({
         TagFilters: [{
           TagKey: SpiConstants.tagNames.project,
           TagValue: [projectName]
         }],
-        Limit: limit, // 分页大小
+        Limit: pageLimit, // 分页大小
         Offset: offset,
       });
+
       return {
         totalCount: response.TotalCount,
         rows: response.Rows ?? [],
-        limit: response.Limit ?? limit,
+        limit: response.Limit ?? pageLimit,
       };
     });
-    const type_tags = new Map<ResourceType, ResourceTag[]>
-    for await(const resourceTag of genResourceTag) {
+    const type_resourceTags = new Map<ResourceType, ResourceTag[]>
+    for  (const resourceTag of tagList) {
       if (!resourceTag.ServiceType || !resourceTag.ResourcePrefix) continue;
       const resourceType = ResourceType.find(resourceTag.ServiceType, resourceTag.ResourcePrefix)
       if (!resourceType) continue;
 
-      let tags = type_tags.get(resourceType);
-      if (!tags) {
-        tags = new Array<ResourceTag>();
-        type_tags.set(resourceType, tags);
+      let oneTypeResourceTags = type_resourceTags.get(resourceType);
+      if (!oneTypeResourceTags) {
+        oneTypeResourceTags = new Array<ResourceTag>();
+        type_resourceTags.set(resourceType, oneTypeResourceTags);
       }
-      tags.push(resourceTag);
+      oneTypeResourceTags.push(resourceTag);
     }
 
     const result = new Array<ResourceInstance<unknown>>();
-    for (const [resourceType, tagResources] of type_tags) {
+    for (const [resourceType, oneTypeResourceTag] of type_resourceTags) {
       const resourceService = this.provider._resourceServices.get(resourceType);
       if (!resourceService) {
         // 不支持类型应该异常退出吗？
         // 不支持类型可能是以前框架支持某种类型时创建的，但当前版本不再支持
-        console.error(`not support resourceType: ${resourceType} - ${tagResources}`);
+        console.error(`not support resourceType: ${resourceType} - ${oneTypeResourceTag}`);
         continue;
       }
 
-      if (resourceService instanceof TaggableResourceService) {
-        // todo tagResources需要分页，也许数量超过
-        const resources = await resourceService.findByTags(tagResources);
-        result.push(...resources);
-      } else {
-        // tag查询的结果即然存在，说明此资源是支持tag，但当前服务类型又不是tagged的，说明版本不对，新版的代码创建了资源，又用旧版的去管理
+      if (!(resourceService instanceof TaggableResourceService)) {
         throw Error(`resourceType:${resourceType} not support tag, may be your current version too old, upgrade and try`)
+      }
+      const region_resourceTags = new Map<string, string[]>;
+
+      for (const resourceTag of oneTypeResourceTag) {
+        const region = resourceTag.ResourceRegion || "";
+        let tags = region_resourceTags.get(region);
+        if (!tags) {
+          tags = new Array<string>();
+          region_resourceTags.set(region, tags);
+        }
+        if (resourceTag.ResourceId) {
+          tags.push(resourceTag.ResourceId!);
+        }
+      }
+      for (const [region, oneRegionResourceIds] of region_resourceTags) {
+        const resources = await resourceService.findByResourceId(region, oneRegionResourceIds);
+        result.push(...resources);
       }
     }
     return result;

@@ -2,11 +2,11 @@ import {
   CreateVpcRequest as tc_CreateVpcRequest,
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
-import {ResourceTag as tc_ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
 import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {VpcClients} from "../internal/_common.ts";
 import {SpiConstants} from "@qpa/core/spi";
+import {Paging} from "../internal/common.ts";
 
 export interface VpcSpec extends tc_CreateVpcRequest {
   Region: string;
@@ -22,40 +22,29 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   // todo。resourceType这个是不是整理到一起？ ResourceTypes.vpc.vpc ResourceTypes.vpc.subnet
   static resourceType: ResourceType = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc"})
   // todo 这个也合并到ResourceTypes定义里去集中管理 DescribeVpcsRequest.limit
-  static maxLimit = 100;
+  static pageMaxLimit = 100;
 
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
 
-  //todo 应该在上层就把region/分页问题解决掉，然后传进来分好类的有限数量的resourceTags，让service简单些，比如 findByTags(region:string,tc_ResourceTag[])
-  async findByTags(resourceTags: tc_ResourceTag[]): Promise<ResourceInstance<VpcState>[]> {
-    type Region = string;
-    const regions = new Map<Region, tc_ResourceTag[]>
+  async findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<VpcState>[]> {
+    const limit = VpcService.pageMaxLimit;
 
-    const result = new Array<ResourceInstance<VpcState>>();
-    for (const t of resourceTags) {
-      if (!t.ResourceRegion) continue;
-      if (!t.ResourceId) continue;
-
-      let v = regions.get(t.ResourceRegion);
-      if (!v) {
-        v = new Array<tc_ResourceTag>();
-        regions.set(t.ResourceRegion, v);
-      }
-      v.push(t);
-    }
-
-    for (const [region, resourceTag] of regions) {
-      const client = this.clients.getClient(region);
-      const vpcIds = resourceTag.map((r) => r.ResourceId!);
-      //todo 分页？
+    const client = this.clients.getClient(region);
+    const list = await Paging.list<tc_Vpc>(async (offset) => {
       const response = await client.DescribeVpcs({
-        VpcIds: vpcIds,
+        VpcIds: resourceIds,
+        Limit: limit.toString(),
+        Offset: offset.toString(),
       });
-      result.push(...this._tcVpcSet2VpcState(region, response.VpcSet));
-    }
-    return result;
+      return {
+        totalCount: response.TotalCount,
+        rows: response.VpcSet ?? [],
+        limit: limit,
+      };
+    })
+    return this._tcVpcSet2VpcState(region, list);
   }
 
   async create(specPart: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcState>> {
