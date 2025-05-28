@@ -169,6 +169,8 @@ export class TencentCloudProvider extends Provider {
    * **SPI 方法**，不应被客户程序执行
    */
   async cleanup(): Promise<void> {
+    await this.refresh();
+
     const undeclaredResourcePendingToDelete = this._resourceInstances.filter(e => {
       const declared = this._resources.get(e.name);
       return !declared;

@@ -1,5 +1,5 @@
-export const xxx="xxx";
+import {Constants} from "../spi/constants.ts";
 
-import {Constants} from '../core.ts'
+export const xxx="xxx";
 
 console.log(Constants.tagNames.project )

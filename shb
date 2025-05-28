@@ -4,6 +4,9 @@ set -o errexit   # -e
 set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
 set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 
+## 开启globstar模式，允许使用**匹配所有子目录,bash4特性，默认是关闭的
+shopt -s globstar
+
 SHB_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 cd "$SHB_DIR"
 
