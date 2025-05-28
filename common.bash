@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+## 开启globstar模式，允许使用**匹配所有子目录,bash4特性，默认是关闭的
+shopt -s globstar
+
 # On Mac OS, readlink -f doesn't work, so use._real_path get the real path of the file
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
@@ -40,7 +43,6 @@ fi
 _run() {
   caller_script=$(caller 0 | awk '{print $3}')
   caller_line=$(caller 0 | awk '{print $1}')
-
   # 把 /home/ubuntu/current_work_dir 替换为 ~/current_work_dir 短格式
   # 使用 @ 作为分隔符，避免与路径中的 / 冲突
   # shellcheck disable=SC2001
@@ -91,7 +93,8 @@ _load_nodejs_group_defaults() {
   build() {
         mkdir -p ./dist
     #    _run npx tsc --noEmit
-        _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/*.ts
+        _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/index.ts \
+                                                                                                  --entry-as-name src/spi/index.ts
 
 #    npm install --save-dev esbuild
 
