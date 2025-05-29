@@ -8,6 +8,7 @@ import {
 import {LazyProject, Project} from "@qpa/core";
 import {VpcLazyFactory} from "./vpc/factory.ts";
 import {SubnetService} from "./vpc/subnet.ts";
+import {CvmInstanceService} from "./cvm/cvm.ts";
 
 /**
  * @public
@@ -61,7 +62,13 @@ export class LazyModeTencentCloudFactory extends TencentCloud {
 function _serviceRegister(provider: TencentCloudProvider): Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> {
   const result: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> = new Map();
   const vpcClients: VpcClients = new VpcClients(provider);
-  result.set(TencentCloudType.vpc_vpc, new VpcService(provider, vpcClients));
-  result.set(TencentCloudType.vpc_subnet, new SubnetService(provider, vpcClients));
+
+  function add(service: TencentCloudResourceService<unknown, unknown>) {
+    result.set(service.resourceType, service);
+  }
+
+  add(new VpcService(provider, vpcClients));
+  add(new SubnetService(provider, vpcClients));
+  add(new CvmInstanceService(provider));
   return result;
 }

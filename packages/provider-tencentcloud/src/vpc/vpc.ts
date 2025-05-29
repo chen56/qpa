@@ -19,9 +19,9 @@ export interface VpcState extends tc_Vpc {
 /**
  */
 export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
-  static resourceType: TencentCloudType = TencentCloudType.vpc_vpc
+  resourceType: TencentCloudType = TencentCloudType.vpc_vpc
 
-  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients, readonly resourceType?: TencentCloudType) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
 
@@ -66,16 +66,16 @@ export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   }
 
   async load(declare: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcState>[]> {
-    const params = {
+    const client = this.clients.getClient(declare.spec.Region);
+    const response = await client.DescribeVpcs({
       // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤
       Filters: [
         {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.provider.project.name]},
         {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [declare.name]},
       ],
-    };
-    const client = this.clients.getClient(declare.spec.Region);
-    const response = await client.DescribeVpcs(params);
+      Limit: this.resourceType!.pageLimit.toString(),
+    });
     return this._tcVpcSet2VpcState(declare.spec.Region, response.VpcSet).map(e => e);
   }
 

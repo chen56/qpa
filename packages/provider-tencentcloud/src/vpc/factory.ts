@@ -31,7 +31,7 @@ export class VpcLazyFactory {
   vpc(props: ResourceConfig<VpcSpec>): LazyResource<VpcSpec, VpcState> {
     const result = new LazyResource<VpcSpec, VpcState>(this.provider, {
       ...props,
-      service: this.provider._getService(VpcService.resourceType) as VpcService,
+      service: this.provider._getService(TencentCloudType.vpc_vpc) as VpcService,
     });
     this.project._configuredResources.push(result);
     return result;

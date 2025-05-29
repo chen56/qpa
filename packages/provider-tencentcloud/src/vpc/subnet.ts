@@ -18,7 +18,9 @@ export interface SubnetState extends tc_Subnet {
 /**
  */
 export class SubnetService extends TaggableResourceService<SubnetSpec, SubnetState> {
-  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients, readonly resourceType?: TencentCloudType) {
+  resourceType = TencentCloudType.vpc_subnet;
+
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
 
@@ -63,16 +65,16 @@ export class SubnetService extends TaggableResourceService<SubnetSpec, SubnetSta
   }
 
   async load(declare: ResourceConfig<SubnetSpec>): Promise<ResourceInstance<SubnetState>[]> {
-    const params = {
+    const client = this.clients.getClient(declare.spec.Region);
+    const response = await client.DescribeSubnets({
       // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤
       Filters: [
         {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.provider.project.name]},
         {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [declare.name]},
       ],
-    };
-    const client = this.clients.getClient(declare.spec.Region);
-    const response = await client.DescribeSubnets(params);
+      Limit: this.resourceType!.pageLimit.toString(),
+    });
     return (response.SubnetSet || []).map(this._toResourceInstanceFunc(declare.spec.Region));
   }
 

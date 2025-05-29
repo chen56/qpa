@@ -1,6 +1,6 @@
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TaggableResourceService, TencentCloudProvider} from "../provider.ts";
+import {TaggableResourceService, TencentCloudProvider, TencentCloudType} from "../provider.ts";
 import {VpcState} from "../vpc/vpc.ts";
 
 
@@ -15,8 +15,7 @@ class CvmState {
 /**
  */
 export class CvmInstanceService extends TaggableResourceService<CvmSpec, CvmState> {
-  readonly serviceType: string = "vpc";
-  readonly resourcePrefix: string = "vpc";
+  readonly resourceType = TencentCloudType.cvm_instance;
 
   private readonly cvmClients: Map<string, CvmClient> = new Map();
 
@@ -33,7 +32,7 @@ export class CvmInstanceService extends TaggableResourceService<CvmSpec, CvmStat
     return this.cvmClients.get(region)!;
   }
 
-  async findOnePageByResourceId(region: string, resourceIds: string[], limit:number): Promise<ResourceInstance<VpcState>[]> {
+  async findOnePageByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<VpcState>[]> {
     throw Error(`CvmInstanceService.load not impl: ${resourceIds}`)
   }
 

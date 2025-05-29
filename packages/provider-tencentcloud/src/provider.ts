@@ -3,6 +3,12 @@ import {Provider, ResourceService, ResourceInstance, Project, Resource, Resource
 import {TagService} from "./internal/_tag_service.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
+  protected constructor() {
+    super();
+  }
+
+  abstract get resourceType(): TencentCloudType ;
+
 
 }
 
@@ -13,6 +19,10 @@ export interface TencentCloudCredential extends tc_Credential {
  * 支持tag的资源 Taggable
  */
 export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudResourceService<SPEC, STATE> {
+  protected constructor() {
+    super();
+  }
+
   /**
    * 调用此接口的上层应用应保证做好分页分批查询，这样子类就不需要考虑分页，只需把limit放到查询接口
    */
@@ -33,13 +43,19 @@ export class TencentCloudType {
   private static _types: TencentCloudType[] = [];
   static vpc_vpc = TencentCloudType.put({serviceType: "vpc", resourcePrefix: "vpc", pageLimit: 100})
   static vpc_subnet = TencentCloudType.put({serviceType: "vpc", resourcePrefix: "subnet", pageLimit: 100})
+  static cvm_instance = TencentCloudType.put({serviceType: "cvm", resourcePrefix: "instance", pageLimit: 100}) //todo 确认limit
 
-  // 私有构造函数，防止外部直接 new
+  /**
+   * 私有构造函数，防止外部直接 new跨过注册过程
+   */
   private constructor(
     readonly serviceType: string,
     readonly resourcePrefix: string,
-    // public readonly createService: (provider: TencentCloudProvider) => TencentCloudTaggedResourceService,
-    readonly pageLimit: number
+    /**
+     * 分页查询时每页的最大数量。
+     * @remark 此值需人工在每个请求API的文档中确认其最大限制。
+     */
+    readonly pageLimit: number,
   ) {
   }
 
@@ -77,9 +93,8 @@ export class TencentCloudType {
     return TencentCloudType._types;
   }
 
-  // 获取唯一标识符
   toString(): string {
-    return `${this.serviceType}:${this.resourcePrefix}-limit:${this.pageLimit}`;
+    return `${this.serviceType}:${this.resourcePrefix}`;
   }
 
   static find(serviceType?: string, resourcePrefix?: string): TencentCloudType | undefined {
