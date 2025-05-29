@@ -26,10 +26,10 @@ export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudR
  * 资源六段式列表。腾讯云使用资源六段式描述一个资源。
  * 例如：ResourceList.1 = qcs::{ServiceType}:{Region}:{Account}:{ResourcePreifx}/${ResourceId}。
  */
-export class ResourceType {
-  private static _types:ResourceType[] = [];
-  static vpc_vpc = ResourceType.put({serviceType: "vpc", resourcePrefix: "vpc", pageLimit: 100})
-  static vpc_subnet = ResourceType.put({serviceType: "vpc", resourcePrefix: "subnet", pageLimit: 100})
+export class TencentCloudType {
+  private static _types:TencentCloudType[] = [];
+  static vpc_vpc = TencentCloudType.put({serviceType: "vpc", resourcePrefix: "vpc", pageLimit: 100})
+  static vpc_subnet = TencentCloudType.put({serviceType: "vpc", resourcePrefix: "subnet", pageLimit: 100})
 
   // 私有构造函数，防止外部直接 new
   private constructor(
@@ -45,7 +45,7 @@ export class ResourceType {
     serviceType: string;
     resourcePrefix: string;
     pageLimit: number;
-  }): ResourceType {
+  }): TencentCloudType {
     // 更严格的类型检查
     if (!props || typeof props !== 'object') {
       throw new Error('Props must be an object');
@@ -59,19 +59,19 @@ export class ResourceType {
       throw new Error('ResourcePrefix must be a non-empty string');
     }
 
-    const result = new ResourceType(props.serviceType, props.resourcePrefix, props.pageLimit);
+    const result = new TencentCloudType(props.serviceType, props.resourcePrefix, props.pageLimit);
     const key = result.toString();
-    const found = ResourceType._types.find(e => e.toString() === key);
+    const found = TencentCloudType._types.find(e => e.toString() === key);
     if (found) {
       throw new Error(`ResourceType重复注册,已存在: ${found} `);
     }
     //注册不存在的类型
-    ResourceType._types.push(result);
+    TencentCloudType._types.push(result);
     return result;
   }
 
-  static get types(): readonly ResourceType[] {
-    return ResourceType._types;
+  static get types(): readonly TencentCloudType[] {
+    return TencentCloudType._types;
   }
 
   // 获取唯一标识符
@@ -79,14 +79,14 @@ export class ResourceType {
     return `${this.serviceType}:${this.resourcePrefix}-limit:${this.pageLimit}`;
   }
 
-  static find(serviceType?: string, resourcePrefix?: string): ResourceType | undefined {
-    return ResourceType._types.find(e => e.serviceType === serviceType && e.resourcePrefix === resourcePrefix);
+  static find(serviceType?: string, resourcePrefix?: string): TencentCloudType | undefined {
+    return TencentCloudType._types.find(e => e.serviceType === serviceType && e.resourcePrefix === resourcePrefix);
   }
 }
 
 export interface TencentCloudProviderProps {
   credential: TencentCloudCredential;
-  serviceRegister: (provider: TencentCloudProvider) => Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
+  serviceRegister: (provider: TencentCloudProvider) => Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
 }
 
 /**
@@ -96,7 +96,7 @@ export class TencentCloudProvider extends Provider {
   /**
    * @internal
    */
-  readonly _resourceServices: Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
+  readonly _resourceServices: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
   public credential!: TencentCloudCredential;
   _resourceInstances: ResourceInstances = new ResourceInstances();
   _resources: Resources = new Resources();
@@ -116,7 +116,7 @@ export class TencentCloudProvider extends Provider {
     if (this._resourceServices.size === 0) {
       throw Error("请提供您项目所要支持的资源服务列表，目前您支持的资源服务列表为空")
     }
-    for (const type of ResourceType.types) {
+    for (const type of TencentCloudType.types) {
       if (!this._resourceServices.has(type)) {
         throw Error(`bug:assert qpa internal bug,ResourceType ${type} 未注册相应的ResourceService`)
       }
@@ -141,7 +141,7 @@ export class TencentCloudProvider extends Provider {
     return this._resourceInstances;
   }
 
-  _getService(type: ResourceType): TencentCloudResourceService<unknown, unknown> {
+  _getService(type: TencentCloudType): TencentCloudResourceService<unknown, unknown> {
     const result = this._resourceServices.get(type);
     if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或放弃使用此资源类型`);
     return result;
@@ -194,7 +194,7 @@ export class TencentCloudProvider extends Provider {
   }
 
 
-  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, type: ResourceType): Promise<Resource<TSpec, TState>> {
+  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, type: TencentCloudType): Promise<Resource<TSpec, TState>> {
     const service = this._getService(type) as ResourceService<TSpec, TState>;
 
     let actual = await service.load(expected);

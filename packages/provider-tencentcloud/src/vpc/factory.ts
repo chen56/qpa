@@ -1,6 +1,6 @@
 import {LazyProject, LazyResource, Resource, ResourceConfig} from "@qpa/core";
 import {VpcService, VpcSpec, VpcState} from "./vpc.ts";
-import {ResourceType, TencentCloudProvider} from "../provider.ts";
+import {TencentCloudType, TencentCloudProvider} from "../provider.ts";
 import {SubnetSpec, SubnetState} from "./subnet.ts";
 
 /**
@@ -12,11 +12,11 @@ export class VpcFactory {
   }
 
   async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcState>> {
-    return await this.provider.apply(expected, ResourceType.vpc_vpc);
+    return await this.provider.apply(expected, TencentCloudType.vpc_vpc);
   }
 
   async subnet(expected: ResourceConfig<SubnetSpec>): Promise<Resource<SubnetSpec, SubnetState>> {
-    return await this.provider.apply(expected, ResourceType.vpc_subnet);
+    return await this.provider.apply(expected, TencentCloudType.vpc_subnet);
   }
 
 }

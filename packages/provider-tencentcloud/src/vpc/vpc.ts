@@ -3,7 +3,7 @@ import {
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
-import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
+import {TencentCloudType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {VpcClients} from "../internal/_common.ts";
 import {SpiConstants} from "@qpa/core/spi";
 import {Paging} from "../internal/common.ts";
@@ -20,14 +20,14 @@ export interface VpcState extends tc_Vpc {
 /**
  */
 export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
-  static resourceType: ResourceType = ResourceType.vpc_vpc
+  static resourceType: TencentCloudType = TencentCloudType.vpc_vpc
 
-  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients, readonly resourceType?: ResourceType) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients, readonly resourceType?: TencentCloudType) {
     super();
   }
 
   async findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<VpcState>[]> {
-    const limit = ResourceType.vpc_vpc.pageLimit;
+    const limit = TencentCloudType.vpc_vpc.pageLimit;
 
     const client = this.clients.getClient(region);
     const list = await Paging.list<tc_Vpc>(async (offset) => {

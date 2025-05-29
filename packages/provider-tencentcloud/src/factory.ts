@@ -2,7 +2,7 @@ import {VpcFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
 import {VpcClients} from "./internal/_common.ts";
 import {
-  ResourceType, TencentCloudCredential,
+  TencentCloudType, TencentCloudCredential,
   TencentCloudProvider, TencentCloudResourceService
 } from "./provider.ts";
 import {LazyProject, Project} from "@qpa/core";
@@ -58,10 +58,10 @@ export class LazyModeTencentCloudFactory extends TencentCloud {
 /**
  * @private
  */
-function _serviceRegister(provider: TencentCloudProvider): Map<ResourceType, TencentCloudResourceService<unknown, unknown>> {
-  const result: Map<ResourceType, TencentCloudResourceService<unknown, unknown>> = new Map();
+function _serviceRegister(provider: TencentCloudProvider): Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> {
+  const result: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> = new Map();
   const vpcClients: VpcClients = new VpcClients(provider);
-  result.set(ResourceType.vpc_vpc, new VpcService(provider, vpcClients));
-  result.set(ResourceType.vpc_subnet, new SubnetService(provider, vpcClients));
+  result.set(TencentCloudType.vpc_vpc, new VpcService(provider, vpcClients));
+  result.set(TencentCloudType.vpc_subnet, new SubnetService(provider, vpcClients));
   return result;
 }

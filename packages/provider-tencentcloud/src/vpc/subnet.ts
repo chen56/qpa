@@ -3,7 +3,7 @@ import {
   Subnet as tc_Subnet
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
-import {ResourceType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
+import {TencentCloudType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {VpcClients} from "../internal/_common.ts";
 import {SpiConstants} from "@qpa/core/spi";
 import {Paging} from "../internal/common.ts";
@@ -19,12 +19,12 @@ export interface SubnetState extends tc_Subnet {
 /**
  */
 export class SubnetService extends TaggableResourceService<SubnetSpec, SubnetState> {
-  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients,readonly resourceType?: ResourceType) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients,readonly resourceType?: TencentCloudType) {
     super();
   }
 
   async findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<SubnetState>[]> {
-    const limit = ResourceType.vpc_subnet.pageLimit;
+    const limit = TencentCloudType.vpc_subnet.pageLimit;
 
     const client = this.clients.getClient(region);
     const list = await Paging.list<tc_Subnet>(async (offset) => {
