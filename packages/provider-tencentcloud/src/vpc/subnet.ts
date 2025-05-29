@@ -19,7 +19,7 @@ export interface SubnetState extends tc_Subnet {
 /**
  */
 export class SubnetService extends TaggableResourceService<SubnetSpec, SubnetState> {
-  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients,readonly resourceType?: ResourceType) {
     super();
   }
 

@@ -20,7 +20,7 @@ export interface VpcState extends tc_Vpc {
  */
 export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   static resourceType: ResourceType = ResourceType.vpc_vpc
-  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients, readonly resourceType?: ResourceType) {
     super();
   }
 

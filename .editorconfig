@@ -17,6 +17,7 @@ end_of_line = lf
 trim_trailing_whitespace = true
 # 不插入最终的新行（可以设置为 true 来强制插入）
 insert_final_newline = false
+max_line_length = 200
 
 # 匹配 JavaScript 和 TypeScript 文件
 [*.{js,ts,jsx,tsx}]

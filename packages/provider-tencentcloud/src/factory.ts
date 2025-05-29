@@ -9,7 +9,6 @@ import {LazyProject, Project} from "@qpa/core";
 import {VpcLazyFactory} from "./vpc/factory.ts";
 import {SubnetService} from "./vpc/subnet.ts";
 
-
 /**
  * @public
  */

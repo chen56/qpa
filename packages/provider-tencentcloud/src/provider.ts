@@ -121,10 +121,15 @@ export class TencentCloudProvider extends Provider {
     this.tagService = new TagService(this);
 
     this._resourceServices = props.serviceRegister(this);
+
     if (this._resourceServices.size === 0) {
       throw Error("请提供您项目所要支持的资源服务列表，目前您支持的资源服务列表为空")
     }
-
+    for (const type of ResourceType.types) {
+      if(!this._resourceServices.has(type)){
+        throw Error(`bug:assert qpa internal bug,ResourceType ${type} 未注册相应的ResourceService`)
+      }
+    }
   }
 
   /**
