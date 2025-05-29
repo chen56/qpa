@@ -13,7 +13,10 @@ export interface TencentCloudCredential extends tc_Credential {
  * 支持tag的资源 Taggable
  */
 export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudResourceService<SPEC, STATE> {
-  abstract findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<STATE>[]> ;
+  /**
+   * 调用此接口的上层应用应保证做好分页分批查询，这样子类就不需要考虑分页，只需把limit放到查询接口
+   */
+  abstract findOnePageByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<STATE>[]> ;
 
 }
 
@@ -27,7 +30,7 @@ export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudR
  * 例如：ResourceList.1 = qcs::{ServiceType}:{Region}:{Account}:{ResourcePreifx}/${ResourceId}。
  */
 export class TencentCloudType {
-  private static _types:TencentCloudType[] = [];
+  private static _types: TencentCloudType[] = [];
   static vpc_vpc = TencentCloudType.put({serviceType: "vpc", resourcePrefix: "vpc", pageLimit: 100})
   static vpc_subnet = TencentCloudType.put({serviceType: "vpc", resourcePrefix: "subnet", pageLimit: 100})
 
@@ -137,7 +140,7 @@ export class TencentCloudProvider extends Provider {
   /**
    * 云上实际的资源实例集合
    */
-  get resourceInstances(): ResourceInstances {
+  get resourceInstances(): readonly ResourceInstance<unknown>[] {
     return this._resourceInstances;
   }
 

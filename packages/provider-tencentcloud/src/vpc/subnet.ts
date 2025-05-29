@@ -6,7 +6,6 @@ import {ResourceConfig, ResourceInstance} from "@qpa/core";
 import {TencentCloudType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {VpcClients} from "../internal/_common.ts";
 import {SpiConstants} from "@qpa/core/spi";
-import {Paging} from "../internal/common.ts";
 
 export interface SubnetSpec extends CreateSubnetRequest {
   Region: string;
@@ -19,27 +18,18 @@ export interface SubnetState extends tc_Subnet {
 /**
  */
 export class SubnetService extends TaggableResourceService<SubnetSpec, SubnetState> {
-  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients,readonly resourceType?: TencentCloudType) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients, readonly resourceType?: TencentCloudType) {
     super();
   }
 
-  async findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<SubnetState>[]> {
-    const limit = TencentCloudType.vpc_subnet.pageLimit;
+  async findOnePageByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<SubnetState>[]> {
 
     const client = this.clients.getClient(region);
-    const list = await Paging.list<tc_Subnet>(async (offset) => {
-      const response = await client.DescribeSubnets({
-        SubnetIds: resourceIds,
-        Limit: limit.toString(),
-        Offset: offset.toString(),
-      });
-      return {
-        totalCount: response.TotalCount,
-        rows: response.SubnetSet ?? [],
-        limit: limit,
-      };
-    })
-    return list.map(this._toResourceInstanceFunc(region));
+    const response = await client.DescribeSubnets({
+      SubnetIds: resourceIds,
+      Limit: limit.toString(),
+    });
+    return (response.SubnetSet || []).map(this._toResourceInstanceFunc(region));
   }
 
   async create(specPart: ResourceConfig<SubnetSpec>): Promise<ResourceInstance<SubnetState>> {

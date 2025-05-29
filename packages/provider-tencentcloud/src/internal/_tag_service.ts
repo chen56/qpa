@@ -4,6 +4,7 @@ import {ResourceInstance} from "@qpa/core";
 import {Paging} from "./common.ts";
 import {TencentCloudType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
+import {Arrays} from "./_common.ts";
 
 const pageLimit = 100;
 
@@ -18,7 +19,7 @@ export class TagService {
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
     const projectName = this.provider.project.name;
-    const tagList =await Paging.list<ResourceTag>(async (offset) => {
+    const tagList = await Paging.list<ResourceTag>(async (offset) => {
 
       const response = await this.tagClient.DescribeResourcesByTags({
         TagFilters: [{
@@ -36,7 +37,7 @@ export class TagService {
       };
     });
     const type_resourceTags = new Map<TencentCloudType, ResourceTag[]>
-    for  (const resourceTag of tagList) {
+    for (const resourceTag of tagList) {
       if (!resourceTag.ServiceType || !resourceTag.ResourcePrefix) continue;
       const resourceType = TencentCloudType.find(resourceTag.ServiceType, resourceTag.ResourcePrefix)
       if (!resourceType) continue;
@@ -76,10 +77,14 @@ export class TagService {
         }
       }
       for (const [region, oneRegionResourceIds] of region_resourceTags) {
-        const resources = await resourceService.findByResourceId(region, oneRegionResourceIds);
-        result.push(...resources);
+        // 切片为多页查询
+        for (const pageIds of Arrays.chunk(oneRegionResourceIds, resourceType.pageLimit)) {
+          const resources = await resourceService.findOnePageByResourceId(region, pageIds, resourceType.pageLimit);
+          result.push(...resources);
+        }
       }
     }
     return result;
   }
 }
+

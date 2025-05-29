@@ -33,7 +33,7 @@ export class CvmInstanceService extends TaggableResourceService<CvmSpec, CvmStat
     return this.cvmClients.get(region)!;
   }
 
-  async findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<VpcState>[]> {
+  async findOnePageByResourceId(region: string, resourceIds: string[], limit:number): Promise<ResourceInstance<VpcState>[]> {
     throw Error(`CvmInstanceService.load not impl: ${resourceIds}`)
   }
 

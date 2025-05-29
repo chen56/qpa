@@ -55,7 +55,7 @@ export abstract class ResourceService<SPEC, STATE> {
 }
 
 export abstract class Provider {
-  abstract get resourceInstances(): ResourceInstance<unknown>[];
+  abstract get resourceInstances(): readonly ResourceInstance<unknown>[];
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
