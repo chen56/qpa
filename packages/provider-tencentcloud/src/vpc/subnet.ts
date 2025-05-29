@@ -19,17 +19,12 @@ export interface SubnetState extends tc_Subnet {
 /**
  */
 export class SubnetService extends TaggableResourceService<SubnetSpec, SubnetState> {
-  // todo。resourceType这个是不是整理到一起？ ResourceTypes.vpc.vpc ResourceTypes.vpc.subnet
-  static resourceType: ResourceType = ResourceType.of({serviceType: "vpc", resourcePrefix: "subnet"})
-  // todo 这个也合并到ResourceTypes定义里去集中管理 DescribeVpcsRequest.limit
-  static pageMaxLimit = 100;
-
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
 
   async findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<SubnetState>[]> {
-    const limit = SubnetService.pageMaxLimit;
+    const limit = ResourceType.vpc_subnet.pageLimit;
 
     const client = this.clients.getClient(region);
     const list = await Paging.list<tc_Subnet>(async (offset) => {

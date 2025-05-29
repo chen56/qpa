@@ -25,7 +25,7 @@ export abstract class TencentCloud {
   }): TencentCloudFactory {
     const provider = TencentCloudProvider.of(project, {
       ...props,
-      allowedResourceServices: _allowServices,
+      serviceRegister: _serviceRegister,
     });
     return new TencentCloudFactory(provider);
   }
@@ -59,10 +59,10 @@ export class LazyModeTencentCloudFactory extends TencentCloud {
 /**
  * @private
  */
-function _allowServices(provider: TencentCloudProvider): Map<ResourceType, TencentCloudResourceService<unknown, unknown>> {
+function _serviceRegister(provider: TencentCloudProvider): Map<ResourceType, TencentCloudResourceService<unknown, unknown>> {
   const result: Map<ResourceType, TencentCloudResourceService<unknown, unknown>> = new Map();
   const vpcClients: VpcClients = new VpcClients(provider);
-  result.set(VpcService.resourceType, new VpcService(provider, vpcClients));
-  result.set(SubnetService.resourceType, new SubnetService(provider, vpcClients));
+  result.set(ResourceType.vpc_vpc, new VpcService(provider, vpcClients));
+  result.set(ResourceType.vpc_subnet, new SubnetService(provider, vpcClients));
   return result;
 }

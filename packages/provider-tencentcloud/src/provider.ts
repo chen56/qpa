@@ -28,12 +28,15 @@ export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudR
  */
 export class ResourceType {
   private static _types = new Array<ResourceType>();
+  static vpc_vpc = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc", pageLimit: 100})
+  static vpc_subnet = ResourceType.of({serviceType: "vpc", resourcePrefix: "subnet", pageLimit: 100})
 
   // 私有构造函数，防止外部直接 new
   private constructor(
-    public readonly serviceType: string,
-    public readonly resourcePrefix: string,
+    readonly serviceType: string,
+    readonly resourcePrefix: string,
     // public readonly createService: (provider: TencentCloudProvider) => TencentCloudTaggedResourceService,
+    readonly pageLimit: number
   ) {
   }
 
@@ -41,6 +44,7 @@ export class ResourceType {
   static of(props: {
     serviceType: string;
     resourcePrefix: string;
+    pageLimit: number;
   }): ResourceType {
     // 更严格的类型检查
     if (!props || typeof props !== 'object') {
@@ -55,7 +59,7 @@ export class ResourceType {
       throw new Error('ResourcePrefix must be a non-empty string');
     }
 
-    const result = new ResourceType(props.serviceType, props.resourcePrefix);
+    const result = new ResourceType(props.serviceType, props.resourcePrefix, props.pageLimit);
     const key = result.toString();
     const found = ResourceType._types.find(e => e.toString() === key);
     if (found) {
@@ -89,7 +93,7 @@ export class ResourceType {
 
 export interface TencentCloudProviderProps {
   credential: TencentCloudCredential;
-  allowedResourceServices: (provider: TencentCloudProvider) => Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
+  serviceRegister: (provider: TencentCloudProvider) => Map<ResourceType, TencentCloudResourceService<unknown, unknown>>;
 }
 
 /**
@@ -116,7 +120,7 @@ export class TencentCloudProvider extends Provider {
     this.credential = props.credential;
     this.tagService = new TagService(this);
 
-    this._resourceServices = props.allowedResourceServices(this);
+    this._resourceServices = props.serviceRegister(this);
     if (this._resourceServices.size === 0) {
       throw Error("请提供您项目所要支持的资源服务列表，目前您支持的资源服务列表为空")
     }

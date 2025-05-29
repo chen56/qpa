@@ -19,17 +19,13 @@ export interface VpcState extends tc_Vpc {
 /**
  */
 export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
-  // todo。resourceType这个是不是整理到一起？ ResourceTypes.vpc.vpc ResourceTypes.vpc.subnet
-  static resourceType: ResourceType = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc"})
-  // todo 这个也合并到ResourceTypes定义里去集中管理 DescribeVpcsRequest.limit
-  static pageMaxLimit = 100;
-
+  static resourceType: ResourceType = ResourceType.vpc_vpc
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
     super();
   }
 
   async findByResourceId(region: string, resourceIds: string[]): Promise<ResourceInstance<VpcState>[]> {
-    const limit = VpcService.pageMaxLimit;
+    const limit = ResourceType.vpc_vpc.pageLimit;
 
     const client = this.clients.getClient(region);
     const list = await Paging.list<tc_Vpc>(async (offset) => {
