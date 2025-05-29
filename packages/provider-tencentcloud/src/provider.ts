@@ -1,5 +1,5 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {Provider, ResourceService, ResourceInstance, Project, Resource,} from "@qpa/core";
+import {Provider, ResourceService, ResourceInstance, Project, Resource, ResourceConfig,} from "@qpa/core";
 import {TagService} from "./internal/_tag_service.ts";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
@@ -27,9 +27,9 @@ export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudR
  * 例如：ResourceList.1 = qcs::{ServiceType}:{Region}:{Account}:{ResourcePreifx}/${ResourceId}。
  */
 export class ResourceType {
-  private static _types = new Array<ResourceType>();
-  static vpc_vpc = ResourceType.of({serviceType: "vpc", resourcePrefix: "vpc", pageLimit: 100})
-  static vpc_subnet = ResourceType.of({serviceType: "vpc", resourcePrefix: "subnet", pageLimit: 100})
+  private static _types:ResourceType[] = [];
+  static vpc_vpc = ResourceType.put({serviceType: "vpc", resourcePrefix: "vpc", pageLimit: 100})
+  static vpc_subnet = ResourceType.put({serviceType: "vpc", resourcePrefix: "subnet", pageLimit: 100})
 
   // 私有构造函数，防止外部直接 new
   private constructor(
@@ -41,7 +41,7 @@ export class ResourceType {
   }
 
   // 静态工厂方法创建实例
-  static of(props: {
+  static put(props: {
     serviceType: string;
     resourcePrefix: string;
     pageLimit: number;
@@ -63,30 +63,23 @@ export class ResourceType {
     const key = result.toString();
     const found = ResourceType._types.find(e => e.toString() === key);
     if (found) {
-      return found;
+      throw new Error(`ResourceType重复注册,已存在: ${found} `);
     }
+    //注册不存在的类型
     ResourceType._types.push(result);
     return result;
   }
 
-  static get types(): ReadonlyArray<ResourceType> {
-    ResourceType.checkInit();
+  static get types(): readonly ResourceType[] {
     return ResourceType._types;
-  }
-
-  private static checkInit() {
-    if (ResourceType._types.length === 0) {
-      throw Error("ResourceType not init")
-    }
   }
 
   // 获取唯一标识符
   toString(): string {
-    return `${this.serviceType}:${this.resourcePrefix}`;
+    return `${this.serviceType}:${this.resourcePrefix}-limit:${this.pageLimit}`;
   }
 
   static find(serviceType?: string, resourcePrefix?: string): ResourceType | undefined {
-    ResourceType.checkInit();
     return ResourceType._types.find(e => e.serviceType === serviceType && e.resourcePrefix === resourcePrefix);
   }
 }
@@ -98,8 +91,6 @@ export interface TencentCloudProviderProps {
 
 /**
  * 这里的方法不应该被客户程序直接执行，应该通过Project.apply()等执行
- *
- * todo 还未考虑如何把api和spi隔离开
  */
 export class TencentCloudProvider extends Provider {
   /**
@@ -126,7 +117,7 @@ export class TencentCloudProvider extends Provider {
       throw Error("请提供您项目所要支持的资源服务列表，目前您支持的资源服务列表为空")
     }
     for (const type of ResourceType.types) {
-      if(!this._resourceServices.has(type)){
+      if (!this._resourceServices.has(type)) {
         throw Error(`bug:assert qpa internal bug,ResourceType ${type} 未注册相应的ResourceService`)
       }
     }
@@ -200,6 +191,27 @@ export class TencentCloudProvider extends Provider {
       await instance.destroy();
       this._resourceInstances.delete(instance);
     }
+  }
+
+
+  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, type: ResourceType): Promise<Resource<TSpec, TState>> {
+    const service = this._getService(type) as ResourceService<TSpec, TState>;
+
+    let actual = await service.load(expected);
+    if (actual.length == 0) {
+      actual = [await service.create(expected)];
+    }
+    if (actual.length === 0) {
+      throw new Error(`bug: 应该不会发生, 可能是QPA的bug, 资源${expected.name}的实际资源实例数量应该不为0, 但是目前为0 `)
+    }
+
+    if (actual.length > 1) {
+      throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行destroy后apply重建,冲突实例：${actual.map(e => e.toJson())}`)
+    }
+
+    const result = new Resource(expected, actual);
+    this._resources.set(result.name, result);
+    return result;
   }
 }
 

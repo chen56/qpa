@@ -11,8 +11,8 @@
 #set -o functrace # -T If set, any trap on DEBUG and RETURN are inherited by shell functions
 #set -o pipefail  # default pipeline status==last command status, If set, status=any command fail
 #set -o nounset # -u: 当尝试使用未定义的变量时，立即报错并退出脚本。这有助于防止因变量拼写错误或未初始化导致的意外行为。
-                #  don't use it ,it is crazy, 
-                #   1.bash version is diff Behavior 
+                #  don't use it ,it is crazy,
+                #   1.bash version is diff Behavior
                 #   2.we need like this: ${arr[@]+"${arr[@]}"}
                 #   3.影响使用此lib的脚本
 
@@ -58,16 +58,16 @@ declare -A _sha_sys_commands
 
 # replace $HOME with "~"
 # Usage: _sha_pwd <path>
-# Examples:  
+# Examples:
 #  _sha_pwd "/home/chen/git/note/"
 #         ===> "~/git/note/"
 _sha_pwd() {
   local _path="$1"
-  printf "%s" "${_path/#$HOME/\~}" ; 
+  printf "%s" "${_path/#$HOME/\~}" ;
 }
 
 # Usage: _sha_log <log_level> <msg...>
-# Examples: 
+# Examples:
 #   _sha_log ERROR "错误消息"
 #
 # log_level: DEBUG|INFO|ERROR|FATAL
@@ -167,9 +167,9 @@ _sha_array_regex_match() {
   return 1 # 没有找到匹配
 }
 
-# _sha_array_find_first_index 
+# _sha_array_find_first_index
 # 注意：此函数的功能是查找索引，而不是简单判断包含元素，但确实可以用于contains包含判断
-# 
+#
 # Usage: _sha_array_find_first_index <array_name> <search_string>
 # 用途：查找数组 array_name 中精确匹配字符串 str 的元素的索引
 # 参数：
@@ -319,11 +319,11 @@ _sha_cmd_get_children() {
         IFS="$delimiter"
         # 使用 "${_sha_current_cmd_children[*]}" 扩展数组的所有元素，并用 IFS 的第一个字符连接它们
         echo "${_sha_current_cmd_children[*]}"
-    ) 
+    )
 }
 
 # Usage: _sha_register_children_cmds <cmd_level>
-# ensure all cmd register
+# ensure all cmd put
 # root cmd_level is "/"
 _sha_register_children_cmds() {
   local next_cmd="$1"
@@ -350,7 +350,7 @@ _sha_register_children_cmds() {
     #   echo "$func_content"
     #   exit 1;
     # fi
-    
+
     # 新增的cmd才是下一级的cmd
     # 父节点的子命令中可能和当前节点子命令同名
     # 判断依据为：只要当前节点识别出的函数与老的不同即认为是当前节点的子命令：
@@ -359,7 +359,7 @@ _sha_register_children_cmds() {
     if [[ "${_sha_all_registerd_cmds["$func_name"]}" == "$func_content"  ]]; then
       continue;
     fi
-    
+
     # 排除掉某些前缀
     local exclude
     local is_excluded=false
@@ -374,7 +374,7 @@ _sha_register_children_cmds() {
     done
 
     if $is_excluded ; then
-       continue 
+       continue
     fi
 
     new_children["$func_name"]="$func_content"
@@ -391,7 +391,7 @@ _sha_register_children_cmds() {
   for key in "${!new_children[@]}"; do
       _sha_all_registerd_cmds["$key"]="${new_children["$key"]}"
       _sha_current_cmd_children["$key"]="${new_children["$key"]}"
-  done  
+  done
 
 }
 
@@ -404,7 +404,7 @@ Available Commands:"
 
   for key in "${!_sha_current_cmd_children[@]}"; do
       echo "  $key"
-  done  
+  done
   echo
 }
 
@@ -446,7 +446,7 @@ _sha() {
     echo  "ERROR: unknown command $cmd, 请使用 './sha --help' 查看可用的命令。 "
     exit 1;
   fi
-  
+
   # 执行当前命令后，再注册当前命令的子命令
   "$cmd" "$@"
   _sha_register_children_cmds "$cmd"

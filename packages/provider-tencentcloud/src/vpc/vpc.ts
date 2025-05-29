@@ -8,6 +8,7 @@ import {VpcClients} from "../internal/_common.ts";
 import {SpiConstants} from "@qpa/core/spi";
 import {Paging} from "../internal/common.ts";
 
+
 export interface VpcSpec extends tc_CreateVpcRequest {
   Region: string;
 }
@@ -20,6 +21,7 @@ export interface VpcState extends tc_Vpc {
  */
 export class VpcService extends TaggableResourceService<VpcSpec, VpcState> {
   static resourceType: ResourceType = ResourceType.vpc_vpc
+
   constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients, readonly resourceType?: ResourceType) {
     super();
   }
