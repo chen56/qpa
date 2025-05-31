@@ -1,6 +1,6 @@
 import {VpcFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
-import {VpcClients} from "./internal/_common.ts";
+import {VpcClients} from "./vpc/_common.ts";
 import {
   TencentCloudType, TencentCloudCredential,
   TencentCloudProvider, TencentCloudResourceService
@@ -8,7 +8,7 @@ import {
 import {LazyProject, Project} from "@qpa/core";
 import {VpcLazyFactory} from "./vpc/factory.ts";
 import {SubnetService} from "./vpc/subnet.ts";
-import {CvmInstanceService} from "./cvm/cvm.ts";
+import {CvmInstanceService} from "./cvm/instance.ts";
 
 /**
  * @public

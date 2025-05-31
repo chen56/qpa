@@ -2,6 +2,7 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {describe, expect, it} from "vitest";
+
 import {Arrays} from "../../packages/provider-tencentcloud/src/internal/_common.ts";
 
 describe('Arrays.chunk', () => {

@@ -4,7 +4,7 @@ import {
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
 import {TencentCloudType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
-import {VpcClients} from "../internal/_common.ts";
+import {VpcClients} from "./_common.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
 

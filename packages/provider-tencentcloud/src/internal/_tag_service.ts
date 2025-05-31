@@ -1,13 +1,14 @@
 import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {ResourceInstance} from "@qpa/core";
-import {Paging} from "./common.ts";
+import {Arrays, Paging} from "./_common.ts";
 import {TencentCloudType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
-import {Arrays} from "./_common.ts";
 
 const pageLimit = 100;
-
+/**
+ * 非资源性
+ */
 export class TagService {
   private tagClient: TagClient;
 

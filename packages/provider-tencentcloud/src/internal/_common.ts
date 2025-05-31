@@ -1,22 +1,69 @@
-import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
-import { TencentCloudProvider } from "../provider.ts";
+// src/types.d.ts
 
-export class VpcClients {
-    private readonly vpcClients: Map<string, tc_VpcClient> = new Map();
+// 定义全局选项的接口
 
-    constructor(readonly provider: TencentCloudProvider) {
+type PageQuery<T> = (offset: number) => Promise<{
+  // 总记录数，可以不提供
+  totalCount?: number;
+  // 当前页的记录
+  rows: Array<T>;
+  // 每页最大记录数
+  limit: number;
+}>;
+
+export class Paging {
+
+  /**
+   * 分页查询，结果为一个集合
+   */
+  static async list<T>(query: PageQuery<T>): Promise<T[]> {
+    const gen = Paging.generator(query);
+
+    const result = new Array<T>();
+    for await (const record of gen) {
+      result.push(record);
     }
+    return result;
+  }
 
-    getClient(region: string): tc_VpcClient {
-        if (!this.vpcClients.has(region)) {
-            const client = new tc_VpcClient(this.provider._getClientConfigByRegion(region));
-            this.vpcClients.set(region, client);
-        }
-        return this.vpcClients.get(region)!;
+  /**
+   * 分页查询，结果为生成器, 以行为单位
+   */
+  static async* generator<T>(query: PageQuery<T>) {
+    const gen = Paging.pageGenerator(query);
+    const result = new Array<T>();
+    for await (const page of gen) {
+      for (const row of page) {
+        yield row;
+      }
     }
+    return result;
+  }
+  /**
+   * 分页查询，结果为生成器, 以页为单位
+   */
+  static async* pageGenerator<T>(query: PageQuery<T>) {
+    let offset = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const page = await query(offset);
+      const rows: T[] = page.rows ?? [];
+
+      yield rows;
+      offset = offset + rows.length;
+
+      if (page.totalCount) {
+        hasMore = offset < page.totalCount;
+      } else {
+        hasMore = rows.length === page.limit;
+      }
+    }
+  }
+
 }
 
-export class Arrays{
+export class Arrays {
   /**
    * 将数组切片为多个固定大小的组。
    * @param array 要切片的数组。
