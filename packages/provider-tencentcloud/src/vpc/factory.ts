@@ -2,13 +2,14 @@ import {LazyProject, LazyResource, Resource, ResourceConfig} from "@qpa/core";
 import {VpcService, VpcSpec, VpcState} from "./vpc.ts";
 import {TencentCloudType, TencentCloudProvider} from "../provider.ts";
 import {SubnetSpec, SubnetState} from "./subnet.ts";
+import {VpcClients} from "./_common.ts";
 
 /**
  * 工厂方法类
  * 命名方式[ServiceType][Mode]Factory
  */
 export class VpcFactory {
-  constructor(readonly provider: TencentCloudProvider) {
+  constructor(readonly provider: TencentCloudProvider, readonly vpcClients: VpcClients) {
   }
 
   async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcState>> {

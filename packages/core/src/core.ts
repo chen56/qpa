@@ -1,8 +1,8 @@
-
-
 export abstract class BaseProject {
+  public name: string;
 
-  protected constructor() {
+  protected constructor(props: { name: string }) {
+    this.name = props.name;
   }
 }
 
@@ -44,9 +44,9 @@ export interface ResourceConfig<SPEC> {
 }
 
 export abstract class ResourceService<SPEC, STATE> {
-  abstract create(specPart: ResourceConfig<SPEC>): Promise<ResourceInstance<STATE>>;
+  abstract create(config: ResourceConfig<SPEC>): Promise<ResourceInstance<STATE>>;
 
-  abstract delete(...resources: ResourceInstance<STATE>[]): Promise<void>;
+  abstract delete(...instances: ResourceInstance<STATE>[]): Promise<void>;
 
   /**
    * @return 可能返回多个实际的同名云资源，因为一个资源可能被非正常的多次创建，重复问题留给上层程序判断解决
@@ -101,11 +101,11 @@ export class Resource<SPEC, STATE> {
 
   // todo actual要改为单数，集合放到核心api有点难以理解和应用，这个类就应该是完整的
   constructor(readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
-    if(actual.length==0){
+    if (actual.length == 0) {
       throw new Error("Resource为非惰性资源，创建Resource必须提供对应云上实例");
     }
     for (const instance of actual) {
-      if(expected.name!==instance.name){
+      if (expected.name !== instance.name) {
         throw new Error(`expected.name(${expected.name})必须和实际资源实例的name(${instance.name})一致`);
       }
     }
@@ -114,7 +114,7 @@ export class Resource<SPEC, STATE> {
   /**
    * name 是区分资源的关键, 我们会把name 用tag的形式打在每个实际的资源上, 以此对齐声明的资源配置和实际资源实例
    */
-  get name():string{
+  get name(): string {
     return this.expected.name;
   }
 
@@ -135,7 +135,6 @@ export type Apply = (project: Project) => Promise<void>;
 
 export class Project extends BaseProject {
   public providers = new Set<Provider>();
-  public name: string;
 
   get resourceInstances(): ResourceInstance<unknown>[] {
     return Array.from(this.providers).flatMap(p => p.resourceInstances);
@@ -144,8 +143,7 @@ export class Project extends BaseProject {
   public constructor(props: {
     name: string;
   }) {
-    super();
-    this.name = props.name
+    super({name: props.name});
   }
 
   static of(props: ProjectProps): Project {

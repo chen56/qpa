@@ -2,6 +2,21 @@ import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs
 import {Provider, ResourceService, ResourceInstance, Project, Resource, ResourceConfig,} from "@qpa/core";
 import {TagService} from "./internal/_tag_service.ts";
 
+export class _TencentCloudClientConfig {
+  credential: TencentCloudCredential
+
+  constructor(props: { credential: TencentCloudCredential }) {
+    this.credential = props.credential;
+  }
+
+  public _getClientConfigByRegion(region: string): ClientConfig {
+    return {
+      credential: this.credential,
+      region: region,
+    }
+  }
+}
+
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor() {
     super();
@@ -26,7 +41,7 @@ export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudR
   /**
    * 调用此接口的上层应用应保证做好分页分批查询，这样子类就不需要考虑分页，只需把limit放到查询接口
    */
-  abstract findOnePageByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<STATE>[]> ;
+  abstract findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<STATE>[]> ;
 
 }
 
@@ -104,7 +119,7 @@ export class TencentCloudType {
 
 export interface TencentCloudProviderProps {
   credential: TencentCloudCredential;
-  serviceRegister: (provider: TencentCloudProvider) => Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
+  services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
 }
 
 /**
@@ -116,8 +131,8 @@ export class TencentCloudProvider extends Provider {
    */
   readonly _resourceServices: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
   public credential!: TencentCloudCredential;
-  _resourceInstances: ResourceInstances = new ResourceInstances();
-  _resources: Resources = new Resources();
+  _resourceInstances: __ResourceInstances = new __ResourceInstances();
+  _resources: __Resources = new __Resources();
   private tagService: TagService;
 
   /**
@@ -129,7 +144,7 @@ export class TencentCloudProvider extends Provider {
     this.credential = props.credential;
     this.tagService = new TagService(this);
 
-    this._resourceServices = props.serviceRegister(this);
+    this._resourceServices = props.services;
 
     if (this._resourceServices.size === 0) {
       throw Error("请提供您项目所要支持的资源服务列表，目前您支持的资源服务列表为空")
@@ -169,18 +184,12 @@ export class TencentCloudProvider extends Provider {
     return this.tagService.findResourceInstances();
   }
 
-  public _getClientConfigByRegion(region: string): ClientConfig {
-    return {
-      credential: this.credential,
-      region: region,
-    }
-  }
 
   /**
    * **SPI 方法**，不应被客户程序执行
    */
   async refresh(): Promise<void> {
-    this._resourceInstances = new ResourceInstances(...await this.findResourceInstances());
+    this._resourceInstances = new __ResourceInstances(...await this.findResourceInstances());
   }
 
   /**
@@ -233,11 +242,11 @@ export class TencentCloudProvider extends Provider {
   }
 }
 
-class ResourceInstances extends Array<ResourceInstance<unknown>> {
+class __ResourceInstances extends Array<ResourceInstance<unknown>> {
   constructor(...args: ResourceInstance<unknown>[]) {
     super(...args); // 调用 Array(...items: T[]) 构造形式
     //typescript原型链修复
-    Object.setPrototypeOf(this, ResourceInstances.prototype);
+    Object.setPrototypeOf(this, __ResourceInstances.prototype);
   }
 
   delete(instance: ResourceInstance<unknown>) {
@@ -248,11 +257,11 @@ class ResourceInstances extends Array<ResourceInstance<unknown>> {
   }
 }
 
-class Resources extends Map<string, Resource<unknown, unknown>> {
+class __Resources extends Map<string, Resource<unknown, unknown>> {
   constructor(...args: [string, Resource<unknown, unknown>][]) {
     super(args);
     //typescript原型链修复
-    Object.setPrototypeOf(this, Resources.prototype);
+    Object.setPrototypeOf(this, __Resources.prototype);
 
   }
 }

@@ -3,12 +3,26 @@ import {VpcService} from "./vpc/vpc.ts";
 import {VpcClients} from "./vpc/_common.ts";
 import {
   TencentCloudType, TencentCloudCredential,
-  TencentCloudProvider, TencentCloudResourceService
+  TencentCloudProvider, TencentCloudResourceService, _TencentCloudClientConfig
 } from "./provider.ts";
 import {LazyProject, Project} from "@qpa/core";
 import {VpcLazyFactory} from "./vpc/factory.ts";
 import {SubnetService} from "./vpc/subnet.ts";
 import {CvmInstanceService} from "./cvm/instance.ts";
+import {CvmClients} from "./cvm/_common.ts";
+import {CvmFactory} from "./cvm/factory.ts";
+
+export class Clients {
+  vpcClients: VpcClients;
+  cvmClients: CvmClients;
+
+  constructor(readonly project: Project, props: { credential: TencentCloudCredential }) {
+    const config = new _TencentCloudClientConfig(props)
+
+    this.vpcClients = new VpcClients(config);
+    this.cvmClients = new CvmClients(config);
+  }
+}
 
 /**
  * @public
@@ -20,14 +34,29 @@ export abstract class TencentCloud {
   /**
    * @public
    */
-  static createFactory(project: Project, props: {
+  static createFactory(clients: Clients, props: {
     credential: TencentCloudCredential;
   }): TencentCloudFactory {
+    const project = clients.project;
+
+    const services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> = new Map();
+
+    function add(service: TencentCloudResourceService<unknown, unknown>) {
+      services.set(service.resourceType, service);
+    }
+
+    // vpc
+    add(new VpcService(project, clients.vpcClients));
+    add(new SubnetService(project, clients.vpcClients));
+
+    // cvm
+    add(new CvmInstanceService(project, clients.cvmClients));
+
     const provider = TencentCloudProvider.of(project, {
       ...props,
-      serviceRegister: _serviceRegister,
+      services: services,
     });
-    return new TencentCloudFactory(provider);
+    return new TencentCloudFactory(provider, clients);
   }
 }
 
@@ -37,10 +66,12 @@ export abstract class TencentCloud {
  */
 export class TencentCloudFactory extends TencentCloud {
   readonly vpc: VpcFactory;
+  readonly cvm: CvmFactory;
 
-  constructor(readonly provider: TencentCloudProvider) {
+  constructor(readonly provider: TencentCloudProvider, clients: Clients) {
     super(provider);
-    this.vpc = new VpcFactory(this.provider);
+    this.vpc = new VpcFactory(this.provider, clients.vpcClients);
+    this.cvm = new CvmFactory(this.provider, clients.cvmClients);
   }
 }
 
@@ -54,21 +85,4 @@ export class LazyModeTencentCloudFactory extends TencentCloud {
     super(provider);
     this.vpc = new VpcLazyFactory(this.project, this.provider);
   }
-}
-
-/**
- * @private
- */
-function _serviceRegister(provider: TencentCloudProvider): Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> {
-  const result: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> = new Map();
-  const vpcClients: VpcClients = new VpcClients(provider);
-
-  function add(service: TencentCloudResourceService<unknown, unknown>) {
-    result.set(service.resourceType, service);
-  }
-
-  add(new VpcService(provider, vpcClients));
-  add(new SubnetService(provider, vpcClients));
-  add(new CvmInstanceService(provider));
-  return result;
 }

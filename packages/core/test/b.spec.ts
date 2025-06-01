@@ -6,5 +6,5 @@ import {LazyProject} from "src/lazy.ts";
 
 test('Squared', () => {
   expect(xxx).toBe("xxx")
-  console.log(new LazyProject())
+  console.log(new LazyProject({name:"unit_test"}))
 })

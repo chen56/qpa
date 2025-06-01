@@ -3,6 +3,7 @@ import {expect} from "vitest";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import {TencentCloud} from "../src/index.ts";
+import {Clients} from "../src/factory.ts";
 
 // 首先加载 .env 文件中的原始键值对
 // dotenv.config() 返回一个包含 parsed 属性的对象，其中是解析后的键值对
@@ -14,7 +15,14 @@ dotenvExpand.expand(myEnv);
 
 export class TextFixture {
   readonly project = Project.of({name: "unit_test"});
-  readonly tc = TencentCloud.createFactory(this.project, {
+  readonly clients = new Clients(this.project,{
+    credential: {
+      secretId: process.env.TENCENTCLOUD_SECRET_ID!,
+      secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
+    },
+  })
+
+  readonly tc = TencentCloud.createFactory(this.clients, {
     credential: {
       secretId: process.env.TENCENTCLOUD_SECRET_ID!,
       secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
@@ -33,7 +41,8 @@ export class TextFixture {
   }
 
   async after() {
-
+    await this.project.destroy();
+    expect(this.project.resourceInstances.length).toBe(0);
   }
 
 

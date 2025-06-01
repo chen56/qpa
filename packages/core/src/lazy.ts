@@ -10,8 +10,8 @@ export class LazyProject extends BaseProject {
    * key: 这个key非常重要，是云资源工作空间的唯一标识，用于区分不同的云资源工作空间
    * 所有资源都在此key下，资源的创建和删除依赖它
    */
-  constructor() {
-    super();
+  constructor(props:{name:string}) {
+    super({name: props.name});
   }
 
   async refresh(): Promise<void> {
@@ -113,7 +113,7 @@ export class ConfigTodoRemove {
   public _setup: ConfigSetup;
 
   private constructor(public readonly _configMode: _ConfigMode, props: ConfigProps) {
-    this.project = new LazyProject();
+    this.project = new LazyProject({name:props.name});
     this._setup = props.setup
   }
 
@@ -131,6 +131,7 @@ export class ConfigTodoRemove {
 }
 
 export interface ConfigProps {
+  name:string
   setup: ConfigSetup;
 }
 

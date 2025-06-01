@@ -1,5 +1,5 @@
 import {Project} from "@qpa/core";
-import {TencentCloud} from "../../src/factory.ts";
+import {Clients, TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 // 首先加载 .env ,存放SECRET_ID等
@@ -9,8 +9,14 @@ const myEnv = dotenv.config();
 dotenvExpand.expand(myEnv);
 
 const project = Project.of({name: "test"});
+const clients = new Clients(project, {
+  credential: {
+    secretId: process.env.TENCENTCLOUD_SECRET_ID!,
+    secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
+  },
+});
 
-const tc = TencentCloud.createFactory(project, {
+const tc = TencentCloud.createFactory(clients, {
   credential: {
     secretId: process.env.TENCENTCLOUD_SECRET_ID!,
     secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
@@ -50,6 +56,24 @@ await project.apply(async project => {
       CidrBlock: '10.0.1.0/24',
     }
   });
+
+  await tc.cvm.cvmClients.getClient("ap-guangzhou").DescribeInstanceTypeConfigs({
+    Filters: [
+      {Name: "zone", Values: ["ap-guangzhou-1"]},
+      {Name: "zone", Values: ["ap-guangzhou-1"]},
+    ]
+  })
+
+  const cvmInstance1 = await tc.cvm.instance({
+    name: "cvmInstance1",
+    spec: {
+      Region: "ap-guangzhou",
+      InstanceChargeType: "SPOTPAID",
+      InstanceType: "",
+
+    },
+  });
+
   console.log("created subnet:", subnet.actualInstance.toJson())
 });
 // exit(0);
