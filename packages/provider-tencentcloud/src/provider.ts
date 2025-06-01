@@ -1,21 +1,7 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {Provider, ResourceService, ResourceInstance, Project, Resource, ResourceConfig,} from "@qpa/core";
 import {TagService} from "./internal/_tag_service.ts";
-
-export class _TencentCloudClientConfig {
-  credential: TencentCloudCredential
-
-  constructor(props: { credential: TencentCloudCredential }) {
-    this.credential = props.credential;
-  }
-
-  public _getClientConfigByRegion(region: string): ClientConfig {
-    return {
-      credential: this.credential,
-      region: region,
-    }
-  }
-}
+import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor() {
@@ -23,10 +9,16 @@ export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceS
   }
 
   abstract get resourceType(): TencentCloudType ;
-
-
 }
 
+export interface _TencentCloudClientsAware {
+  _getClientConfigByRegion(region: string): ClientConfig;
+
+  tagClient: tc_TagClient;
+  _project: Project;
+}
+
+// fixme remove?
 export interface TencentCloudCredential extends tc_Credential {
 }
 
@@ -118,7 +110,6 @@ export class TencentCloudType {
 }
 
 export interface TencentCloudProviderProps {
-  credential: TencentCloudCredential;
   services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
 }
 
@@ -130,7 +121,6 @@ export class TencentCloudProvider extends Provider {
    * @internal
    */
   readonly _resourceServices: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
-  public credential!: TencentCloudCredential;
   _resourceInstances: __ResourceInstances = new __ResourceInstances();
   _resources: __Resources = new __Resources();
   private tagService: TagService;
@@ -138,11 +128,10 @@ export class TencentCloudProvider extends Provider {
   /**
    * @private
    */
-  private constructor(readonly project: Project, readonly props: TencentCloudProviderProps) {
+  private constructor(project: Project, clients: _TencentCloudClientsAware, readonly props: TencentCloudProviderProps) {
     super();
 
-    this.credential = props.credential;
-    this.tagService = new TagService(this);
+    this.tagService = new TagService(project, this, clients);
 
     this._resourceServices = props.services;
 
@@ -160,8 +149,8 @@ export class TencentCloudProvider extends Provider {
    * 创建并注册TencentCloudProvider到Project.providers
    * @public
    * */
-  static of(project: Project, props: TencentCloudProviderProps): TencentCloudProvider {
-    const result = new TencentCloudProvider(project, props);
+  static of(project: Project, clients: _TencentCloudClientsAware, props: TencentCloudProviderProps): TencentCloudProvider {
+    const result = new TencentCloudProvider(project, clients, props);
     //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
     project.providers.add(result);
     return result;

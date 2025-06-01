@@ -1,5 +1,5 @@
 import {Project} from "@qpa/core";
-import {Clients, TencentCloud} from "../../src/factory.ts";
+import {TencentCloudClients, TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 // 首先加载 .env ,存放SECRET_ID等
@@ -9,19 +9,14 @@ const myEnv = dotenv.config();
 dotenvExpand.expand(myEnv);
 
 const project = Project.of({name: "test"});
-const clients = new Clients(project, {
+const clients = new TencentCloudClients(project, {
   credential: {
     secretId: process.env.TENCENTCLOUD_SECRET_ID!,
     secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
   },
 });
 
-const tc = TencentCloud.createFactory(clients, {
-  credential: {
-    secretId: process.env.TENCENTCLOUD_SECRET_ID!,
-    secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
-  },
-});
+const tc = TencentCloud.createFactory(clients);
 await project.refresh();
 await project.destroy();
 console.log('list all resource');

@@ -3,7 +3,7 @@ import {VpcService} from "./vpc/vpc.ts";
 import {VpcClients} from "./vpc/_common.ts";
 import {
   TencentCloudType, TencentCloudCredential,
-  TencentCloudProvider, TencentCloudResourceService, _TencentCloudClientConfig
+  TencentCloudProvider, TencentCloudResourceService, _TencentCloudClientsAware
 } from "./provider.ts";
 import {LazyProject, Project} from "@qpa/core";
 import {VpcLazyFactory} from "./vpc/factory.ts";
@@ -12,16 +12,39 @@ import {CvmInstanceService} from "./cvm/instance.ts";
 import {CvmClients} from "./cvm/_common.ts";
 import {CvmFactory} from "./cvm/factory.ts";
 
-export class Clients {
+
+import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface";
+import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client";
+
+interface TencentCloudClientsProps {
+  credential: TencentCloudCredential
+}
+
+export class TencentCloudClients implements _TencentCloudClientsAware {
+  private readonly _credential: TencentCloudCredential;
   vpcClients: VpcClients;
   cvmClients: CvmClients;
+  tagClient: tc_TagClient;
 
-  constructor(readonly project: Project, props: { credential: TencentCloudCredential }) {
-    const config = new _TencentCloudClientConfig(props)
+  constructor(readonly _project: Project, props: TencentCloudClientsProps) {
+    this._credential = props.credential;
+    this.vpcClients = new VpcClients(this);
+    this.cvmClients = new CvmClients(this);
 
-    this.vpcClients = new VpcClients(config);
-    this.cvmClients = new CvmClients(config);
+    this.tagClient = new tc_TagClient({
+      credential: this._credential,
+    });
+    ``
   }
+
+
+  public _getClientConfigByRegion(region: string): tc_ClientConfig {
+    return {
+      credential: this._credential,
+      region: region,
+    }
+  }
+
 }
 
 /**
@@ -34,10 +57,8 @@ export abstract class TencentCloud {
   /**
    * @public
    */
-  static createFactory(clients: Clients, props: {
-    credential: TencentCloudCredential;
-  }): TencentCloudFactory {
-    const project = clients.project;
+  static createFactory(clients: TencentCloudClients): TencentCloudFactory {
+    const project = clients._project;
 
     const services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> = new Map();
 
@@ -52,8 +73,7 @@ export abstract class TencentCloud {
     // cvm
     add(new CvmInstanceService(project, clients.cvmClients));
 
-    const provider = TencentCloudProvider.of(project, {
-      ...props,
+    const provider = TencentCloudProvider.of(project, clients, {
       services: services,
     });
     return new TencentCloudFactory(provider, clients);
@@ -68,7 +88,7 @@ export class TencentCloudFactory extends TencentCloud {
   readonly vpc: VpcFactory;
   readonly cvm: CvmFactory;
 
-  constructor(readonly provider: TencentCloudProvider, clients: Clients) {
+  constructor(readonly provider: TencentCloudProvider, clients: TencentCloudClients) {
     super(provider);
     this.vpc = new VpcFactory(this.provider, clients.vpcClients);
     this.cvm = new CvmFactory(this.provider, clients.cvmClients);

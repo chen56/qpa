@@ -12,7 +12,7 @@
 //         type:"TagBaseResourceScope",
 //         scopeName: "test",
 //       },
-//       credential: {
+//       _credential: {
 //         secretId: process.env.TENCENTCLOUD_SECRET_ID!,
 //         secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
 //       },

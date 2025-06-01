@@ -1,25 +1,24 @@
-import {Client as TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
+import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {ResourceInstance} from "@qpa/core";
+import {Project, ResourceInstance} from "@qpa/core";
 import {Arrays, Paging} from "./_common.ts";
-import {TencentCloudType, TaggableResourceService, TencentCloudProvider} from "../provider.ts";
+import {TencentCloudType, TaggableResourceService, TencentCloudProvider, _TencentCloudClientsAware} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
 const pageLimit = 100;
+
 /**
  * 非资源性
  */
 export class TagService {
-  private tagClient: TagClient;
+  private tagClient: tc_TagClient;
 
-  constructor(readonly provider: TencentCloudProvider) {
-    this.tagClient = new TagClient({
-      credential: provider.credential,
-    });
+  constructor(private readonly project: Project, private readonly provider: TencentCloudProvider, clients: _TencentCloudClientsAware) {
+    this.tagClient = clients.tagClient;
   }
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
-    const projectName = this.provider.project.name;
+    const projectName = this.project.name;
     const tagList = await Paging.list<ResourceTag>(async (offset) => {
 
       const response = await this.tagClient.DescribeResourcesByTags({
