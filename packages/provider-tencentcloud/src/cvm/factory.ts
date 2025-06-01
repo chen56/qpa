@@ -9,7 +9,7 @@ import {CvmClients} from "./_common.ts";
  * 命名方式[ServiceType][Mode]Factory
  */
 export class CvmFactory {
-  constructor(readonly provider: TencentCloudProvider, readonly cvmClients: CvmClients) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: CvmClients) {
   }
 
   async instance(expected: ResourceConfig<CvmInstanceSpec>): Promise<Resource<CvmInstanceSpec, CvmInstanceState>> {

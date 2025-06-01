@@ -20,4 +20,3 @@ export {TencentCloudProvider} from './provider.ts';
 // 2. 为重要的类型添加类型导出
 export {LazyModeTencentCloudFactory} from './factory.ts';
 export {TencentCloudFactory} from './factory.ts';
-export {TencentCloud} from './factory.ts';

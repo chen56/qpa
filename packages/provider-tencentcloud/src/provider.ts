@@ -11,7 +11,7 @@ export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceS
   abstract get resourceType(): TencentCloudType ;
 }
 
-export interface _TencentCloudClientsAware {
+export interface _TencentCloudAware {
   _getClientConfigByRegion(region: string): ClientConfig;
 
   tagClient: tc_TagClient;
@@ -128,7 +128,7 @@ export class TencentCloudProvider extends Provider {
   /**
    * @private
    */
-  private constructor(project: Project, clients: _TencentCloudClientsAware, readonly props: TencentCloudProviderProps) {
+  private constructor(project: Project, clients: _TencentCloudAware, readonly props: TencentCloudProviderProps) {
     super();
 
     this.tagService = new TagService(project, this, clients);
@@ -149,7 +149,7 @@ export class TencentCloudProvider extends Provider {
    * 创建并注册TencentCloudProvider到Project.providers
    * @public
    * */
-  static of(project: Project, clients: _TencentCloudClientsAware, props: TencentCloudProviderProps): TencentCloudProvider {
+  static of(project: Project, clients: _TencentCloudAware, props: TencentCloudProviderProps): TencentCloudProvider {
     const result = new TencentCloudProvider(project, clients, props);
     //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
     project.providers.add(result);

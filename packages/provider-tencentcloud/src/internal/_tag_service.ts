@@ -2,7 +2,7 @@ import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/servi
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Project, ResourceInstance} from "@qpa/core";
 import {Arrays, Paging} from "./_common.ts";
-import {TencentCloudType, TaggableResourceService, TencentCloudProvider, _TencentCloudClientsAware} from "../provider.ts";
+import {TencentCloudType, TaggableResourceService, TencentCloudProvider, _TencentCloudAware} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
 const pageLimit = 100;
@@ -13,7 +13,7 @@ const pageLimit = 100;
 export class TagService {
   private tagClient: tc_TagClient;
 
-  constructor(private readonly project: Project, private readonly provider: TencentCloudProvider, clients: _TencentCloudClientsAware) {
+  constructor(private readonly project: Project, private readonly provider: TencentCloudProvider, clients: _TencentCloudAware) {
     this.tagClient = clients.tagClient;
   }
 

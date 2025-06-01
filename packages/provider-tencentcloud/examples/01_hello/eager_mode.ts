@@ -1,5 +1,5 @@
 import {Project} from "@qpa/core";
-import {TencentCloudClients, TencentCloud} from "../../src/factory.ts";
+import {TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 // 首先加载 .env ,存放SECRET_ID等
@@ -9,14 +9,14 @@ const myEnv = dotenv.config();
 dotenvExpand.expand(myEnv);
 
 const project = Project.of({name: "test"});
-const clients = new TencentCloudClients(project, {
+const clients = new TencentCloud(project, {
   credential: {
     secretId: process.env.TENCENTCLOUD_SECRET_ID!,
     secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
   },
 });
 
-const tc = TencentCloud.createFactory(clients);
+const tc = clients.factory;
 await project.refresh();
 await project.destroy();
 console.log('list all resource');
@@ -52,7 +52,7 @@ await project.apply(async project => {
     }
   });
 
-  await tc.cvm.cvmClients.getClient("ap-guangzhou").DescribeInstanceTypeConfigs({
+  await tc.cvm.clients.getClient("ap-guangzhou").DescribeInstanceTypeConfigs({
     Filters: [
       {Name: "zone", Values: ["ap-guangzhou-1"]},
       {Name: "zone", Values: ["ap-guangzhou-1"]},

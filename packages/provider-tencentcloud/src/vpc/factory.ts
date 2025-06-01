@@ -9,7 +9,7 @@ import {VpcClients} from "./_common.ts";
  * 命名方式[ServiceType][Mode]Factory
  */
 export class VpcFactory {
-  constructor(readonly provider: TencentCloudProvider, readonly vpcClients: VpcClients) {
+  constructor(readonly provider: TencentCloudProvider, readonly clients: VpcClients) {
   }
 
   async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcState>> {
