@@ -11,10 +11,12 @@ const pageLimit = 100;
  * 非资源性
  */
 export class TagService {
-  private tagClient: tc_TagClient;
 
-  constructor(private readonly project: Project, private readonly provider: TencentCloudProvider, clients: _TencentCloudAware) {
-    this.tagClient = clients.tagClient;
+  constructor(private readonly project: Project, private readonly provider: TencentCloudProvider, readonly tc: _TencentCloudAware) {
+  }
+
+  get tagClient(): tc_TagClient {
+    return this.tc.tagClient;
   }
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {

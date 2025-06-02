@@ -1,5 +1,5 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {Provider, ResourceService, ResourceInstance, Project, Resource, ResourceConfig,} from "@qpa/core";
+import {Project, Provider, Resource, ResourceConfig, ResourceInstance, ResourceService,} from "@qpa/core";
 import {TagService} from "./internal/_tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client";
 
@@ -12,10 +12,12 @@ export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceS
 }
 
 export interface _TencentCloudAware {
-  _getClientConfigByRegion(region: string): ClientConfig;
-
   tagClient: tc_TagClient;
+
+  _getClientConfigByRegion(region: string): ClientConfig;
   _project: Project;
+  _provider: TencentCloudProvider;
+
 }
 
 // fixme remove?
@@ -128,10 +130,10 @@ export class TencentCloudProvider extends Provider {
   /**
    * @private
    */
-  private constructor(project: Project, clients: _TencentCloudAware, readonly props: TencentCloudProviderProps) {
+  constructor(project: Project, tc: _TencentCloudAware, readonly props: TencentCloudProviderProps) {
     super();
 
-    this.tagService = new TagService(project, this, clients);
+    this.tagService = new TagService(project, this, tc);
 
     this._resourceServices = props.services;
 
@@ -144,18 +146,6 @@ export class TencentCloudProvider extends Provider {
       }
     }
   }
-
-  /**
-   * 创建并注册TencentCloudProvider到Project.providers
-   * @public
-   * */
-  static of(project: Project, clients: _TencentCloudAware, props: TencentCloudProviderProps): TencentCloudProvider {
-    const result = new TencentCloudProvider(project, clients, props);
-    //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
-    project.providers.add(result);
-    return result;
-  }
-
   /**
    * 云上实际的资源实例集合
    */

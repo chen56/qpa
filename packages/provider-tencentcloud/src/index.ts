@@ -7,7 +7,7 @@
  * 腾讯云服务模块
  *
  * @example
- * import { TencentCloudProvider } from '@qpa/provider-tencentcloud'
+ * import { TencentCloudProvider } from '@qpa/_provider-tencentcloud'
  */
 export * from './vpc/index.ts';
 
@@ -19,4 +19,3 @@ export {TencentCloudProvider} from './provider.ts';
 
 // 2. 为重要的类型添加类型导出
 export {LazyModeTencentCloudFactory} from './factory.ts';
-export {TencentCloudFactory} from './factory.ts';

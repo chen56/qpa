@@ -9,14 +9,13 @@ const myEnv = dotenv.config();
 dotenvExpand.expand(myEnv);
 
 const project = Project.of({name: "test"});
-const clients = new TencentCloud(project, {
+const tc = new TencentCloud(project, {
   credential: {
     secretId: process.env.TENCENTCLOUD_SECRET_ID!,
     secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
   },
 });
 
-const tc = clients.factory;
 await project.refresh();
 await project.destroy();
 console.log('list all resource');
@@ -70,6 +69,7 @@ await project.apply(async project => {
   });
 
   console.log("created subnet:", subnet.actualInstance.toJson())
+  console.log("created cvmInstance1:", cvmInstance1)
 });
 // exit(0);
 

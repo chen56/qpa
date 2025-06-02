@@ -1,18 +1,20 @@
-import {TencentCloudProvider} from "@qpa/provider-tencentcloud";
 import {Resource, ResourceConfig} from "@qpa/core";
-import {TencentCloudType} from "../provider.ts";
+import {_TencentCloudAware, TencentCloudType} from "../provider.ts";
 import {CvmInstanceSpec, CvmInstanceState} from "./instance.ts";
 import {CvmClients} from "./_common.ts";
 
 /**
- * 工厂方法类
- * 命名方式[ServiceType][Mode]Factory
+ * 工厂类
  */
 export class CvmFactory {
-  constructor(readonly provider: TencentCloudProvider, readonly clients: CvmClients) {
+  constructor(readonly _tc: _TencentCloudAware, readonly clients: CvmClients) {
+  }
+
+  get _provider() {
+    return this._tc._provider;
   }
 
   async instance(expected: ResourceConfig<CvmInstanceSpec>): Promise<Resource<CvmInstanceSpec, CvmInstanceState>> {
-    return await this.provider.apply(expected, TencentCloudType.cvm_instance);
+    return await this._provider.apply(expected, TencentCloudType.cvm_instance);
   }
 }
