@@ -51,7 +51,7 @@ await project.apply(async project => {
     }
   });
 
-  await tc.cvm.clients.getClient("ap-guangzhou").DescribeInstanceTypeConfigs({
+  await tc.cvm.getClient("ap-guangzhou").DescribeInstanceTypeConfigs({
     Filters: [
       {Name: "zone", Values: ["ap-guangzhou-1"]},
       {Name: "zone", Values: ["ap-guangzhou-1"]},
