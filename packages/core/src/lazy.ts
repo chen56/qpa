@@ -1,7 +1,7 @@
-import {BaseProject, Provider, ResourceService, ResourceConfig, ResourceInstance} from "./core.ts";
+import {BaseProject, Provider, ResourceService, ResourceConfig, ResourceInstance, ProviderState} from "./core.ts";
 
 export class LazyProject extends BaseProject {
-  _providers: Providers = new Providers();
+  _providers =new Map<Provider, ProviderState>;
 
   _configuredResources: ConfiguredResources = new ConfiguredResources();
   _deconfiguredResources: DeconfiguredResources = new DeconfiguredResources();
@@ -22,8 +22,8 @@ export class LazyProject extends BaseProject {
     this._deconfiguredResources.length = 0;
 
     // load new state
-    for (const provider of this._providers) {
-      const actualStates: ResourceInstance<unknown>[] = await provider.findResourceInstances();
+    for (const [provider,state] of this._providers) {
+      const actualStates: ResourceInstance<unknown>[] = await provider.findResourceInstances(state);
       for (const state of actualStates) {
         const configured = this._configuredResources.find(e => e.name === state.name);
         if (configured) {
@@ -160,8 +160,3 @@ class DeconfiguredResources extends Array<ResourceInstance<unknown>> {
   }
 }
 
-export class Providers extends Array<Provider> {
-  constructor(...args: Provider[]) {
-    super(...args); // 调用 Array(...items: T[]) 构造形式
-  }
-}

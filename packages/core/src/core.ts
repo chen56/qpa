@@ -54,8 +54,36 @@ export abstract class ResourceService<SPEC, STATE> {
   abstract load(config: ResourceConfig<SPEC>): Promise<ResourceInstance<STATE>[]> ;
 }
 
+export class ProviderState {
+  _resourceInstances: ResourceInstances = new ResourceInstances();
+  _resources: __Resources = new __Resources();
+}
+
+export class ResourceInstances extends Array<ResourceInstance<unknown>> {
+  constructor(...args: ResourceInstance<unknown>[]) {
+    super(...args); // 调用 Array(...items: T[]) 构造形式
+    //typescript原型链修复
+    Object.setPrototypeOf(this, ResourceInstances.prototype);
+  }
+
+  delete(instance: ResourceInstance<unknown>) {
+    const index = this.indexOf(instance); // 查找 'banana' 的索引
+    if (index !== -1) {
+      this.splice(index, 1); // 删除该元素
+    }
+  }
+}
+
+class __Resources extends Map<string, Resource<unknown, unknown>> {
+  constructor(...args: [string, Resource<unknown, unknown>][]) {
+    super(args);
+    //typescript原型链修复
+    Object.setPrototypeOf(this, __Resources.prototype);
+
+  }
+}
+
 export abstract class Provider {
-  abstract get resourceInstances(): readonly ResourceInstance<unknown>[];
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
@@ -64,19 +92,19 @@ export abstract class Provider {
    *
    * @return 获取查询出ResourceScope内的所有的资源状态
    */
-  abstract findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
+  abstract findResourceInstances(state: ProviderState): Promise<ResourceInstance<unknown>[]>;
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
    ** */
-  abstract refresh(): Promise<void>;
+  abstract refresh(state: ProviderState): Promise<void>;
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
    *
    * 销毁所有实际存在的资源实例
    * */
-  abstract destroy(): Promise<void>;
+  abstract destroy(state: ProviderState): Promise<void>;
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
@@ -87,7 +115,7 @@ export abstract class Provider {
    * 服务提供者Provider应确保此方法内部先获取最新的实际资源实例，再删除所有Pending Deletion Instances
    * 不应期待外部调用者获取最新状态
    * */
-  abstract cleanup(): Promise<void>;
+  abstract cleanup(state: ProviderState): Promise<void>;
 }
 
 /**
@@ -134,17 +162,22 @@ export interface ProjectProps {
 export type Apply = (project: Project) => Promise<void>;
 
 export class Project extends BaseProject {
-  public providers = new Set<Provider>();
-
-  get resourceInstances(): ResourceInstance<unknown>[] {
-    return Array.from(this.providers).flatMap(p => p.resourceInstances);
-  }
+  public _providers = new Map<Provider, ProviderState>();
 
   public constructor(props: {
     name: string;
   }) {
     super({name: props.name});
   }
+
+  registerProvider(provider: Provider):void {
+    this._providers.set(provider, new ProviderState());
+  }
+
+  get resourceInstances(): ResourceInstance<unknown>[] {
+    return Array.from(this._providers.values()).flatMap(p => p._resourceInstances);
+  }
+
 
   static of(props: ProjectProps): Project {
     return new Project({name: props.name});
@@ -156,14 +189,14 @@ export class Project extends BaseProject {
     await apply(this);
 
     // cleanup
-    for (const provider of this.providers) {
-      await provider.cleanup();
+    for (const [provider, state] of this._providers) {
+      await provider.cleanup(state);
     }
   }
 
   async refresh(): Promise<void> {
-    for (const provider of this.providers) {
-      await provider.refresh();
+    for (const [provider, state] of this._providers) {
+      await provider.refresh(state);
     }
   }
 
@@ -173,11 +206,8 @@ export class Project extends BaseProject {
    * - 各Provider按资源类型固定的顺序进行删除，比如先删除虚拟机、再删除网络等等。
    */
   async destroy(): Promise<void> {
-    const safeCopy = Array.from(this.providers); // 再次从 Set 转换为数组
-    safeCopy.reverse(); // 反转数组 (注意：reverse() 会修改原数组，所以需要先复制)
-
-    for (const provider of safeCopy) {
-      await provider.destroy();
+    for (const [provider, state] of this._providers) {
+      await provider.destroy(state);
     }
   }
 }

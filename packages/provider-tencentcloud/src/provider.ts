@@ -1,7 +1,7 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {Project, Provider, Resource, ResourceConfig, ResourceInstance, ResourceService,} from "@qpa/core";
+import {ResourceInstances, Project, Provider, ProviderState, Resource, ResourceConfig, ResourceInstance, ResourceService,} from "@qpa/core";
 import {TagService} from "./internal/_tag_service.ts";
-import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client";
+import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor() {
@@ -15,6 +15,7 @@ export interface _TencentCloudAware {
   tagClient: tc_TagClient;
 
   _getClientConfigByRegion(region: string): ClientConfig;
+
   _project: Project;
   _provider: TencentCloudProvider;
 
@@ -116,6 +117,8 @@ export interface TencentCloudProviderProps {
 }
 
 /**
+ * 无状态服务提供者
+ *
  * 这里的方法不应该被客户程序直接执行，应该通过Project.apply()等执行
  */
 export class TencentCloudProvider extends Provider {
@@ -123,8 +126,6 @@ export class TencentCloudProvider extends Provider {
    * @internal
    */
   readonly _resourceServices: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
-  _resourceInstances: __ResourceInstances = new __ResourceInstances();
-  _resources: __Resources = new __Resources();
   private tagService: TagService;
 
   /**
@@ -146,12 +147,6 @@ export class TencentCloudProvider extends Provider {
       }
     }
   }
-  /**
-   * 云上实际的资源实例集合
-   */
-  get resourceInstances(): readonly ResourceInstance<unknown>[] {
-    return this._resourceInstances;
-  }
 
   _getService(type: TencentCloudType): TencentCloudResourceService<unknown, unknown> {
     const result = this._resourceServices.get(type);
@@ -159,7 +154,7 @@ export class TencentCloudProvider extends Provider {
     return result;
   }
 
-  async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
+  async findResourceInstances(state: ProviderState): Promise<ResourceInstance<unknown>[]> {
     return this.tagService.findResourceInstances();
   }
 
@@ -167,18 +162,18 @@ export class TencentCloudProvider extends Provider {
   /**
    * **SPI 方法**，不应被客户程序执行
    */
-  async refresh(): Promise<void> {
-    this._resourceInstances = new __ResourceInstances(...await this.findResourceInstances());
+  async refresh(state: ProviderState): Promise<void> {
+    state._resourceInstances = new ResourceInstances(...await this.findResourceInstances(state));
   }
 
   /**
    * **SPI 方法**，不应被客户程序执行
    */
-  async cleanup(): Promise<void> {
-    await this.refresh();
+  async cleanup(state: ProviderState): Promise<void> {
+    await this.refresh(state);
 
-    const undeclaredResourcePendingToDelete = this._resourceInstances.filter(e => {
-      const declared = this._resources.get(e.name);
+    const undeclaredResourcePendingToDelete = state._resourceInstances.filter(e => {
+      const declared = state._resources.get(e.name);
       return !declared;
     });
     // todo 需要按类型顺序删除
@@ -190,17 +185,17 @@ export class TencentCloudProvider extends Provider {
   /**
    * **SPI 方法**，不应被客户程序执行
    */
-  async destroy(): Promise<void> {
-    await this.refresh();
-    const safeCopy = this._resourceInstances.slice()
+  async destroy(state: ProviderState): Promise<void> {
+    await this.refresh(state);
+    const safeCopy = state._resourceInstances.slice()
     for (const instance of safeCopy) {
       await instance.destroy();
-      this._resourceInstances.delete(instance);
+      state._resourceInstances.delete(instance);
     }
   }
 
 
-  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, type: TencentCloudType): Promise<Resource<TSpec, TState>> {
+  async apply<TSpec, TState>(state: ProviderState, expected: ResourceConfig<TSpec>, type: TencentCloudType): Promise<Resource<TSpec, TState>> {
     const service = this._getService(type) as ResourceService<TSpec, TState>;
 
     let actual = await service.load(expected);
@@ -216,31 +211,28 @@ export class TencentCloudProvider extends Provider {
     }
 
     const result = new Resource(expected, actual);
-    this._resources.set(result.name, result);
+    state._resources.set(result.name, result);
     return result;
   }
 }
 
-class __ResourceInstances extends Array<ResourceInstance<unknown>> {
-  constructor(...args: ResourceInstance<unknown>[]) {
-    super(...args); // 调用 Array(...items: T[]) 构造形式
-    //typescript原型链修复
-    Object.setPrototypeOf(this, __ResourceInstances.prototype);
+
+export abstract class BaseServiceFactory {
+  protected constructor(protected _tc: _TencentCloudAware) {
+
   }
 
-  delete(instance: ResourceInstance<unknown>) {
-    const index = this.indexOf(instance); // 查找 'banana' 的索引
-    if (index !== -1) {
-      this.splice(index, 1); // 删除该元素
+  protected get _provider() {
+    return this._tc._provider;
+  }
+
+  protected get _providerState(): ProviderState {
+    const result = this._tc._project._providers.get(this._provider);
+    if (!result) {
+      throw new Error("provider need register to Project")
     }
+    return result;
   }
-}
 
-class __Resources extends Map<string, Resource<unknown, unknown>> {
-  constructor(...args: [string, Resource<unknown, unknown>][]) {
-    super(args);
-    //typescript原型链修复
-    Object.setPrototypeOf(this, __Resources.prototype);
 
-  }
 }

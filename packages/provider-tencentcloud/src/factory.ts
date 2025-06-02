@@ -9,8 +9,8 @@ import {CvmClients} from "./cvm/_common.ts";
 import {CvmFactory} from "./cvm/factory.ts";
 
 
-import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface";
-import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client";
+import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
+import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 
 interface TencentCloudProps {
   credential: TencentCloudCredential
@@ -56,7 +56,7 @@ export class TencentCloud implements _TencentCloudAware {
       services: services,
     });
     //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
-    _project.providers.add(this._provider);
+    _project.registerProvider(this._provider);
 
     this.vpc = new VpcFactory(this, vpcClients);
     this.cvm = new CvmFactory(this, cvmClients);

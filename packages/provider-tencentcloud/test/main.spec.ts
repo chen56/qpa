@@ -2,7 +2,7 @@
 
 import {afterEach, beforeEach, describe, expect, it} from "vitest";
 import {VpcState} from "../src";
-import {TextFixture} from "../test_by_hand/fixture.ts";
+import {TextFixture} from "./fixture.ts";
 
 describe('vpc', () => {
   const fixture = TextFixture.of();
