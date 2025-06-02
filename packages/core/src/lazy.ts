@@ -108,7 +108,7 @@ export enum _ConfigMode {
 
 export type ConfigSetup = (project: LazyProject) => Promise<void>;
 
-export class ConfigTodoRemove {
+export class LazyConfig {
   public project: LazyProject;
   public _setup: ConfigSetup;
 
@@ -122,11 +122,11 @@ export class ConfigTodoRemove {
   }
 
   static directMode(props: ConfigProps) {
-    return new ConfigTodoRemove(_ConfigMode.Direct, props);
+    return new LazyConfig(_ConfigMode.Direct, props);
   }
 
   static plannedMode(props: ConfigProps) {
-    return new ConfigTodoRemove(_ConfigMode.Planned, props);
+    return new LazyConfig(_ConfigMode.Planned, props);
   }
 }
 

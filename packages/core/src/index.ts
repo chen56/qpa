@@ -14,7 +14,7 @@ export {ResourceInstance} from "./core.ts";
 export type {ResourceConfig} from "./core.ts";
 export {BaseProject} from "./core.ts";
 
-export {ConfigTodoRemove} from "./lazy.ts"
+export {LazyConfig} from "./lazy.ts"
 export {LazyProject} from "./lazy.ts"
 export {LazyResource} from "./lazy.ts"
 

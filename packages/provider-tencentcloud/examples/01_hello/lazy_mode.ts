@@ -1,10 +1,10 @@
 // // noinspection JSUnusedGlobalSymbols
-// import {ConfigTodoRemove, LazyProject} from "@qpa/core";
+// import {LazyConfig, LazyProject} from "@qpa/core";
 //
 // import {TencentCloud} from "src/providers/tencent_cloud/factory.ts";
 //
 //
-// export default ConfigTodoRemove.plannedMode({
+// export default LazyConfig.plannedMode({
 //   before: async (project: LazyProject): Promise<void> => {
 //
 //     const tc = TencentCloud.createFactory({
