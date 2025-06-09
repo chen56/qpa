@@ -9,10 +9,10 @@ describe('vpc', () => {
   const {tc, project} = fixture;
 
   beforeEach(async () => {
-    await fixture.before();
+    await fixture.reset();
   })
   afterEach(async ()=>{
-    await fixture.after();
+    await fixture.reset();
   })
 
   it('vpc apply', async () => {
