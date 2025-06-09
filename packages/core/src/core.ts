@@ -85,10 +85,7 @@ export class ProviderState {
       const declared = this._resources.get(e.name);
       return !declared;
     });
-    // todo 需要按类型顺序删除
-    for (const instance of undeclaredResourcePendingToDelete) {
-      await instance.destroy();
-    }
+    return this._removeResourceInstances(undeclaredResourcePendingToDelete);
   }
 
   /**
@@ -99,12 +96,17 @@ export class ProviderState {
   async destroy(): Promise<void> {
     await this.refresh();
     const safeCopy = this._resourceInstances.slice()
-    for (const instance of safeCopy) {
+    await this._removeResourceInstances(safeCopy);
+    // todo 这里是否应该每删除一个instance就删除一个相应的resource: this._resources.delete(instance.name)?
+    this._resources.clear();
+  }
+
+  async _removeResourceInstances(instances: ResourceInstance<unknown>[]) {
+    for (const instance of instances) {
       await instance.destroy();
       this._resourceInstances.delete(instance);
     }
   }
-
 
   async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<Resource<TSpec, TState>> {
     let actual = await service.load(expected);
@@ -121,6 +123,7 @@ export class ProviderState {
 
     const result = new Resource(expected, actual);
     this._resources.set(result.name, result);
+    this._resourceInstances.push(...actual);
     return result;
   }
 }
