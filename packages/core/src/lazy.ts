@@ -22,14 +22,14 @@ export class LazyProject extends BaseProject {
     this._deconfiguredResources.length = 0;
 
     // load new state
-    for (const [provider,state] of this._providers) {
-      const actualStates: ResourceInstance<unknown>[] = await provider.findResourceInstances(state);
-      for (const state of actualStates) {
-        const configured = this._configuredResources.find(e => e.name === state.name);
+    for (const [provider,_] of this._providers) {
+      const instances: ResourceInstance<unknown>[] = await provider.findResourceInstances();
+      for (const instance of instances) {
+        const configured = this._configuredResources.find(e => e.name === instance.name);
         if (configured) {
-          configured.states.push(state);
+          configured.states.push(instance);
         } else {
-          this._deconfiguredResources.push(state);
+          this._deconfiguredResources.push(instance);
         }
       }
     }
@@ -64,7 +64,7 @@ export class LazyProject extends BaseProject {
 export class LazyResource<SPEC, STATE> {
   public readonly name: string;
 
-  _states:ResourceInstance<STATE>[] = [];
+  _instances:ResourceInstance<STATE>[] = [];
   readonly service: ResourceService<SPEC, STATE>;
   private readonly specPart: ResourceConfig<SPEC>;
 
@@ -84,7 +84,7 @@ export class LazyResource<SPEC, STATE> {
   }
 
   get states(): ResourceInstance<STATE>[] {
-    return this._states;
+    return this._instances;
   }
 
   async create(): Promise<ResourceInstance<STATE>> {
@@ -92,11 +92,11 @@ export class LazyResource<SPEC, STATE> {
   }
 
   async destroy(): Promise<void> {
-    return this.service.delete(...this._states);
+    return this.service.delete(...this._instances);
   }
 
   async reload(): Promise<void> {
-    this._states=await this.service.load(this);
+    this._instances=await this.service.load(this);
   }
 }
 

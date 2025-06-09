@@ -2,7 +2,7 @@ import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/servi
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Project, ResourceInstance} from "@qpa/core";
 import {Arrays, Paging} from "./_common.ts";
-import {TencentCloudType, TaggableResourceService, TencentCloudProvider, _TencentCloudAware} from "../provider.ts";
+import {TencentCloudType, TaggableResourceService, _TencentCloudAware} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
 const pageLimit = 100;
@@ -12,7 +12,7 @@ const pageLimit = 100;
  */
 export class TagService {
 
-  constructor(private readonly project: Project, private readonly provider: TencentCloudProvider, readonly tc: _TencentCloudAware) {
+  constructor(private readonly project: Project, readonly tc: _TencentCloudAware) {
   }
 
   get tagClient(): tc_TagClient {
@@ -54,7 +54,7 @@ export class TagService {
 
     const result = new Array<ResourceInstance<unknown>>();
     for (const [resourceType, oneTypeResourceTag] of type_resourceTags) {
-      const resourceService = this.provider._resourceServices.get(resourceType);
+      const resourceService = this.tc._services.get(resourceType);
       if (!resourceService) {
         // 不支持类型应该异常退出吗？
         // 不支持类型可能是以前框架支持某种类型时创建的，但当前版本不再支持

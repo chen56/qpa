@@ -1,8 +1,8 @@
-import {LazyProject, LazyResource, Resource, ResourceConfig} from "@qpa/core";
+import {Resource, ResourceConfig} from "@qpa/core";
 import {VpcService, VpcSpec, VpcState} from "./vpc.ts";
-import {_TencentCloudAware, BaseServiceFactory, TencentCloudProvider, TencentCloudType} from "../provider.ts";
+import {_TencentCloudAware, BaseServiceFactory, TencentCloudType} from "../provider.ts";
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
-import {SubnetSpec, SubnetState} from "./subnet.ts";
+import {SubnetService, SubnetSpec, SubnetState} from "./subnet.ts";
 
 export class VpcFactory extends BaseServiceFactory {
   private readonly vpcClients: Map<string, tc_VpcClient> = new Map();
@@ -20,30 +20,13 @@ export class VpcFactory extends BaseServiceFactory {
   }
 
   async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcState>> {
-    return await this._provider.apply(this._providerState, expected, TencentCloudType.vpc_vpc);
+    const service = this._getService(TencentCloudType.vpc_vpc) as VpcService;
+    return await this._providerState.apply(expected, service)
   }
 
   async subnet(expected: ResourceConfig<SubnetSpec>): Promise<Resource<SubnetSpec, SubnetState>> {
-    return await this._provider.apply(this._providerState, expected, TencentCloudType.vpc_subnet);
-  }
-
-}
-
-
-
-/**
- * 工厂方法类
- */
-export class VpcLazyFactory {
-  constructor(readonly project: LazyProject, readonly provider: TencentCloudProvider) {
-  }
-
-  vpc(props: ResourceConfig<VpcSpec>): LazyResource<VpcSpec, VpcState> {
-    const result = new LazyResource<VpcSpec, VpcState>(this.provider, {
-      ...props,
-      service: this.provider._getService(TencentCloudType.vpc_vpc) as VpcService,
-    });
-    this.project._configuredResources.push(result);
-    return result;
+    const service = this._getService(TencentCloudType.vpc_subnet) as SubnetService;
+    return await this._providerState.apply(expected, service)
   }
 }
+

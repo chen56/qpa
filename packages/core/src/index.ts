@@ -1,5 +1,3 @@
-/**
- * */
 
 export type {ProjectProps} from "./core.ts";
 export {Project} from "./core.ts";
@@ -17,4 +15,3 @@ export {BaseProject} from "./core.ts";
 export {LazyConfig} from "./lazy.ts"
 export {LazyProject} from "./lazy.ts"
 export {LazyResource} from "./lazy.ts"
-

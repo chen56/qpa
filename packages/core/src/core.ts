@@ -57,6 +57,72 @@ export abstract class ResourceService<SPEC, STATE> {
 export class ProviderState {
   _resourceInstances: ResourceInstances = new ResourceInstances();
   _resources: __Resources = new __Resources();
+
+  constructor(readonly provider: Provider) {
+  }
+
+
+  /**
+   * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
+   ** */
+  async refresh(): Promise<void> {
+    this._resourceInstances = new ResourceInstances(...await this.provider.findResourceInstances());
+  }
+
+  /**
+   * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
+   *
+   * 因为清理方法是apply的最后一步，此方法必须在外部调用完apply后才能使用。
+   *
+   * 清理待删除资源(Pending Deletion Instances)
+   * 服务提供者Provider应确保此方法内部先获取最新的实际资源实例，再删除所有Pending Deletion Instances
+   * 不应期待外部调用者获取最新状态
+   * */
+  async cleanup(): Promise<void> {
+    await this.refresh();
+
+    const undeclaredResourcePendingToDelete = this._resourceInstances.filter(e => {
+      const declared = this._resources.get(e.name);
+      return !declared;
+    });
+    // todo 需要按类型顺序删除
+    for (const instance of undeclaredResourcePendingToDelete) {
+      await instance.destroy();
+    }
+  }
+
+  /**
+   * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
+   *
+   * 销毁所有实际存在的资源实例
+   * */
+  async destroy(): Promise<void> {
+    await this.refresh();
+    const safeCopy = this._resourceInstances.slice()
+    for (const instance of safeCopy) {
+      await instance.destroy();
+      this._resourceInstances.delete(instance);
+    }
+  }
+
+
+  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<Resource<TSpec, TState>> {
+    let actual = await service.load(expected);
+    if (actual.length == 0) {
+      actual = [await service.create(expected)];
+    }
+    if (actual.length === 0) {
+      throw new Error(`bug: 应该不会发生, 可能是QPA的bug, 资源${expected.name}的实际资源实例数量应该不为0, 但是目前为0 `)
+    }
+
+    if (actual.length > 1) {
+      throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行destroy后apply重建,冲突实例：${actual.map(e => e.toJson())}`)
+    }
+
+    const result = new Resource(expected, actual);
+    this._resources.set(result.name, result);
+    return result;
+  }
 }
 
 export class ResourceInstances extends Array<ResourceInstance<unknown>> {
@@ -84,7 +150,6 @@ class __Resources extends Map<string, Resource<unknown, unknown>> {
 }
 
 export abstract class Provider {
-
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
    *
@@ -92,30 +157,8 @@ export abstract class Provider {
    *
    * @return 获取查询出ResourceScope内的所有的资源状态
    */
-  abstract findResourceInstances(state: ProviderState): Promise<ResourceInstance<unknown>[]>;
+  abstract findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
 
-  /**
-   * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
-   ** */
-  abstract refresh(state: ProviderState): Promise<void>;
-
-  /**
-   * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
-   *
-   * 销毁所有实际存在的资源实例
-   * */
-  abstract destroy(state: ProviderState): Promise<void>;
-
-  /**
-   * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
-   *
-   * 因为清理方法是apply的最后一步，此方法必须在外部调用完apply后才能使用。
-   *
-   * 清理待删除资源(Pending Deletion Instances)
-   * 服务提供者Provider应确保此方法内部先获取最新的实际资源实例，再删除所有Pending Deletion Instances
-   * 不应期待外部调用者获取最新状态
-   * */
-  abstract cleanup(state: ProviderState): Promise<void>;
 }
 
 /**
@@ -170,8 +213,8 @@ export class Project extends BaseProject {
     super({name: props.name});
   }
 
-  registerProvider(provider: Provider):void {
-    this._providers.set(provider, new ProviderState());
+  registerProvider(provider: Provider): void {
+    this._providers.set(provider, new ProviderState(provider));
   }
 
   get resourceInstances(): ResourceInstance<unknown>[] {
@@ -189,14 +232,14 @@ export class Project extends BaseProject {
     await apply(this);
 
     // cleanup
-    for (const [provider, state] of this._providers) {
-      await provider.cleanup(state);
+    for (const [_, state] of this._providers) {
+      await state.cleanup();
     }
   }
 
   async refresh(): Promise<void> {
-    for (const [provider, state] of this._providers) {
-      await provider.refresh(state);
+    for (const [_, state] of this._providers) {
+      await state.refresh();
     }
   }
 
@@ -206,8 +249,8 @@ export class Project extends BaseProject {
    * - 各Provider按资源类型固定的顺序进行删除，比如先删除虚拟机、再删除网络等等。
    */
   async destroy(): Promise<void> {
-    for (const [provider, state] of this._providers) {
-      await provider.destroy(state);
+    for (const [_, state] of this._providers) {
+      await state.destroy();
     }
   }
 }

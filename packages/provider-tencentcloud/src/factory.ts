@@ -1,7 +1,7 @@
-import {VpcFactory, VpcLazyFactory} from "./vpc/factory.ts";
+import {VpcFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
 import {_TencentCloudAware, TencentCloudCredential, TencentCloudProvider, TencentCloudResourceService, TencentCloudType} from "./provider.ts";
-import {LazyProject, Project} from "@qpa/core";
+import {Project} from "@qpa/core";
 import {SubnetService} from "./vpc/subnet.ts";
 import {CvmInstanceService} from "./cvm/instance.ts";
 import {CvmFactory} from "./cvm/factory.ts";
@@ -22,6 +22,7 @@ interface TencentCloudProps {
 export class TencentCloud implements _TencentCloudAware {
   private readonly _credential: TencentCloudCredential;
   readonly _provider: TencentCloudProvider;
+  readonly _services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> =new Map();
 
   tagClient: tc_TagClient;
 
@@ -35,10 +36,9 @@ export class TencentCloud implements _TencentCloudAware {
       credential: this._credential,
     });
 
-    const services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> = new Map();
 
-    function add(service: TencentCloudResourceService<unknown, unknown>) {
-      services.set(service.resourceType, service);
+    const add=(service: TencentCloudResourceService<unknown, unknown>)=>{
+      this._services.set(service.resourceType, service);
     }
 
     // vpc
@@ -50,12 +50,17 @@ export class TencentCloud implements _TencentCloudAware {
     this.cvm = new CvmFactory(this);
     add(new CvmInstanceService(_project, this.cvm));
 
-    this._provider = new TencentCloudProvider(_project, this, {
-      services: services,
-    });
+
+    // assert services register
+    for (const type of TencentCloudType.types) {
+      if (!this._services.has(type)) {
+        throw Error(`bug:assert qpa internal bug,ResourceType ${type} 未注册相应的ResourceService`)
+      }
+    }
+
+    this._provider = new TencentCloudProvider(_project, this);
     //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
     _project.registerProvider(this._provider);
-
   }
 
   public _getClientConfigByRegion(region: string): tc_ClientConfig {
@@ -66,14 +71,3 @@ export class TencentCloud implements _TencentCloudAware {
   }
 }
 
-
-/**
- * @public
- */
-export class LazyModeTencentCloudFactory {
-  readonly vpc: VpcLazyFactory;
-
-  constructor(readonly project: LazyProject, readonly provider: TencentCloudProvider) {
-    this.vpc = new VpcLazyFactory(this.project, this.provider);
-  }
-}

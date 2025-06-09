@@ -58,9 +58,15 @@ export class CvmInstanceService extends TaggableResourceService<CvmInstanceSpec,
   async create(config: ResourceConfig<CvmInstanceSpec>): Promise<ResourceInstance<CvmInstanceState>> {
     const client = this.clients.getClient(config.spec.Region);
 
+    // 分离出扩展的参数，不然腾讯云api会报错
+    const { Region, ...runInstancesRequest } = config.spec;
+
     const response = await client.RunInstances({
-      ...config.spec,
-      TagSpecification: [...(config.spec.TagSpecification ?? []),
+      ...runInstancesRequest,
+      TagSpecification: [
+        // 先复制客户定义的标签
+        ...(config.spec.TagSpecification ?? []),
+        //再附带上项目标签和资源标签
         {
           ResourceType: "instance", Tags: [
             {Key: SpiConstants.tagNames.project, Value: this.project.name},
