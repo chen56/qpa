@@ -1,7 +1,8 @@
 import {ClientConfig, Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {Project, Provider, ProviderState, ResourceInstance, ResourceService,} from "@qpa/core";
+import {Project, ProviderRuntime, ResourceInstance} from "@qpa/core";
 import {TagService} from "./internal/_tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
+import {Provider, ResourceService} from "@qpa/core/spi";
 
 export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor() {
@@ -147,7 +148,7 @@ export abstract class BaseServiceFactory {
     return this._tc._provider;
   }
 
-  protected get _providerState(): ProviderState {
+  protected get _providerState(): ProviderRuntime {
     const result = this._tc._project._providers.get(this._provider);
     if (!result) {
       throw new Error("provider need register to Project")

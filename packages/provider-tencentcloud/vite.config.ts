@@ -29,6 +29,9 @@ export default defineConfig({
         },
         /* for example, use global to avoid globals imports (describe, test, expect): */
         // globals: true,
+      // Vitest 的配置项
+      // 1. 指定测试文件的匹配模式 (glob patterns)
+      include: ['test/**/*.test.{ts,tsx,js,jsx}', 'test/**/*.spec.{ts,tsx,js,jsx}'],
 
     },
 })

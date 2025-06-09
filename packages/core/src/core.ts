@@ -1,3 +1,5 @@
+import {Provider, ResourceService} from "./spi/provider.ts";
+
 export abstract class BaseProject {
   public name: string;
 
@@ -43,30 +45,73 @@ export interface ResourceConfig<SPEC> {
   spec: SPEC;
 }
 
-export abstract class ResourceService<SPEC, STATE> {
-  abstract create(config: ResourceConfig<SPEC>): Promise<ResourceInstance<STATE>>;
 
-  abstract delete(...instances: ResourceInstance<STATE>[]): Promise<void>;
+/**
+ * 一个完整的受管理资源，包括
+ * - expected: 资源配置(定义期望的规格状态)
+ * - actual: 对应的以资源名为映射关系的的多个同名实际资源实例(正常应该只有一个,但可能有重复create的问题资源)
+ *
+ * 资源的最终状态，LazyResource加载后也会变成完全体的Resource
+ */
+export class Resource<SPEC, STATE> {
+
+  // todo actual要改为单数，集合放到核心api有点难以理解和应用，这个类就应该是完整的
+  constructor(readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
+    if (actual.length == 0) {
+      throw new Error("Resource为非惰性资源，创建Resource必须提供对应云上实例");
+    }
+    for (const instance of actual) {
+      if (expected.name !== instance.name) {
+        throw new Error(`expected.name(${expected.name})必须和实际资源实例的name(${instance.name})一致`);
+      }
+    }
+  }
 
   /**
-   * @return 可能返回多个实际的同名云资源，因为一个资源可能被非正常的多次创建，重复问题留给上层程序判断解决
+   * name 是区分资源的关键, 我们会把name 用tag的形式打在每个实际的资源上, 以此对齐声明的资源配置和实际资源实例
    */
-  abstract load(config: ResourceConfig<SPEC>): Promise<ResourceInstance<STATE>[]> ;
+  get name(): string {
+    return this.expected.name;
+  }
+
+  get actualInstance() {
+    if (this.actual.length != 1) {
+      throw new Error(`正常资源应该对应云上1个云上实际实例，但现在有${this.actual.length}个,请检查:${this.actual.map(it => (it.toJson()))}`);
+    }
+    return this.actual[0];
+  }
+
 }
 
-export class ProviderState {
-  _resourceInstances: ResourceInstances = new ResourceInstances();
+export interface ProjectProps {
+  name: string;
+}
+
+export type Apply = (project: Project) => Promise<void>;
+
+/**
+ * SPI 接口，并不直接暴露给api客户程序。
+ *
+ *
+ * 实现Provider的公共逻辑有2种方式：
+ * 1. 使用继承：用父类型实现对资源的管理公共逻辑
+ * 2. 使用隔离的组合composite模型
+ *
+ * ProviderRuntime的逻辑原先用继承实现，由Provider父类型提供公共逻辑，我们拆离为组合模式，这样SPI实现者只关注Provider的接口实现即可
+ * 避免SPI客户面对ProviderRuntime和云实现无关的接口，减少信息过载
+ */
+export class ProviderRuntime {
+  _resourceInstances: __ResourceInstances = new __ResourceInstances();
   _resources: __Resources = new __Resources();
 
   constructor(readonly provider: Provider) {
   }
 
-
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
-   ** */
+   **/
   async refresh(): Promise<void> {
-    this._resourceInstances = new ResourceInstances(...await this.provider.findResourceInstances());
+    this._resourceInstances = new __ResourceInstances(...await this.provider.findResourceInstances());
   }
 
   /**
@@ -128,87 +173,8 @@ export class ProviderState {
   }
 }
 
-export class ResourceInstances extends Array<ResourceInstance<unknown>> {
-  constructor(...args: ResourceInstance<unknown>[]) {
-    super(...args); // 调用 Array(...items: T[]) 构造形式
-    //typescript原型链修复
-    Object.setPrototypeOf(this, ResourceInstances.prototype);
-  }
-
-  delete(instance: ResourceInstance<unknown>) {
-    const index = this.indexOf(instance); // 查找 'banana' 的索引
-    if (index !== -1) {
-      this.splice(index, 1); // 删除该元素
-    }
-  }
-}
-
-class __Resources extends Map<string, Resource<unknown, unknown>> {
-  constructor(...args: [string, Resource<unknown, unknown>][]) {
-    super(args);
-    //typescript原型链修复
-    Object.setPrototypeOf(this, __Resources.prototype);
-
-  }
-}
-
-export abstract class Provider {
-  /**
-   * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
-   *
-   * 查询最新的 ResourceScope 内的所有的已存在资源的状态信息
-   *
-   * @return 获取查询出ResourceScope内的所有的资源状态
-   */
-  abstract findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
-
-}
-
-/**
- * 一个完整的受管理资源，包括
- * - expected: 资源配置(定义期望的规格状态)
- * - actual: 对应的以资源名为映射关系的的多个同名实际资源实例(正常应该只有一个,但可能有重复create的问题资源)
- *
- * 资源的最终状态，LazyResource加载后也会变成完全体的Resource
- */
-export class Resource<SPEC, STATE> {
-
-  // todo actual要改为单数，集合放到核心api有点难以理解和应用，这个类就应该是完整的
-  constructor(readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
-    if (actual.length == 0) {
-      throw new Error("Resource为非惰性资源，创建Resource必须提供对应云上实例");
-    }
-    for (const instance of actual) {
-      if (expected.name !== instance.name) {
-        throw new Error(`expected.name(${expected.name})必须和实际资源实例的name(${instance.name})一致`);
-      }
-    }
-  }
-
-  /**
-   * name 是区分资源的关键, 我们会把name 用tag的形式打在每个实际的资源上, 以此对齐声明的资源配置和实际资源实例
-   */
-  get name(): string {
-    return this.expected.name;
-  }
-
-  get actualInstance() {
-    if (this.actual.length != 1) {
-      throw new Error(`正常资源应该对应云上1个云上实际实例，但现在有${this.actual.length}个,请检查:${this.actual.map(it => (it.toJson()))}`);
-    }
-    return this.actual[0];
-  }
-
-}
-
-export interface ProjectProps {
-  name: string;
-}
-
-export type Apply = (project: Project) => Promise<void>;
-
 export class Project extends BaseProject {
-  public _providers = new Map<Provider, ProviderState>();
+  public _providers = new Map<Provider, ProviderRuntime>();
 
   public constructor(props: {
     name: string;
@@ -217,13 +183,12 @@ export class Project extends BaseProject {
   }
 
   registerProvider(provider: Provider): void {
-    this._providers.set(provider, new ProviderState(provider));
+    this._providers.set(provider, new ProviderRuntime(provider));
   }
 
   get resourceInstances(): ResourceInstance<unknown>[] {
     return Array.from(this._providers.values()).flatMap(p => p._resourceInstances);
   }
-
 
   static of(props: ProjectProps): Project {
     return new Project({name: props.name});
@@ -254,6 +219,31 @@ export class Project extends BaseProject {
   async destroy(): Promise<void> {
     for (const [_, state] of this._providers) {
       await state.destroy();
+    }
+  }
+}
+
+
+class __Resources extends Map<string, Resource<unknown, unknown>> {
+  constructor(...args: [string, Resource<unknown, unknown>][]) {
+    super(args);
+    //typescript原型链修复
+    Object.setPrototypeOf(this, __Resources.prototype);
+
+  }
+}
+
+class __ResourceInstances extends Array<ResourceInstance<unknown>> {
+  constructor(...args: ResourceInstance<unknown>[]) {
+    super(...args); // 调用 Array(...items: T[]) 构造形式
+    //typescript原型链修复
+    Object.setPrototypeOf(this, __ResourceInstances.prototype);
+  }
+
+  delete(instance: ResourceInstance<unknown>) {
+    const index = this.indexOf(instance); // 查找 'banana' 的索引
+    if (index !== -1) {
+      this.splice(index, 1); // 删除该元素
     }
   }
 }

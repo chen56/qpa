@@ -1,7 +1,8 @@
-import {BaseProject, Provider, ResourceService, ResourceConfig, ResourceInstance, ProviderState} from "./core.ts";
+import {BaseProject, ProviderRuntime, ResourceConfig, ResourceInstance} from "./core.ts";
+import {Provider, ResourceService} from "./spi/provider.ts";
 
 export class LazyProject extends BaseProject {
-  _providers =new Map<Provider, ProviderState>;
+  _providers =new Map<Provider, ProviderRuntime>;
 
   _configuredResources: ConfiguredResources = new ConfiguredResources();
   _deconfiguredResources: DeconfiguredResources = new DeconfiguredResources();
