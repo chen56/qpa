@@ -1,6 +1,6 @@
 import {VpcFactory} from "./vpc/factory.ts";
 import {VpcService} from "./vpc/vpc.ts";
-import {_TencentCloudAware, TencentCloudCredential, TencentCloudProvider, TencentCloudResourceService, TencentCloudType} from "./provider.ts";
+import {_TencentCloudAware, TencentCloudCredential, _TencentCloudProvider, _TencentCloudResourceService, TencentCloudType} from "./provider.ts";
 import {Project} from "@qpa/core";
 import {SubnetService} from "./vpc/subnet.ts";
 import {CvmInstanceService} from "./cvm/instance.ts";
@@ -21,8 +21,8 @@ interface TencentCloudProps {
  */
 export class TencentCloud implements _TencentCloudAware {
   private readonly _credential: TencentCloudCredential;
-  readonly _provider: TencentCloudProvider;
-  readonly _services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>> =new Map();
+  readonly _provider: _TencentCloudProvider;
+  readonly _services: Map<TencentCloudType, _TencentCloudResourceService<unknown, unknown>> =new Map();
 
   tagClient: tc_TagClient;
 
@@ -37,7 +37,7 @@ export class TencentCloud implements _TencentCloudAware {
     });
 
 
-    const add=(service: TencentCloudResourceService<unknown, unknown>)=>{
+    const add=(service: _TencentCloudResourceService<unknown, unknown>)=>{
       this._services.set(service.resourceType, service);
     }
 
@@ -58,7 +58,7 @@ export class TencentCloud implements _TencentCloudAware {
       }
     }
 
-    this._provider = new TencentCloudProvider(_project, this);
+    this._provider = new _TencentCloudProvider(_project, this);
     //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
     _project.registerProvider(this._provider);
   }

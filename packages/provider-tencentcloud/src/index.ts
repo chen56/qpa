@@ -7,12 +7,12 @@
  * 腾讯云服务模块
  *
  * @example
- * import { TencentCloudProvider } from '@qpa/_provider-tencentcloud'
+ * import { _TencentCloudProvider } from '@qpa/_provider-tencentcloud'
  */
 export * from './vpc/index.ts';
 
 // 1. 明确列出要导出的内容（可选）
 export type{TencentCloudCredential} from './provider.ts';
 
-export {TencentCloudProvider} from './provider.ts';
+export {_TencentCloudProvider} from './provider.ts';
 

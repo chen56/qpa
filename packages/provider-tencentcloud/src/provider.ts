@@ -4,7 +4,7 @@ import {TagService} from "./internal/_tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {Provider, ResourceService} from "@qpa/core/spi";
 
-export abstract class TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
+export abstract class _TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor() {
     super();
   }
@@ -18,8 +18,8 @@ export interface _TencentCloudAware {
   _getClientConfigByRegion(region: string): ClientConfig;
 
   _project: Project;
-  _provider: TencentCloudProvider;
-  _services: Map<TencentCloudType, TencentCloudResourceService<unknown, unknown>>;
+  _provider: _TencentCloudProvider;
+  _services: Map<TencentCloudType, _TencentCloudResourceService<unknown, unknown>>;
 
 }
 
@@ -30,7 +30,7 @@ export interface TencentCloudCredential extends tc_Credential {
 /**
  * 支持tag的资源 Taggable
  */
-export abstract class TaggableResourceService<SPEC, STATE> extends TencentCloudResourceService<SPEC, STATE> {
+export abstract class _TaggableResourceService<SPEC, STATE> extends _TencentCloudResourceService<SPEC, STATE> {
   protected constructor() {
     super();
   }
@@ -119,7 +119,7 @@ export class TencentCloudType {
  *
  * 这里的方法不应该被客户程序直接执行，应该通过Project.apply()等执行
  */
-export class TencentCloudProvider extends Provider {
+export class _TencentCloudProvider extends Provider {
   private tagService: TagService;
 
   /**
@@ -134,8 +134,6 @@ export class TencentCloudProvider extends Provider {
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
     return this.tagService.findResourceInstances();
   }
-
-
 }
 
 
@@ -156,11 +154,9 @@ export abstract class BaseServiceFactory {
     return result;
   }
 
-  protected _getService(type: TencentCloudType): TencentCloudResourceService<unknown, unknown> {
+  protected _getService(type: TencentCloudType): _TencentCloudResourceService<unknown, unknown> {
     const result = this._tc._services.get(type);
     if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或放弃使用此资源类型`);
     return result;
   }
-
-
 }

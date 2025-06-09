@@ -1,6 +1,6 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
 import {Project, ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TaggableResourceService, TencentCloudType} from "../provider.ts";
+import {_TaggableResourceService, TencentCloudType} from "../provider.ts";
 import {CvmFactory} from "./factory.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
@@ -39,7 +39,7 @@ export interface CvmInstanceState extends Instance {
 
 /**
  */
-export class CvmInstanceService extends TaggableResourceService<CvmInstanceSpec, CvmInstanceState> {
+export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec, CvmInstanceState> {
   readonly resourceType = TencentCloudType.cvm_instance;
 
   constructor(readonly project: Project, readonly clients: CvmFactory) {
