@@ -80,8 +80,8 @@ export class TagService {
       }
       for (const [region, oneRegionResourceIds] of region_resourceTags) {
         // 切片为多页查询
-        for (const pageIds of Arrays.chunk(oneRegionResourceIds, resourceType.pageLimit)) {
-          const resources = await resourceService.findOnePageInstanceByResourceId(region, pageIds, resourceType.pageLimit);
+        for (const onePageResourceIds of Arrays.chunk(oneRegionResourceIds, resourceType.pageLimit)) {
+          const resources = await resourceService.findOnePageInstanceByResourceId(region, onePageResourceIds, resourceType.pageLimit);
           result.push(...resources);
         }
       }

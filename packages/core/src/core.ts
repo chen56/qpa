@@ -45,6 +45,20 @@ export interface ResourceConfig<SPEC> {
   spec: SPEC;
 }
 
+export interface ResourceType {
+  /**
+   * CN: 唯一的资源类型名
+   * EN: unique resource type name
+   */
+  get name():string;
+  /**
+   *
+   * CN: 依赖项，比如 vm 依赖 vpc,subnet
+   * EN: dependencies, examples: vm dependencies is vpc,subnet
+   */
+  get dependencies(): ResourceType[];
+}
+
 
 /**
  * 一个完整的受管理资源，包括

@@ -58,8 +58,9 @@ export class TencentCloud implements _TencentCloudAware {
       }
     }
 
-    this._provider = new _TencentCloudProvider(_project, this);
-    //放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
+    this._provider = new _TencentCloudProvider(_project, this,this._services);
+    //todo 这里的设计有点诡异，依赖执行顺序？
+    // 放到最后执行，避免因构造check失败而抛出异常，但却把this加入到{@link Project.providers | 提供者集合} 中
     _project.registerProvider(this._provider);
   }
 

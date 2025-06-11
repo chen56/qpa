@@ -7,7 +7,6 @@ describe('cvm', () => {
   const fixture = TextFixture.of();
   const { tc, project } = fixture;
   const cvmGuangzhou = tc.cvm.getClient("ap-guangzhou");
-
   it('DescribeZones', async () => {
     const zonesResponse = await cvmGuangzhou.DescribeZones()
     const availableZones = (zonesResponse.ZoneSet ?? [])?.filter(e => e.ZoneState === "AVAILABLE");

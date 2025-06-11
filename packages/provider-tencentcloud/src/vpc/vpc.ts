@@ -25,7 +25,7 @@ export class VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
     super();
   }
 
-  async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit:number): Promise<ResourceInstance<VpcState>[]> {
+  async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<VpcState>[]> {
     const client = this.clients.getClient(region);
     const response = await client.DescribeVpcs({
       VpcIds: resourceIds,
