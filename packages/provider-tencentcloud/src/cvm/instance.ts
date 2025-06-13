@@ -1,6 +1,6 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
 import {Project, ResourceConfig, ResourceInstance} from "@qpa/core";
-import {_TaggableResourceService, TencentCloudType} from "../provider.ts";
+import {_Runners, _TaggableResourceService, _TencentCloudProvider, TencentCloudType} from "../provider.ts";
 import {CvmFactory} from "./factory.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
@@ -50,9 +50,13 @@ export interface CvmInstanceState extends Instance {
  */
 export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec, CvmInstanceState> {
   readonly resourceType = TencentCloudType.cvm_instance;
+  private readonly provider: _TencentCloudProvider;
+  private runners: _Runners;
 
   constructor(readonly project: Project, readonly clients: CvmFactory) {
     super();
+    this.provider=clients.provider;
+    this.runners=clients.provider.runners;
   }
 
   async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<CvmInstanceState>[]> {
@@ -124,9 +128,41 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
       console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
       await client.TerminateInstances({InstanceIds: [state.InstanceId!]})
 
+      // 创建重试策略
+      const waitingDeleteComplete = this.runners.removeResourceWaiting();
 
-      // handleWhenResult(res => res.statusCode === 503)
+      await waitingDeleteComplete.execute(async (context) => {
+        console.log(`waiting delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
 
+        const describeInstancesResponse = await client.DescribeInstances({
+          // 按标签过滤
+          Filters: [
+            {Name: `instance-id`, Values: [r.state.InstanceId!]},
+          ],
+          Limit: this.resourceType.queryLimit,
+        });
+
+        if (!describeInstancesResponse.InstanceSet || describeInstancesResponse.InstanceSet!.length == 0) {
+          return;
+        }else{
+          throw new Error(`实例${r.state.InstanceId}还未删除干净，继续等待`);
+        }
+      });
+
+      console.log(`cvm instance 删除成功，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
+    }
+  }
+
+  async delete2(...resources: ResourceInstance<CvmInstanceState>[]): Promise<void> {
+    // 单台删除，别怕慢，就怕乱
+    for (const r of resources) {
+      const state = r.state;
+      const client = this.clients.getClient(state.Region);
+      console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
+      await client.TerminateInstances({InstanceIds: [state.InstanceId!]})
+
+
+      const runner=this.runners.removeResourceWaiting();
       while (true) {
 
         await new Promise(resolve => setTimeout(resolve, 1000));

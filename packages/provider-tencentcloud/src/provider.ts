@@ -138,7 +138,7 @@ export class _TencentCloudProvider extends Provider {
   readonly services = new _Services();
   private readonly credential: TencentCloudCredential;
   private readonly tagService: _TagService;
-
+  readonly runners:_Runners=new _Runners();
   constructor(readonly project: Project, props: TencentCloudProviderProps) {
     super(project);
     this.credential = props.credential;
@@ -185,16 +185,22 @@ class _Services extends Map<TencentCloudType, _TencentCloudResourceService<unkno
   }
 }
 
-class _Runners {
 
+/**
+ * 集中配置Retry的工具类
+ */
+export class _Runners {
 
-  apiRunner(policy?: Policy) {
+  /**
+   * 等待资源删除完成的策略
+   */
+  removeResourceWaiting(policy?: Policy) {
     return wrap(
       retry(
         policy ?? handleAll, // handle all errors
-        {maxAttempts: 1, backoff: new ConstantBackoff(0)}, // retry three times, with no backoff
+        {maxAttempts: 50, backoff: new ConstantBackoff(100)}, // retry three times, with no backoff
       ),
-      timeout(2000, TimeoutStrategy.Aggressive),
+      timeout(15000, TimeoutStrategy.Aggressive),
     );
   }
 }
