@@ -1,11 +1,11 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
-import { describe, it } from "vitest";
+import {describe, expect, it} from "vitest";
 import { TextFixture } from "../test/fixture.ts";
 
 describe('cvm', () => {
   const fixture = TextFixture.of();
-  const { tc, project } = fixture;
+  const { tc} = fixture;
   const cvmGuangzhou = tc.cvm.getClient("ap-guangzhou");
   it('DescribeZones', async () => {
     const zonesResponse = await cvmGuangzhou.DescribeZones()
@@ -55,6 +55,13 @@ describe('cvm', () => {
   })
 
   it('DescribeInstances', async () => {
+    const response = await cvmGuangzhou.DescribeInstances({
+      InstanceIds:["ins-xxxxxxxx"],//not exists
+    });
+    expect(response.InstanceSet?.length).toBe(0)
+  })
+
+  it('InquiryPriceRunInstances', async () => {
     const inquiryPriceRunInstancesResponse = await cvmGuangzhou.InquiryPriceRunInstances({
       Placement: {
         Zone: "ap-guangzhou-7", // 可用区

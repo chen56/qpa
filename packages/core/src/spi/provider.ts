@@ -10,6 +10,7 @@ import {ResourceConfig, ResourceInstance, ResourceType} from "../core.ts";
 export abstract class Provider {
 
   abstract get services(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
+
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
    *

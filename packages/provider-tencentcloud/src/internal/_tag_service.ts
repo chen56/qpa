@@ -2,7 +2,7 @@ import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/servi
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Project, ResourceInstance} from "@qpa/core";
 import {Arrays, Paging} from "./_common.ts";
-import {TencentCloudType, _TaggableResourceService, _TencentCloudAware} from "../provider.ts";
+import {TencentCloudType, _TaggableResourceService, _TencentCloudResourceService} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
 const pageLimit = 100;
@@ -12,11 +12,7 @@ const pageLimit = 100;
  */
 export class TagService {
 
-  constructor(private readonly project: Project, readonly tc: _TencentCloudAware) {
-  }
-
-  get tagClient(): tc_TagClient {
-    return this.tc.tagClient;
+  constructor(private readonly project: Project, readonly tagClient: tc_TagClient,readonly services: Map<TencentCloudType, _TencentCloudResourceService<unknown, unknown>>) {
   }
 
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
@@ -54,7 +50,7 @@ export class TagService {
 
     const result = new Array<ResourceInstance<unknown>>();
     for (const [resourceType, oneTypeResourceTag] of type_resourceTags) {
-      const resourceService = this.tc._services.get(resourceType);
+      const resourceService = this.services.get(resourceType);
       if (!resourceService) {
         // 不支持类型应该异常退出吗？
         // 不支持类型可能是以前框架支持某种类型时创建的，但当前版本不再支持
@@ -80,8 +76,8 @@ export class TagService {
       }
       for (const [region, oneRegionResourceIds] of region_resourceTags) {
         // 切片为多页查询
-        for (const onePageResourceIds of Arrays.chunk(oneRegionResourceIds, resourceType.pageLimit)) {
-          const resources = await resourceService.findOnePageInstanceByResourceId(region, onePageResourceIds, resourceType.pageLimit);
+        for (const onePageResourceIds of Arrays.chunk(oneRegionResourceIds, resourceType.queryLimit)) {
+          const resources = await resourceService.findOnePageInstanceByResourceId(region, onePageResourceIds, resourceType.queryLimit);
           result.push(...resources);
         }
       }

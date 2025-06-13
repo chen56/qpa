@@ -74,7 +74,7 @@ export class VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
         {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.project.name]},
         {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [declare.name]},
       ],
-      Limit: this.resourceType!.pageLimit.toString(),
+      Limit: this.resourceType!.queryLimit.toString(),
     });
     return this._tcVpcSet2VpcState(declare.spec.Region, response.VpcSet).map(e => e);
   }

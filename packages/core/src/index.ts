@@ -9,7 +9,7 @@ export {ResourceInstance} from "./core.ts";
 export type {ResourceConfig} from "./core.ts";
 export {BaseProject} from "./core.ts";
 export {ProviderRuntime} from "./core.ts";
-export {ResourceType} from "./core.ts";
+export type {ResourceType} from "./core.ts";
 
 
 

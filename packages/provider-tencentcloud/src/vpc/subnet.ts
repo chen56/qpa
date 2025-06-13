@@ -72,7 +72,7 @@ export class SubnetService extends _TaggableResourceService<SubnetSpec, SubnetSt
         {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.project.name]},
         {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [declare.name]},
       ],
-      Limit: this.resourceType!.pageLimit.toString(),
+      Limit: this.resourceType!.queryLimit.toString(),
     });
     return (response.SubnetSet || []).map(this._toResourceInstanceFunc(declare.spec.Region));
   }

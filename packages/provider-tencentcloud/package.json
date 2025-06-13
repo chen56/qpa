@@ -58,6 +58,7 @@
   "dependencies": {
     "@qpa/cli": "workspace:*",
     "@qpa/core": "workspace:*",
+    "cockatiel": "^3.2.1",
     "tencentcloud-sdk-nodejs": "^4.0.973"
   }
 }

@@ -1,10 +1,8 @@
-import {expect, test} from 'vitest'
-import {xxx} from "src/internal/_common.ts";
-import {LazyProject} from "src/lazy.ts";
+import {test} from 'vitest'
+import {Project} from "../src/index.ts";
 
 // Edit an assertion and save to see HMR in action
 
 test('Squared', () => {
-  expect(xxx).toBe("xxx")
-  console.log(new LazyProject({name:"unit_test"}))
+  console.log(new Project({name:"unit_test"}))
 })

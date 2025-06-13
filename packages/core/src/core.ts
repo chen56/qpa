@@ -1,4 +1,5 @@
 import {Provider, ResourceService} from "./spi/provider.ts";
+import {topologicalSortDFS} from "./internal/_common.ts";
 
 export abstract class BaseProject {
   public name: string;
@@ -14,13 +15,15 @@ export abstract class BaseProject {
  * - 其他字段：云上资源从tag等提取出的QPA元信息，比如resource_name等
  */
 export class ResourceInstance<STATE> {
-  private resourceService: ResourceService<unknown, STATE>;
+  private readonly resourceService: ResourceService<unknown, STATE>;
+  readonly resourceType: ResourceType;
 
   /**
    * @internal
    */
   constructor(resourceService: ResourceService<unknown, STATE>, readonly name: string, readonly state: STATE) {
     this.resourceService = resourceService;
+    this.resourceType=resourceService.resourceType;
   }
 
   async destroy(): Promise<void> {
@@ -117,9 +120,19 @@ export type Apply = (project: Project) => Promise<void>;
 export class ProviderRuntime {
   _resourceInstances: __ResourceInstances = new __ResourceInstances();
   _resources: __Resources = new __Resources();
+  private readonly _resourceTypeDependencies: Map<ResourceType, ResourceType[]>;
+  private _sortedResourceTypes: ResourceType[];
 
   constructor(readonly provider: Provider) {
+    // init _resourceTypeDependencies
+    this._resourceTypeDependencies=new Map<ResourceType, ResourceType[]>();
+    for (const [type,_] of provider.services) {
+      this._resourceTypeDependencies.set(type,type.dependencies);
+    }
+    this._sortedResourceTypes = topologicalSortDFS(this._resourceTypeDependencies);
+
   }
+
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
@@ -161,10 +174,32 @@ export class ProviderRuntime {
   }
 
   async _removeResourceInstances(instances: ResourceInstance<unknown>[]) {
-    for (const instance of instances) {
-      await instance.destroy();
-      this._resourceInstances.delete(instance);
+    // 1. 获取所有待删除实例涉及的资源类型
+    const uniqueResourceTypesToDelete = new Set<ResourceType>(instances.map(e=>e.resourceType));
+
+    // 2. 过滤出只包含待删除实例类型的排序结果，并且是反向排序（先删除依赖者，后删除被依赖者）
+    // 因为拓扑排序的结果是：被依赖者在前，依赖者在后。
+    // 而删除顺序需要：依赖者在前，被依赖者在后。
+    // 所以需要反转 sortedGlobalTypes，并过滤出要删除的类型。
+    const deletionOrderTypes = this._sortedResourceTypes
+      .filter(type => uniqueResourceTypesToDelete.has(type));
+
+    // 3. 按类型顺序逐批删除资源
+    for (const typeToDestroy of deletionOrderTypes) {
+      const instancesOfType = instances.filter(res => res.resourceType === typeToDestroy);
+
+      console.log(`--- 正在删除 ${typeToDestroy} 类型的资源 ${instancesOfType.length} 个 ---`);
+      for (const instance of instancesOfType) {
+        console.log(`正在删除实例: ${instance.name} (类型: ${instance.resourceType})`);
+
+        // real delete
+        await instance.destroy();
+        this._resourceInstances.delete(instance);
+
+        console.log(`实例 ${instance.name} (类型: ${instance.resourceType}) 删除完成。`);
+      }
     }
+    console.log('所有指定资源删除完成。');
   }
 
   async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<Resource<TSpec, TState>> {
@@ -185,6 +220,7 @@ export class ProviderRuntime {
     this._resourceInstances.push(...actual);
     return result;
   }
+
 }
 
 export class Project extends BaseProject {

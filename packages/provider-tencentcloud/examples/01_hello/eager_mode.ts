@@ -23,7 +23,7 @@ await project.destroy();
 console.log('list all resource');
 
 const vars = {
-  zone: "ap-guangzhou-1",
+  zone: "ap-guangzhou-7",
   instanceType: "SA2.MEDIUM2",// 选最便宜的机型
   imageId: "img-mmytdhbn",//Ubuntu Server 24.04 LTS 64bit
 }
