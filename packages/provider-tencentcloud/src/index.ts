@@ -10,9 +10,11 @@
  * import { _TencentCloudProvider } from '@qpa/_provider-tencentcloud'
  */
 export * from './vpc/index.ts';
+export * from './cvm/index.ts';
 
 // 1. 明确列出要导出的内容（可选）
 export type{TencentCloudCredential} from './provider.ts';
+export {TencentCloudType} from './provider.ts';
 
-export {_TencentCloudProvider} from './provider.ts';
-
+export type{TencentCloudProps} from './factory.ts';
+export {TencentCloud} from './factory.ts'

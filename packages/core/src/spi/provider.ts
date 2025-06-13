@@ -5,9 +5,17 @@
  *
  * @return 获取查询出ResourceScope内的所有的资源状态
  */
-import {ResourceConfig, ResourceInstance, ResourceType} from "../core.ts";
+import {Project, ResourceConfig, ResourceInstance, ResourceType} from "../core.ts";
 
+
+/**
+ * 无状态服务提供者, 状态由每个Provider对应的 ProviderRuntime 维护
+ *
+ * todo 既然已经拆分ProviderRuntime,为啥不直接用接口呢？
+ */
 export abstract class Provider {
+  protected constructor(readonly project: Project) {
+  }
 
   abstract get services(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
 

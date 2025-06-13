@@ -23,7 +23,7 @@ export class ResourceInstance<STATE> {
    */
   constructor(resourceService: ResourceService<unknown, STATE>, readonly name: string, readonly state: STATE) {
     this.resourceService = resourceService;
-    this.resourceType=resourceService.resourceType;
+    this.resourceType = resourceService.resourceType;
   }
 
   async destroy(): Promise<void> {
@@ -53,7 +53,8 @@ export interface ResourceType {
    * CN: 唯一的资源类型名
    * EN: unique resource type name
    */
-  get name():string;
+  get name(): string;
+
   /**
    *
    * CN: 依赖项，比如 vm 依赖 vpc,subnet
@@ -117,22 +118,32 @@ export type Apply = (project: Project) => Promise<void>;
  * ProviderRuntime的逻辑原先用继承实现，由Provider父类型提供公共逻辑，我们拆离为组合模式，这样SPI实现者只关注Provider的接口实现即可
  * 避免SPI客户面对ProviderRuntime和云实现无关的接口，减少信息过载
  */
-export class ProviderRuntime {
+export class ProviderRuntime<T extends Provider> {
+  /**
+   * @internal
+   * */
   _resourceInstances: __ResourceInstances = new __ResourceInstances();
+  /**
+   * @internal
+   * */
   _resources: __Resources = new __Resources();
-  private readonly _resourceTypeDependencies: Map<ResourceType, ResourceType[]>;
-  private _sortedResourceTypes: ResourceType[];
+  private sortedResourceTypesCache!: ResourceType[];
 
-  constructor(readonly provider: Provider) {
-    // init _resourceTypeDependencies
-    this._resourceTypeDependencies=new Map<ResourceType, ResourceType[]>();
-    for (const [type,_] of provider.services) {
-      this._resourceTypeDependencies.set(type,type.dependencies);
-    }
-    this._sortedResourceTypes = topologicalSortDFS(this._resourceTypeDependencies);
-
+  constructor(readonly provider: T) {
   }
 
+  private get sortedResourceTypes(): ResourceType[] {
+    // init
+    if (!this.sortedResourceTypesCache) {
+      const resourceTypeDependencies = new Map<ResourceType, ResourceType[]>();
+      for (const [type, _] of this.provider.services) {
+        resourceTypeDependencies.set(type, type.dependencies);
+      }
+      this.sortedResourceTypesCache = topologicalSortDFS(resourceTypeDependencies);
+    }
+
+    return this.sortedResourceTypesCache;
+  }
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
@@ -157,7 +168,7 @@ export class ProviderRuntime {
       const declared = this._resources.get(e.name);
       return !declared;
     });
-    return this._removeResourceInstances(undeclaredResourcePendingToDelete);
+    return this.removeResourceInstances(undeclaredResourcePendingToDelete);
   }
 
   /**
@@ -168,20 +179,20 @@ export class ProviderRuntime {
   async destroy(): Promise<void> {
     await this.refresh();
     const safeCopy = this._resourceInstances.slice()
-    await this._removeResourceInstances(safeCopy);
+    await this.removeResourceInstances(safeCopy);
     // todo 这里是否应该每删除一个instance就删除一个相应的resource: this._resources.delete(instance.name)?
     this._resources.clear();
   }
 
-  async _removeResourceInstances(instances: ResourceInstance<unknown>[]) {
+  private async removeResourceInstances(instances: ResourceInstance<unknown>[]) {
     // 1. 获取所有待删除实例涉及的资源类型
-    const uniqueResourceTypesToDelete = new Set<ResourceType>(instances.map(e=>e.resourceType));
+    const uniqueResourceTypesToDelete = new Set<ResourceType>(instances.map(e => e.resourceType));
 
     // 2. 过滤出只包含待删除实例类型的排序结果，并且是反向排序（先删除依赖者，后删除被依赖者）
     // 因为拓扑排序的结果是：被依赖者在前，依赖者在后。
     // 而删除顺序需要：依赖者在前，被依赖者在后。
     // 所以需要反转 sortedGlobalTypes，并过滤出要删除的类型。
-    const deletionOrderTypes = this._sortedResourceTypes
+    const deletionOrderTypes = this.sortedResourceTypes
       .filter(type => uniqueResourceTypesToDelete.has(type));
 
     // 3. 按类型顺序逐批删除资源
@@ -224,7 +235,7 @@ export class ProviderRuntime {
 }
 
 export class Project extends BaseProject {
-  public _providers = new Map<Provider, ProviderRuntime>();
+  public _providers = new Map<Provider, ProviderRuntime<Provider>>();
 
   public constructor(props: {
     name: string;
@@ -232,8 +243,10 @@ export class Project extends BaseProject {
     super({name: props.name});
   }
 
-  registerProvider(provider: Provider): void {
-    this._providers.set(provider, new ProviderRuntime(provider));
+  registerProvider<T extends Provider>(provider: T): ProviderRuntime<T> {
+    const result=new ProviderRuntime(provider);
+    this._providers.set(provider, result);
+    return result;
   }
 
   get resourceInstances(): ResourceInstance<unknown>[] {
@@ -273,7 +286,9 @@ export class Project extends BaseProject {
   }
 }
 
-
+/**
+ * @internal
+ */
 class __Resources extends Map<string, Resource<unknown, unknown>> {
   constructor(...args: [string, Resource<unknown, unknown>][]) {
     super(args);
@@ -283,6 +298,9 @@ class __Resources extends Map<string, Resource<unknown, unknown>> {
   }
 }
 
+/**
+ * @internal
+ */
 class __ResourceInstances extends Array<ResourceInstance<unknown>> {
   constructor(...args: ResourceInstance<unknown>[]) {
     super(...args); // 调用 Array(...items: T[]) 构造形式
@@ -297,3 +315,4 @@ class __ResourceInstances extends Array<ResourceInstance<unknown>> {
     }
   }
 }
+

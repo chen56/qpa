@@ -1,25 +1,28 @@
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
-import {_TencentCloudAware, BaseServiceFactory, TencentCloudType} from "../provider.ts";
-import {Resource, ResourceConfig} from "@qpa/core";
+import {_TencentCloudProvider, TencentCloudType} from "../provider.ts";
+import {ProviderRuntime, Resource, ResourceConfig} from "@qpa/core";
 import {CvmInstanceService, CvmInstanceSpec, CvmInstanceState} from "./instance.ts";
 
-export class CvmFactory extends BaseServiceFactory {
-    private readonly vpcClients: Map<string, CvmClient> = new Map();
+export class CvmFactory {
+  private readonly vpcClients: Map<string, CvmClient> = new Map();
 
-    constructor(tc: _TencentCloudAware) {
-        super(tc);
-    }
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>) {
+  }
 
-    getClient(region: string): CvmClient {
-        if (!this.vpcClients.has(region)) {
-            const client = new CvmClient(this._tc._getClientConfigByRegion(region));
-            this.vpcClients.set(region, client);
-        }
-        return this.vpcClients.get(region)!;
-    }
+  get provider(): _TencentCloudProvider {
+    return this.providerRuntime.provider;
+  }
 
-    async instance(expected: ResourceConfig<CvmInstanceSpec>): Promise<Resource<CvmInstanceSpec, CvmInstanceState>> {
-        const service = this._getService(TencentCloudType.cvm_instance) as CvmInstanceService;
-        return await this._providerState.apply(expected, service)
+  getClient(region: string): CvmClient {
+    if (!this.vpcClients.has(region)) {
+      const client = new CvmClient(this.provider.getClientConfigByRegion(region));
+      this.vpcClients.set(region, client);
     }
+    return this.vpcClients.get(region)!;
+  }
+
+  async instance(expected: ResourceConfig<CvmInstanceSpec>): Promise<Resource<CvmInstanceSpec, CvmInstanceState>> {
+    const service = this.provider._getService(TencentCloudType.cvm_instance) as CvmInstanceService;
+    return await this.providerRuntime.apply(expected, service)
+  }
 }
