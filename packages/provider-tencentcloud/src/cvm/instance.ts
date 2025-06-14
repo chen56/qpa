@@ -53,14 +53,14 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
   private readonly provider: _TencentCloudProvider;
   private runners: _Runners;
 
-  constructor(readonly project: Project, readonly clients: CvmFactory) {
+  constructor(readonly project: Project, readonly cvm: CvmFactory) {
     super();
-    this.provider=clients.provider;
-    this.runners=clients.provider.runners;
+    this.provider=cvm.provider;
+    this.runners=cvm.provider.runners;
   }
 
   async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<CvmInstanceState>[]> {
-    const client = this.clients.getClient(region);
+    const client = this.cvm.getClient(region);
     const response = await client.DescribeInstances({
       InstanceIds: resourceIds,
       Limit: limit,
@@ -73,7 +73,7 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
         throw new Error(`实例计费类型(InstanceChargeType)只支持: POSTPAID_BY_HOUR, SPOTPAID`);
     }
 
-    const client = this.clients.getClient(config.spec.Region);
+    const client = this.cvm.getClient(config.spec.Region);
 
     // 分离出扩展的参数，不然腾讯云api会报错
     const {Region, ...runInstancesRequest} = config.spec;
@@ -124,9 +124,9 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
     // 单台删除，别怕慢，就怕乱
     for (const r of resources) {
       const state = r.state;
-      const client = this.clients.getClient(state.Region);
+      const cvmClient = this.cvm.getClient(state.Region);
       console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
-      await client.TerminateInstances({InstanceIds: [state.InstanceId!]})
+      await cvmClient.TerminateInstances({InstanceIds: [state.InstanceId!]})
 
       // 创建重试策略
       const waitingDeleteComplete = this.runners.removeResourceWaiting();
@@ -134,7 +134,24 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
       await waitingDeleteComplete.execute(async (context) => {
         console.log(`waiting delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
 
-        const describeInstancesResponse = await client.DescribeInstances({
+        const describeInstancesResponse = await cvmClient.DescribeInstances({
+          // 按标签过滤
+          Filters: [
+            {Name: `instance-id`, Values: [r.state.InstanceId!]},
+          ],
+          Limit: this.resourceType.queryLimit,
+        });
+
+        if (!describeInstancesResponse.InstanceSet || describeInstancesResponse.InstanceSet!.length == 0) {
+          return;
+        }else{
+          throw new Error(`实例${r.state.InstanceId}还未删除干净，继续等待`);
+        }
+      });
+      await waitingDeleteComplete.execute(async (context) => {
+        console.log(`waiting delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
+
+        const describeInstancesResponse = await cvmClient.DescribeInstances({
           // 按标签过滤
           Filters: [
             {Name: `instance-id`, Values: [r.state.InstanceId!]},
@@ -149,6 +166,9 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
         }
       });
 
+
+
+
       console.log(`cvm instance 删除成功，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
     }
   }
@@ -157,7 +177,7 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
     // 单台删除，别怕慢，就怕乱
     for (const r of resources) {
       const state = r.state;
-      const client = this.clients.getClient(state.Region);
+      const client = this.cvm.getClient(state.Region);
       console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
       await client.TerminateInstances({InstanceIds: [state.InstanceId!]})
 
@@ -184,7 +204,7 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
   }
 
   async load(config: ResourceConfig<CvmInstanceSpec>): Promise<ResourceInstance<CvmInstanceState>[]> {
-    const client = this.clients.getClient(config.spec.Region);
+    const client = this.cvm.getClient(config.spec.Region);
     const response = await client.DescribeInstances({
       // 按标签过滤
       Filters: [
