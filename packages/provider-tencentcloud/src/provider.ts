@@ -1,6 +1,6 @@
 import {Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {Project, ResourceInstance, ResourceType} from "@qpa/core";
-import {_TagService} from "./internal/_tag_service.ts";
+import {_TagClient} from "./internal/tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {Provider, ResourceService} from "@qpa/core/spi";
 import {retry, handleAll, ConstantBackoff, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
@@ -135,9 +135,9 @@ export interface TencentCloudProviderProps {
  *
  */
 export class _TencentCloudProvider extends Provider {
-  readonly services = new _Services();
+  readonly resourceServices = new _ResourceServices();
   private readonly credential: TencentCloudCredential;
-  private readonly tagService: _TagService;
+  private readonly tagClient: _TagClient;
   readonly runners:_Runners=new _Runners();
   constructor(readonly project: Project, props: TencentCloudProviderProps) {
     super(project);
@@ -146,13 +146,13 @@ export class _TencentCloudProvider extends Provider {
       credential: props.credential,
     });
 
-    this.tagService = new _TagService(project, tagClient);
+    this.tagClient = new _TagClient(project, tagClient);
   }
 
   /**
    */
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
-    return this.tagService.findResourceInstances(this);
+    return this.tagClient.findResourceInstances(this);
   }
 
   public getClientConfigByRegion(region: string): tc_ClientConfig {
@@ -163,17 +163,17 @@ export class _TencentCloudProvider extends Provider {
   }
 
   _getService(type: TencentCloudType): _TencentCloudResourceService<unknown, unknown> {
-    const result = this.services.get(type);
+    const result = this.resourceServices.get(type);
     if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或放弃使用此资源类型`);
     return result;
   }
 }
 
-class _Services extends Map<TencentCloudType, _TencentCloudResourceService<unknown, unknown>> {
+class _ResourceServices extends Map<TencentCloudType, _TencentCloudResourceService<unknown, unknown>> {
   constructor(...args: [TencentCloudType, _TencentCloudResourceService<unknown, unknown>][]) {
     super(args);
     // 确保原型链正确
-    Object.setPrototypeOf(this, _Services.prototype);
+    Object.setPrototypeOf(this, _ResourceServices.prototype);
   }
 
   register(service: _TencentCloudResourceService<unknown, unknown>) {

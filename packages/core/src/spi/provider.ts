@@ -17,7 +17,7 @@ export abstract class Provider {
   protected constructor(readonly project: Project) {
   }
 
-  abstract get services(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
+  abstract get resourceServices(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用

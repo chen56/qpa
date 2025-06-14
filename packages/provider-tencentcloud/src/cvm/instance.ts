@@ -1,8 +1,9 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
-import {Project, ResourceConfig, ResourceInstance} from "@qpa/core";
+import {ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
 import {_Runners, _TaggableResourceService, _TencentCloudProvider, TencentCloudType} from "../provider.ts";
-import {CvmFactory} from "./factory.ts";
 import {SpiConstants} from "@qpa/core/spi";
+import {_CvmClientWrap} from "./client.ts";
+import {_VpcClientWarp} from "../vpc/client.ts";
 
 
 /**
@@ -48,19 +49,21 @@ export interface CvmInstanceState extends Instance {
 
 /**
  */
-export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec, CvmInstanceState> {
+export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec, CvmInstanceState> {
   readonly resourceType = TencentCloudType.cvm_instance;
-  private readonly provider: _TencentCloudProvider;
-  private runners: _Runners;
+  private readonly runners: _Runners;
 
-  constructor(readonly project: Project, readonly cvm: CvmFactory) {
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly cvmClient: _CvmClientWrap, private readonly vpcClient: _VpcClientWarp) {
     super();
-    this.provider=cvm.provider;
-    this.runners=cvm.provider.runners;
+    this.runners = providerRuntime.provider.runners;
+  }
+
+  get project() {
+    return this.providerRuntime.project;
   }
 
   async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<CvmInstanceState>[]> {
-    const client = this.cvm.getClient(region);
+    const client = this.cvmClient.getClient(region);
     const response = await client.DescribeInstances({
       InstanceIds: resourceIds,
       Limit: limit,
@@ -69,11 +72,11 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
   }
 
   async create(config: ResourceConfig<CvmInstanceSpec>): Promise<ResourceInstance<CvmInstanceState>> {
-    if( !["POSTPAID_BY_HOUR","SPOTPAID"].includes(config.spec.InstanceChargeType)){
-        throw new Error(`实例计费类型(InstanceChargeType)只支持: POSTPAID_BY_HOUR, SPOTPAID`);
+    if (!["POSTPAID_BY_HOUR", "SPOTPAID"].includes(config.spec.InstanceChargeType)) {
+      throw new Error(`实例计费类型(InstanceChargeType)只支持: POSTPAID_BY_HOUR, SPOTPAID`);
     }
 
-    const client = this.cvm.getClient(config.spec.Region);
+    const client = this.cvmClient.getClient(config.spec.Region);
 
     // 分离出扩展的参数，不然腾讯云api会报错
     const {Region, ...runInstancesRequest} = config.spec;
@@ -108,23 +111,21 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
     const describeResponse = await client.DescribeInstances({
       InstanceIds: [resourceId],
     })
-    if (!describeResponse.InstanceSet || describeResponse.InstanceSet.length == 0) {
+
+    if ((describeResponse.InstanceSet ?? []).length == 0) {
       throw new Error("创建 cvm instance 失败，DescribeInstances 未返回 InstanceSet");
     }
 
-
     // 当前未实现对tags的 waiting, 暂时忽略
     // Wait for the tags attached to the vm since tags attachment it's async while vm creation.
-
-
-    return this._toResourceInstanceFunc(config.spec.Region)(describeResponse.InstanceSet[0]);
+    return this._toResourceInstanceFunc(config.spec.Region)(describeResponse.InstanceSet![0]);
   }
 
   async delete(...resources: ResourceInstance<CvmInstanceState>[]): Promise<void> {
     // 单台删除，别怕慢，就怕乱
     for (const r of resources) {
       const state = r.state;
-      const cvmClient = this.cvm.getClient(state.Region);
+      const cvmClient = this.cvmClient.getClient(state.Region);
       console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
       await cvmClient.TerminateInstances({InstanceIds: [state.InstanceId!]})
 
@@ -132,7 +133,7 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
       const waitingDeleteComplete = this.runners.removeResourceWaiting();
 
       await waitingDeleteComplete.execute(async (context) => {
-        console.log(`waiting delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
+        console.log(`cvm - waiting cvm instance delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
 
         const describeInstancesResponse = await cvmClient.DescribeInstances({
           // 按标签过滤
@@ -142,31 +143,29 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
           Limit: this.resourceType.queryLimit,
         });
 
-        if (!describeInstancesResponse.InstanceSet || describeInstancesResponse.InstanceSet!.length == 0) {
+        if ((describeInstancesResponse.InstanceSet ?? []).length == 0) {
           return;
-        }else{
+        } else {
           throw new Error(`实例${r.state.InstanceId}还未删除干净，继续等待`);
         }
       });
       await waitingDeleteComplete.execute(async (context) => {
-        console.log(`waiting delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
+        console.log(`vpc - waiting delete cvm complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
+        const vpcClient = this.vpcClient.getClient(state.Region);
 
-        const describeInstancesResponse = await cvmClient.DescribeInstances({
-          // 按标签过滤
-          Filters: [
-            {Name: `instance-id`, Values: [r.state.InstanceId!]},
-          ],
-          Limit: this.resourceType.queryLimit,
+        const response = await vpcClient.DescribeUsedIpAddress({
+          VpcId: state.VirtualPrivateCloud!.VpcId!,
+          SubnetId: state.VirtualPrivateCloud!.SubnetId!,
+          IpAddresses: state.PrivateIpAddresses,
+          Limit: TencentCloudType.vpc_subnet.queryLimit,
         });
 
-        if (!describeInstancesResponse.InstanceSet || describeInstancesResponse.InstanceSet!.length == 0) {
+        if ((response.IpAddressStates ?? []).length == 0) {
           return;
-        }else{
+        } else {
           throw new Error(`实例${r.state.InstanceId}还未删除干净，继续等待`);
         }
       });
-
-
 
 
       console.log(`cvm instance 删除成功，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
@@ -177,12 +176,12 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
     // 单台删除，别怕慢，就怕乱
     for (const r of resources) {
       const state = r.state;
-      const client = this.cvm.getClient(state.Region);
+      const client = this.cvmClient.getClient(state.Region);
       console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
       await client.TerminateInstances({InstanceIds: [state.InstanceId!]})
 
 
-      const runner=this.runners.removeResourceWaiting();
+      const runner = this.runners.removeResourceWaiting();
       while (true) {
 
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -204,7 +203,7 @@ export class CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec
   }
 
   async load(config: ResourceConfig<CvmInstanceSpec>): Promise<ResourceInstance<CvmInstanceState>[]> {
-    const client = this.cvm.getClient(config.spec.Region);
+    const client = this.cvmClient.getClient(config.spec.Region);
     const response = await client.DescribeInstances({
       // 按标签过滤
       Filters: [

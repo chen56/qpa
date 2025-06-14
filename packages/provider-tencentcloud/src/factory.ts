@@ -1,10 +1,12 @@
 import {VpcFactory} from "./vpc/factory.ts";
-import {VpcService} from "./vpc/vpc.ts";
+import {_VpcService} from "./vpc/vpc.ts";
 import {_TencentCloudProvider, TencentCloudProviderProps} from "./provider.ts";
 import {Project} from "@qpa/core";
-import {SubnetService} from "./vpc/subnet.ts";
-import {CvmInstanceService} from "./cvm/instance.ts";
+import {_SubnetService} from "./vpc/subnet.ts";
+import {_CvmInstanceService} from "./cvm/instance.ts";
 import {CvmFactory} from "./cvm/factory.ts";
+import {_VpcClientWarp} from "./vpc/client.ts";
+import {_CvmClientWrap} from "./cvm/client.ts";
 
 export interface TencentCloudProps extends TencentCloudProviderProps {
 }
@@ -24,13 +26,16 @@ export class TencentCloud {
     const providerRuntime=project.registerProvider(provider);
 
     // vpc
-    this.vpc = new VpcFactory(providerRuntime);
-    provider.services.register(new VpcService(project, this.vpc));
-    provider.services.register(new SubnetService(project, this.vpc));
+    const vpcClient =new _VpcClientWarp(providerRuntime);
+    this.vpc = new VpcFactory(providerRuntime,vpcClient);
+
+    provider.resourceServices.register(new _VpcService(providerRuntime,vpcClient));
+    provider.resourceServices.register(new _SubnetService(providerRuntime, vpcClient));
 
     // cvm
+    const cvmClient = new _CvmClientWrap(providerRuntime);
     this.cvm = new CvmFactory(providerRuntime);
-    provider.services.register(new CvmInstanceService(project, this.cvm));
+    provider.resourceServices.register(new _CvmInstanceService(providerRuntime, cvmClient,vpcClient));
 
   }
 }

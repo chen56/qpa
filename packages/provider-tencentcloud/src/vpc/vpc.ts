@@ -2,10 +2,10 @@ import {
   CreateVpcRequest as tc_CreateVpcRequest,
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
-import {Project, ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudType, _TaggableResourceService} from "../provider.ts";
+import {Project, ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
+import {TencentCloudType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
-import {VpcFactory} from "./factory.ts";
+import {_VpcClientWarp} from "./client.ts";
 
 
 export interface VpcSpec extends tc_CreateVpcRequest {
@@ -18,15 +18,19 @@ export interface VpcState extends tc_Vpc {
 
 /**
  */
-export class VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
+export class _VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   resourceType: TencentCloudType = TencentCloudType.vpc_vpc
 
-  constructor(readonly project: Project, readonly vpc: VpcFactory) {
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly vpcClient: _VpcClientWarp) {
     super();
   }
 
+  private get project(){
+    return this.providerRuntime.project;
+  }
+
   async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<VpcState>[]> {
-    const client = this.vpc.getClient(region);
+    const client = this.vpcClient.getClient(region);
     const response = await client.DescribeVpcs({
       VpcIds: resourceIds,
       Limit: limit.toString(),
@@ -35,7 +39,7 @@ export class VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   }
 
   async create(specPart: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcState>> {
-    const client = this.vpc.getClient(specPart.spec.Region);
+    const client = this.vpcClient.getClient(specPart.spec.Region);
     const vpcResponse = await client.CreateVpc({
       VpcName: specPart.spec.VpcName,
       CidrBlock: specPart.spec.CidrBlock,
@@ -58,7 +62,7 @@ export class VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   async delete(...resources: ResourceInstance<VpcState>[]): Promise<void> {
     for (const r of resources) {
       const state = r.state;
-      const client = this.vpc.getClient(state.Region);
+      const client = this.vpcClient.getClient(state.Region);
       console.log(`VPC删除准备，VpcId: ${state.VpcId}`);
       await client.DeleteVpc({VpcId: state.VpcId!})
       console.log(`VPC删除成功，VpcId: ${state.VpcId}`);
@@ -66,7 +70,7 @@ export class VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   }
 
   async load(declare: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcState>[]> {
-    const client = this.vpc.getClient(declare.spec.Region);
+    const client = this.vpcClient.getClient(declare.spec.Region);
     const response = await client.DescribeVpcs({
       // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤

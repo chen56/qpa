@@ -132,11 +132,15 @@ export class ProviderRuntime<T extends Provider> {
   constructor(readonly provider: T) {
   }
 
+  get project(): Project {
+    return this.provider.project;
+  }
+
   private get sortedResourceTypes(): ResourceType[] {
     // init
     if (!this.sortedResourceTypesCache) {
       const resourceTypeDependencies = new Map<ResourceType, ResourceType[]>();
-      for (const [type, _] of this.provider.services) {
+      for (const [type, _] of this.provider.resourceServices) {
         resourceTypeDependencies.set(type, type.dependencies);
       }
       this.sortedResourceTypesCache = topologicalSortDFS(resourceTypeDependencies);

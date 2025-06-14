@@ -2,30 +2,33 @@ import {
   CreateSubnetRequest,
   Subnet as tc_Subnet
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
-import {Project, ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudType, _TaggableResourceService} from "../provider.ts";
+import {Project, ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
+import {TencentCloudType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
-import {VpcFactory} from "./factory.ts";
+import {_VpcClientWarp} from "./client.ts";
 
-export interface SubnetSpec extends CreateSubnetRequest {
+export interface VpcSubnetSpec extends CreateSubnetRequest {
   Region: string;
 }
 
-export interface SubnetState extends tc_Subnet {
+export interface VpcSubnetState extends tc_Subnet {
   Region: string;
 }
 
 /**
  */
-export class SubnetService extends _TaggableResourceService<SubnetSpec, SubnetState> {
+export class _SubnetService extends _TaggableResourceService<VpcSubnetSpec, VpcSubnetState> {
   resourceType = TencentCloudType.vpc_subnet;
 
-  constructor(readonly project: Project, readonly clients: VpcFactory) {
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly vpcClient: _VpcClientWarp) {
     super();
   }
 
-  async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<SubnetState>[]> {
-    const client = this.clients.getClient(region);
+  private get project(): Project {
+    return this.providerRuntime.project;
+  }
+  async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<VpcSubnetState>[]> {
+    const client = this.vpcClient.getClient(region);
     const response = await client.DescribeSubnets({
       SubnetIds: resourceIds,
       Limit: limit.toString(),
@@ -33,8 +36,8 @@ export class SubnetService extends _TaggableResourceService<SubnetSpec, SubnetSt
     return (response.SubnetSet || []).map(this._toResourceInstanceFunc(region));
   }
 
-  async create(specPart: ResourceConfig<SubnetSpec>): Promise<ResourceInstance<SubnetState>> {
-    const client = this.clients.getClient(specPart.spec.Region);
+  async create(specPart: ResourceConfig<VpcSubnetSpec>): Promise<ResourceInstance<VpcSubnetState>> {
+    const client = this.vpcClient.getClient(specPart.spec.Region);
     const response = await client.CreateSubnet({
       VpcId: specPart.spec.VpcId,
       SubnetName: specPart.spec.SubnetName,
@@ -53,18 +56,18 @@ export class SubnetService extends _TaggableResourceService<SubnetSpec, SubnetSt
     return this._toResourceInstanceFunc(specPart.spec.Region)(response.Subnet!);
   }
 
-  async delete(...resources: ResourceInstance<SubnetState>[]): Promise<void> {
+  async delete(...resources: ResourceInstance<VpcSubnetState>[]): Promise<void> {
     for (const r of resources) {
       const state = r.state;
-      const client = this.clients.getClient(state.Region);
+      const client = this.vpcClient.getClient(state.Region);
       console.log(`Subnet删除准备，VpcId: ${state.VpcId} SubnetId:${state.SubnetId}`);
       await client.DeleteSubnet({SubnetId: state.SubnetId!})
       console.log(`Subnet删除成功，VpcId: ${state.VpcId} SubnetId:${state.SubnetId}`);
     }
   }
 
-  async load(declare: ResourceConfig<SubnetSpec>): Promise<ResourceInstance<SubnetState>[]> {
-    const client = this.clients.getClient(declare.spec.Region);
+  async load(declare: ResourceConfig<VpcSubnetSpec>): Promise<ResourceInstance<VpcSubnetState>[]> {
+    const client = this.vpcClient.getClient(declare.spec.Region);
     const response = await client.DescribeSubnets({
       // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤
@@ -77,7 +80,7 @@ export class SubnetService extends _TaggableResourceService<SubnetSpec, SubnetSt
     return (response.SubnetSet || []).map(this._toResourceInstanceFunc(declare.spec.Region));
   }
 
-  private _toResourceInstanceFunc(region: string): (e: tc_Subnet) => ResourceInstance<SubnetState> {
+  private _toResourceInstanceFunc(region: string): (e: tc_Subnet) => ResourceInstance<VpcSubnetState> {
     return (e: tc_Subnet) => {
       const resourceName = (e.TagSet ?? []).find(tag => tag.Key === SpiConstants.tagNames.resource)?.Value;
       return new ResourceInstance(this, resourceName || "", {

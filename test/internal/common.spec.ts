@@ -3,7 +3,7 @@
 
 import {describe, expect, it} from "vitest";
 
-import {Arrays} from "../../packages/provider-tencentcloud/src/internal/_common.ts";
+import {Arrays} from "../../packages/provider-tencentcloud/src/internal/common.ts";
 
 describe('Arrays.chunk', () => {
   it('should chunk an array into smaller arrays of a given size', () => {
