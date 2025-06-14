@@ -28,7 +28,6 @@ const vars = {
   imageId: "img-mmytdhbn",//Ubuntu Server 24.04 LTS 64bit
 }
 
-// exit(1);
 for (const r of project.resourceInstances) {
   console.log('project.resourceInstances[%s]: %O', project.resourceInstances.length, {
     key: r.name,
@@ -89,8 +88,10 @@ await project.apply(async project => {
     }
   );
 
-  console.log("created cvmInstance1:", cvmInstance1)
+
+  console.log("created cvmInstance1:", cvmInstance1, cvmInstance1.actualInstance.toJson())
   console.log("project:", project.resourceInstances.map(e => e.name))
+
 });
 // exit(0);
 

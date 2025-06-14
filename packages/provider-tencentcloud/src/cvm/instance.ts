@@ -20,7 +20,6 @@ import {_VpcClientWarp} from "../vpc/client.ts";
  *
  *   不支持以下属性:
  *   - InstanceChargePrepaid 不支持包年包月模式
- *   - Placement
  *   - InstanceCount  不支持实例数量参数， 简化为只创建1个实例
  *   - LaunchTemplate
  *   - DisasterRecoverGroupIds
@@ -29,7 +28,7 @@ import {_VpcClientWarp} from "../vpc/client.ts";
  *   - ChcIds
  *
  **/
-export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChargePrepaid' | 'Placement' | 'InstanceCount' | 'LaunchTemplate' | 'DisasterRecoverGroupIds' | 'HpcClusterId' | 'DedicatedClusterId' | 'ChcIds'> {
+export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChargePrepaid'  | 'InstanceCount' | 'LaunchTemplate' | 'DisasterRecoverGroupIds' | 'HpcClusterId' | 'DedicatedClusterId' | 'ChcIds'> {
   // todo temp waiting to remove
   Region: string;
 
@@ -168,36 +167,6 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
       });
 
 
-      console.log(`cvm instance 删除成功，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
-    }
-  }
-
-  async delete2(...resources: ResourceInstance<CvmInstanceState>[]): Promise<void> {
-    // 单台删除，别怕慢，就怕乱
-    for (const r of resources) {
-      const state = r.state;
-      const client = this.cvmClient.getClient(state.Region);
-      console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
-      await client.TerminateInstances({InstanceIds: [state.InstanceId!]})
-
-
-      const runner = this.runners.removeResourceWaiting();
-      while (true) {
-
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const describeInstancesResponse = await client.DescribeInstances({
-          // 按标签过滤
-          Filters: [
-            {Name: `instance-id`, Values: [r.state.InstanceId!]},
-          ],
-          Limit: this.resourceType.queryLimit,
-        });
-        if (!describeInstancesResponse.InstanceSet || describeInstancesResponse.InstanceSet!.length == 0) {
-          break;
-        }
-        const i = describeInstancesResponse.InstanceSet![0];
-        console.log(`deleting，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, i);
-      }
       console.log(`cvm instance 删除成功，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
     }
   }
