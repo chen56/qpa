@@ -108,113 +108,67 @@ interface MyVars {
 
 const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentValues 参数，所有验证数据从 data 参数获取
   return z.object({
-    region: z.string().describe('选择区域').qpa$optionTable({
-      fetchData: async (): Promise<RegionApiData[]> => { // fetchData 在这里仍然需要 `values.region`
-        console.log("API Call: Fetching regions...");
-        return fetchRegions();
-      },
-      valueKey: 'RegionId',
-      schema: z.object({
-        RegionId: z.string().describe('区域'),
-        RegionName: z.string().describe('区域名称'),
+    region: z.string()
+      .describe('选择区域')
+      .refine((val) => !val, "请选择区域")
+      .refine(async (val) => {
+        const availableRegions = await fetchRegions(); // 直接调用 API 获取数据
+        return availableRegions.some(opt => opt.RegionId === val)
+      }, `无效区域`)
+      .qpa$optionTable({
+        fetchData: async (): Promise<RegionApiData[]> => { // fetchData 在这里仍然需要 `values.region`
+          console.log("API Call: Fetching regions...");
+          return fetchRegions();
+        },
+        valueKey: 'RegionId',
+        schema: z.object({
+          RegionId: z.string().describe('区域'),
+          RegionName: z.string().describe('区域名称'),
+        }),
       }),
-    }),
-    zone: z.string().describe('选择可用区').qpa$optionTable({
-      fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
-        if (values.region) {
-          return fetchZonesByRegion(values.region);
+    zone: z.string()
+      .describe('选择可用区')
+      .refine((val) => !val, "请选择可用区")
+      .refine(async (val) => {
+        if (!values.region) {
+          return false;
         }
-        return [];
-      },
-      valueKey: 'ZoneId',
-      schema: z.object({
-        ZoneId: z.string().describe('可用区'),
-        ZoneName: z.string().describe('可用区名称'),
-        RegionId: z.string().describe('区域'),
+        const availableZones = await fetchZonesByRegion(values.region); // 依赖 data.region
+        return availableZones.some(opt => opt.ZoneId === val)
+      }, `无效可用区`)
+      .qpa$optionTable({
+        fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
+          if (values.region) {
+            return fetchZonesByRegion(values.region);
+          }
+          return [];
+        },
+        valueKey: 'ZoneId',
+        schema: z.object({
+          ZoneId: z.string().describe('可用区'),
+          ZoneName: z.string().describe('可用区名称'),
+          RegionId: z.string().describe('区域'),
+        }),
       }),
-    }),
-    instanceType: z.string().describe('选择实例类型'),
-    imageId: z.string().describe('选择镜像 ID'),
-  }).check(async (data) => { // object-level superRefine
-    // 1. 校验 Region (即使没有 superRefine，也要确保其值在有效选项内)
-    if (!data.value.region) { // 如果选择了zone但没选region
-      data.issues.push({
-        code: "custom",
-        input: data.value.region,
-        message: `请先选择区域`,
-        path: ['region'],
-      });
-      return;
-    }
-
-    const availableRegions = await fetchRegions(); // 直接调用 API 获取数据
-    if (availableRegions.length > 0 && !availableRegions.some(opt => opt.RegionId === data.value.region)) {
-      data.issues.push({
-        code: "custom",
-        input: data.value.zone,
-        message: `无效区域: ${data.value.region}, 请选择有效值${availableRegions.map(opt => opt.RegionId).join(', ')}}`,
-        path: ['region'],
-      });
-      return;
-    }
-
-    // 2. 校验 Zone (依赖 Region)
-    if (data.value.zone) {
-      {
-        const availableZones = await fetchZonesByRegion(data.value.region); // 依赖 data.region
-        if (availableZones.length > 0 && !availableZones.some(opt => opt.ZoneId === data.value.zone)) {
-          data.issues.push({
-            code: "custom",
-            input: data.value.zone,
-            message: `无效可用区: ${data.value.zone} (对于区域 ${data.value.region})`,
-            path: ['zone'],
-          });
+    instanceType: z.string()
+      .describe('选择实例类型')
+      .refine((val) => !val, "请选择实例类型")
+      .refine(async (val) => {
+        if (!values.region) {
+          return false;
         }
-      }
-    }
-
-    // 3. 校验 Instance Type (依赖 Region)
-    if (data.value.instanceType) {
-      if (!data.value.region) {
-        data.issues.push({
-          code: "custom",
-          input: data.value.zone,
-          message: `请先选择区域再选择实例类型`,
-          path: ['instanceType'],
-        });
-      } else {
-        const types = await getTencentCloudInstanceTypesByRegion(data.value.region); // 依赖 data.region
-        if (!types.includes(data.value.instanceType)) {
-          data.issues.push({
-            code: "custom",
-            input: data.value.zone,
-            message: `实例类型 "${data.value.instanceType}" 在区域 "${data.value.region}" 不可用`,
-            path: ['instanceType'],
-          });
+        const types = await getTencentCloudInstanceTypesByRegion(values.region); // 依赖 data.region
+        return types.includes(val)
+      }, `无效实例类型`),
+    imageId: z.string()
+      .describe('选择镜像 ID')
+      .refine((val) => !val, "请选择镜像 ID")
+      .refine(async (val) => {
+        if (!values.region) {
+          return false;
         }
-      }
-    }
-
-    // 4. 校验 Image ID (依赖 Region)
-    if (data.value.imageId) {
-      if (!data.value.region) {
-        data.issues.push({
-          code: "custom",
-          input: data.value.zone,
-          message: `请先选择区域再选择镜像 ID`,
-          path: ['imageId'],
-        });
-      } else {
-        const imageIds = await getTencentCloudImageIdsByRegion(data.value.region); // 依赖 data.region
-        if (!imageIds.includes(data.value.imageId)) {
-          data.issues.push({
-            code: "custom",
-            input: data.value.zone,
-            message: `镜像 ID "${data.value.imageId}" 在区域 "${data.value.region}" 不可用`,
-            path: ['imageId'],
-          });
-        }
-      }
-    }
+        const imageIds = await getTencentCloudImageIdsByRegion(values.region); // 依赖 data.region
+        return imageIds.includes(val)
+      }, `无效实例类型`),
   });
 };

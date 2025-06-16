@@ -17,6 +17,9 @@ interface MyVars {
   imageId: string;
 }
 
+
+
+
 interface ProjectRuntimeProps<Vars, Setup> {
   project: ProjectProps;
 
@@ -127,11 +130,11 @@ const runtime=QPA.declare({
   }
 });
 
-const vars: MyVars = {
+const myVars: MyVars = {
   region: "ap-guangzhou",
   zone: "ap-guangzhou-7",
   instanceType: "SA2.MEDIUM2",// 选最便宜的机型
   imageId: "img-mmytdhbn",//Ubuntu Server 24.04 LTS 64bit
 };
-await runtime.apply(vars);
+await runtime.apply(myVars);
 await runtime.destroy();
