@@ -11,7 +11,10 @@ export abstract class _TencentCloudResourceService<SPEC, STATE> extends Resource
     super();
   }
 
-  abstract get resourceType(): TencentCloudType ;
+  abstract get resourceType(): TencentCloudResourceType ;
+
+  //todo 不实用，需要获取所有region，这个真麻烦
+  abstract loadAll(): Promise<ResourceInstance<STATE>[]>;
 }
 
 export interface TencentCloudCredential extends tc_Credential {
@@ -41,11 +44,11 @@ export abstract class _TaggableResourceService<SPEC, STATE> extends _TencentClou
  * 资源六段式列表。腾讯云使用资源六段式描述一个资源。
  * 例如：ResourceList.1 = qcs::{ServiceType}:{Region}:{Account}:{ResourcePrefix}/${ResourceId}。
  */
-export class TencentCloudType implements ResourceType {
-  private static _types = new Map<string, TencentCloudType>();
-  static vpc_vpc = TencentCloudType.put("vpc", "vpc", 100, 100, [])
-  static vpc_subnet = TencentCloudType.put("vpc", "subnet", 100, 100, [TencentCloudType.vpc_vpc])
-  static cvm_instance = TencentCloudType.put("cvm", "instance", 100, 100, [TencentCloudType.vpc_subnet, TencentCloudType.vpc_vpc]) // ref: DescribeInstancesRequest
+export class TencentCloudResourceType implements ResourceType {
+  private static _types = new Map<string, TencentCloudResourceType>();
+  static vpc_vpc = TencentCloudResourceType.put("vpc", "vpc", 100, 100, [])
+  static vpc_subnet = TencentCloudResourceType.put("vpc", "subnet", 100, 100, [TencentCloudResourceType.vpc_vpc])
+  static cvm_instance = TencentCloudResourceType.put("cvm", "instance", 100, 100, [TencentCloudResourceType.vpc_subnet, TencentCloudResourceType.vpc_vpc]) // ref: DescribeInstancesRequest
 
   /**
    * 私有构造函数，防止外部直接 new跨过注册过程
@@ -67,7 +70,7 @@ export class TencentCloudType implements ResourceType {
      * 依赖项, 比如cvm_instance依赖vpc_subnet和vpc_vpc。
      * @remark 此值需人工在每个请求API的文档中确认其最大限制。
      */
-    readonly dependencies: TencentCloudType[]) {
+    readonly dependencies: TencentCloudResourceType[]) {
   }
 
   static _name(serviceType?: string, resourcePrefix?: string): string {
@@ -75,7 +78,7 @@ export class TencentCloudType implements ResourceType {
   }
 
   get name(): string {
-    return TencentCloudType._name(this.serviceType, this.resourcePrefix);
+    return TencentCloudResourceType._name(this.serviceType, this.resourcePrefix);
   }
 
   /**
@@ -85,8 +88,8 @@ export class TencentCloudType implements ResourceType {
                      resourcePrefix: string,
                      pageLimit: number,
                      deleteLimit: number,
-                     dependencies: TencentCloudType[]
-  ): TencentCloudType {
+                     dependencies: TencentCloudResourceType[]
+  ): TencentCloudResourceType {
     // 更严格的类型检查
     if (serviceType && serviceType.trim() === '') {
       throw new Error('ServiceType must be a non-empty string');
@@ -96,34 +99,38 @@ export class TencentCloudType implements ResourceType {
       throw new Error('ResourcePrefix must be a non-empty string');
     }
 
-    const key = TencentCloudType._name(serviceType, resourcePrefix);
-    const found = TencentCloudType._types.get(key);
+    const key = TencentCloudResourceType._name(serviceType, resourcePrefix);
+    const found = TencentCloudResourceType._types.get(key);
 
     if (found) {
       throw new Error(`ResourceType重复注册,已存在: ${found} `);
     }
     //注册不存在的类型
-    const result = new TencentCloudType(serviceType, resourcePrefix, pageLimit, deleteLimit, dependencies);
-    TencentCloudType._types.set(key, result);
+    const result = new TencentCloudResourceType(serviceType, resourcePrefix, pageLimit, deleteLimit, dependencies);
+    TencentCloudResourceType._types.set(key, result);
     return result;
   }
 
-  static get types(): ReadonlyMap<string, TencentCloudType> {
-    return TencentCloudType._types;
+  static get types(): ReadonlyMap<string, TencentCloudResourceType> {
+    return TencentCloudResourceType._types;
   }
 
   toString(): string {
     return this.name;
   }
 
-  static find(serviceType?: string, resourcePrefix?: string): TencentCloudType | undefined {
-    return TencentCloudType._types.get(TencentCloudType._name(serviceType ?? "", resourcePrefix ?? ""));
+  static find(serviceType?: string, resourcePrefix?: string): TencentCloudResourceType | undefined {
+    return TencentCloudResourceType._types.get(TencentCloudResourceType._name(serviceType ?? "", resourcePrefix ?? ""));
   }
 }
 
 export interface TencentCloudProviderProps {
   credential: TencentCloudCredential
-
+  /**
+   * **重要**，由于腾讯云不保证TAG和资源的一致性，所以用Tag查询资源会有找不到(延迟)，
+   * 导致destroy时漏掉资源,所以我们只能用这种列表的方式罗列遍历查询，如不提供，则会查询所有类型.
+   */
+  // includedResourceTypes?: TencentCloudResourceType[],
 }
 
 /**
@@ -138,7 +145,8 @@ export class _TencentCloudProvider extends Provider {
   readonly resourceServices = new _ResourceServices();
   private readonly credential: TencentCloudCredential;
   private readonly tagClient: _TagClient;
-  readonly runners:_Runners=new _Runners();
+  readonly runners: _Runners = new _Runners();
+
   constructor(readonly project: Project, props: TencentCloudProviderProps) {
     super(project);
     this.credential = props.credential;
@@ -152,6 +160,10 @@ export class _TencentCloudProvider extends Provider {
   /**
    */
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
+    // const result = new Array<ResourceInstance<unknown>>();
+    // for (const [_,service] of this.resourceServices) {
+    //   result.push(...await service.loadAll());
+    // }
     return this.tagClient.findResourceInstances(this);
   }
 
@@ -162,15 +174,15 @@ export class _TencentCloudProvider extends Provider {
     }
   }
 
-  _getService(type: TencentCloudType): _TencentCloudResourceService<unknown, unknown> {
+  _getService(type: TencentCloudResourceType): _TencentCloudResourceService<unknown, unknown> {
     const result = this.resourceServices.get(type);
     if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或放弃使用此资源类型`);
     return result;
   }
 }
 
-class _ResourceServices extends Map<TencentCloudType, _TencentCloudResourceService<unknown, unknown>> {
-  constructor(...args: [TencentCloudType, _TencentCloudResourceService<unknown, unknown>][]) {
+class _ResourceServices extends Map<TencentCloudResourceType, _TencentCloudResourceService<unknown, unknown>> {
+  constructor(...args: [TencentCloudResourceType, _TencentCloudResourceService<unknown, unknown>][]) {
     super(args);
     // 确保原型链正确
     Object.setPrototypeOf(this, _ResourceServices.prototype);

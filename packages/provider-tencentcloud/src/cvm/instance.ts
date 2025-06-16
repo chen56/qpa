@@ -1,6 +1,6 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
 import {ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
-import {_Runners, _TaggableResourceService, _TencentCloudProvider, TencentCloudType} from "../provider.ts";
+import {_Runners, _TaggableResourceService, _TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
@@ -49,7 +49,7 @@ export interface CvmInstanceState extends Instance {
 /**
  */
 export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpec, CvmInstanceState> {
-  readonly resourceType = TencentCloudType.cvm_instance;
+  readonly resourceType = TencentCloudResourceType.cvm_instance;
   private readonly runners: _Runners;
 
   constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly cvmClient: _CvmClientWrap, private readonly vpcClient: _VpcClientWarp) {
@@ -59,6 +59,9 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
 
   get project() {
     return this.providerRuntime.project;
+  }
+  loadAll(): Promise<ResourceInstance<CvmInstanceState>[]> {
+    throw new Error("Method not implemented.");
   }
 
   async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<CvmInstanceState>[]> {
@@ -156,7 +159,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
           VpcId: state.VirtualPrivateCloud!.VpcId!,
           SubnetId: state.VirtualPrivateCloud!.SubnetId!,
           IpAddresses: state.PrivateIpAddresses,
-          Limit: TencentCloudType.vpc_subnet.queryLimit,
+          Limit: TencentCloudResourceType.vpc_subnet.queryLimit,
         });
 
         if ((response.IpAddressStates ?? []).length == 0) {

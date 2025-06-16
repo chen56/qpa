@@ -3,7 +3,7 @@ import {
   Subnet as tc_Subnet
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {Project, ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
+import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 import {_VpcClientWarp} from "./client.ts";
 
@@ -18,10 +18,13 @@ export interface VpcSubnetState extends tc_Subnet {
 /**
  */
 export class _SubnetService extends _TaggableResourceService<VpcSubnetSpec, VpcSubnetState> {
-  resourceType = TencentCloudType.vpc_subnet;
+  resourceType = TencentCloudResourceType.vpc_subnet;
 
   constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly vpcClient: _VpcClientWarp) {
     super();
+  }
+  loadAll(): Promise<ResourceInstance<VpcSubnetState>[]> {
+    throw new Error("Method not implemented.");
   }
 
   private get project(): Project {

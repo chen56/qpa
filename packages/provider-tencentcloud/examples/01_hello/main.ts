@@ -23,6 +23,7 @@ await project.destroy();
 console.log('list all resource');
 
 const vars = {
+  region: "ap-guangzhou",
   zone: "ap-guangzhou-7",
   instanceType: "SA2.MEDIUM2",// 选最便宜的机型
   imageId: "img-mmytdhbn",//Ubuntu Server 24.04 LTS 64bit
@@ -40,7 +41,7 @@ await project.apply(async project => {
   const vpc = await tc.vpc.vpc({
     name: "test-vpc1",
     spec: {
-      Region: "ap-guangzhou",
+      Region: vars.region,
       VpcName: "test-vpc",
       CidrBlock: '10.0.0.0/16',
     }
@@ -51,7 +52,7 @@ await project.apply(async project => {
   const subnet = await tc.vpc.subnet({
     name: "test-subnet1",
     spec: {
-      Region: "ap-guangzhou",
+      Region: vars.region,
       Zone: vars.zone,
       VpcId: vpc.actualInstance.state.VpcId!,
       SubnetName: "test-subnet",
@@ -63,7 +64,7 @@ await project.apply(async project => {
   const cvmInstance1 = await tc.cvm.instance({
       name: "cvmInstance1",
       spec: {
-        Region: "ap-guangzhou",
+        Region: vars.region,
         Placement: {
           Zone: subnet.actualInstance.state.Zone!,
         },

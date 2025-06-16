@@ -9,6 +9,7 @@ import {_VpcClientWarp} from "./vpc/client.ts";
 import {_CvmClientWrap} from "./cvm/client.ts";
 
 export interface TencentCloudProps extends TencentCloudProviderProps {
+
 }
 
 /**

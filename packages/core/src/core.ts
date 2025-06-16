@@ -241,7 +241,7 @@ export class ProviderRuntime<T extends Provider> {
 export class Project extends BaseProject {
   public _providers = new Map<Provider, ProviderRuntime<Provider>>();
 
-  public constructor(props: {
+  private constructor(props: {
     name: string;
   }) {
     super({name: props.name});

@@ -2,8 +2,8 @@ import {
   CreateVpcRequest as tc_CreateVpcRequest,
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
-import {Project, ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
+import {ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
+import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 import {_VpcClientWarp} from "./client.ts";
 
@@ -19,7 +19,10 @@ export interface VpcState extends tc_Vpc {
 /**
  */
 export class _VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
-  resourceType: TencentCloudType = TencentCloudType.vpc_vpc
+  loadAll(): Promise<ResourceInstance<VpcState>[]> {
+      throw new Error("Method not implemented.");
+  }
+  resourceType: TencentCloudResourceType = TencentCloudResourceType.vpc_vpc
 
   constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly vpcClient: _VpcClientWarp) {
     super();

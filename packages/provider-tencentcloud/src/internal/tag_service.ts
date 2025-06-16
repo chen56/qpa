@@ -2,7 +2,7 @@ import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/servi
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Project, ResourceInstance} from "@qpa/core";
 import {Arrays, Paging} from "./common.ts";
-import {TencentCloudType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
+import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
 import {SpiConstants} from "@qpa/core/spi";
 
 const pageLimit = 100;
@@ -34,10 +34,10 @@ export class _TagClient {
         limit: response.Limit ?? pageLimit,
       };
     });
-    const type_resourceTags = new Map<TencentCloudType, ResourceTag[]>
+    const type_resourceTags = new Map<TencentCloudResourceType, ResourceTag[]>
     for (const resourceTag of tagList) {
       if (!resourceTag.ServiceType || !resourceTag.ResourcePrefix) continue;
-      const resourceType = TencentCloudType.find(resourceTag.ServiceType, resourceTag.ResourcePrefix)
+      const resourceType = TencentCloudResourceType.find(resourceTag.ServiceType, resourceTag.ResourcePrefix)
       if (!resourceType) continue;
 
       let oneTypeResourceTags = type_resourceTags.get(resourceType);
