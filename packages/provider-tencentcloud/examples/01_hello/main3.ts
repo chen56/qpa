@@ -1,15 +1,23 @@
-import {z} from 'zod/v4';
+import {Project, ProjectProps} from "@qpa/core";
+import {TencentCloud} from "../../src/factory.ts";
+import * as dotenv from 'dotenv';
+import * as dotenvExpand from 'dotenv-expand';
+import * as console from "node:console";
+import {Cli} from "@qpa/cli";
+import {z} from "zod/v4";
+// 首先加载 .env ,存放SECRET_ID等
+const myEnv = dotenv.config();
+// 然后使用 dotenvExpand.expand() 来处理变量扩展
+// 它会修改 process.env，并返回一个包含所有扩展后变量的对象
+dotenvExpand.expand(myEnv);
 
-
-// 定义扁平选项表的元数据结构
-interface OptionTableMetadata<Row, K extends Extract<keyof Row, string>> {
-  type: 'qpa$optionTable';
-  fetchData: () => Promise<Row[]>; // fetchData 接收整个表单的当前值
-  valueKey: K;
-  schema: z.ZodObject<Record<keyof Row, z.ZodTypeAny>>;
+interface MyVars {
+  region: string,
+  zone: string;
+  instanceType: string;
+  imageId: string;
 }
 
-``
 
 // 2. 模拟 API 函数 (返回 Promise)
 interface RegionApiData {
@@ -76,27 +84,6 @@ async function getTencentCloudImageIdsByRegion(region: string): Promise<string[]
   }, 500));
 }
 
-// 3. Zod Schema 辅助函数：附加 UI 元数据 (使用 z.meta())
-// 移除 superRefine 逻辑，因为跨字段和动态校验将放到 object-level superRefine
-// 扩展 ZodString 接口
-declare module 'zod/v4' {
-  interface ZodType {
-    qpa$optionTable<Row extends object, ColumnName extends Extract<keyof Row, string>>(table: Omit<OptionTableMetadata<Row, ColumnName>, 'type'>): this;
-  }
-}
-
-// 实现扩展方法
-// 实现 optionTable 方法
-z.ZodType.prototype.qpa$optionTable = function <T extends object, K extends Extract<keyof T, string>>(
-  table: Omit<OptionTableMetadata<T, K>, 'type'>
-) {
-  const {fetchData, valueKey} = table;
-  return this.meta({
-    qpa$OptionTable: {type: 'qpa$optionTable', fetchData, valueKey},
-  });
-};
-
-
 // 1. 公共类型定义
 // 定义最终表单数据结构
 interface MyVars {
@@ -105,8 +92,6 @@ interface MyVars {
   instanceType: string;
   imageId: string;
 }
-
-
 
 const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentValues 参数，所有验证数据从 data 参数获取
   return z.object({
@@ -174,13 +159,77 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
       }, `无效实例类型`),
   });
 };
-type SchemaFunc=( values: Partial<MyVars>)=> z.ZodObject<{imageId: z.ZodString, instanceType: z.ZodString, region: z.ZodString, zone: z.ZodString}>
-type SchemaFunc2<Vars>=( values: Partial<Vars>)=> z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>
-function xxx(createVarsSchema: SchemaFunc) {
-  throw new Error('Function not implemented.');
-}
-function xxx2<Vars>(createVarsSchema: SchemaFunc2<Vars>) {
-  throw new Error('Function not implemented.');
-}
-xxx(createVarsSchema)
-xxx2(createVarsSchema)
+
+const cli=Cli.create(()=>{
+  const project=Project.of({name: "test"});
+  const tc = new TencentCloud(project, {
+    credential: {
+      secretId: process.env.TENCENTCLOUD_SECRET_ID!,
+      secretKey: process.env.TENCENTCLOUD_SECRET_KEY!,
+    },
+  });
+
+  return {
+    project:project,
+    varsSchema:createVarsSchema,
+    apply:async (context) => {
+      const project=context.project;
+      const vars=context.vars;
+
+      const vpc = await tc.vpc.vpc({
+        name: "test-vpc1",
+        spec: {
+          Region: vars.region,
+          VpcName: "test-vpc",
+          CidrBlock: '10.0.0.0/16',
+        }
+      });
+      console.log("created vpc:", vpc.actualInstance.toJson())
+      console.log("project:", project.resourceInstances.map(e => e.name))
+
+      const subnet = await tc.vpc.subnet({
+        name: "test-subnet1",
+        spec: {
+          Region: vars.region,
+          Zone: vars.zone,
+          VpcId: vpc.actualInstance.state.VpcId!,
+          SubnetName: "test-subnet",
+          CidrBlock: '10.0.1.0/24',
+        }
+      });
+      console.log("created subnet:", subnet.actualInstance.toJson())
+
+      const cvmInstance1 = await tc.cvm.instance({
+          name: "cvmInstance1",
+          spec: {
+            Region: vars.region,
+            Placement: {
+              Zone: subnet.actualInstance.state.Zone!,
+            },
+            InstanceChargeType: "SPOTPAID",
+            InstanceType: vars.instanceType,
+            ImageId: vars.imageId,
+            InstanceName: "test-cvm-instance1",
+            VirtualPrivateCloud: {
+              VpcId: vpc.actualInstance.state.VpcId!,
+              SubnetId: subnet.actualInstance.state.SubnetId!,
+            },
+            SystemDisk: {
+              DiskType: "CLOUD_PREMIUM",
+              DiskSize: 20,
+            },
+            InternetAccessible: {
+              InternetChargeType: "TRAFFIC_POSTPAID_BY_HOUR",
+              InternetMaxBandwidthOut: 1,
+              PublicIpAssigned: true,
+            }
+          },
+        }
+      );
+      console.log("created cvmInstance1:", cvmInstance1, cvmInstance1.actualInstance.toJson())
+      console.log("project:", project.resourceInstances.map(e => e.name))
+    },
+  }
+})
+
+cli.rootCommand.parse(process.argv);

@@ -267,8 +267,8 @@ export class Project extends BaseProject {
     await apply(this);
 
     // cleanup
-    for (const [_, state] of this._providers) {
-      await state.cleanup();
+    for (const [_, providerRuntime] of this._providers) {
+      await providerRuntime.cleanup();
     }
   }
 
@@ -284,8 +284,8 @@ export class Project extends BaseProject {
    * - 各Provider按资源类型固定的顺序进行删除，比如先删除虚拟机、再删除网络等等。
    */
   async destroy(): Promise<void> {
-    for (const [_, state] of this._providers) {
-      await state.destroy();
+    for (const [_, providerRuntime] of this._providers) {
+      await providerRuntime.destroy();
     }
   }
 }
