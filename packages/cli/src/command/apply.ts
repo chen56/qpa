@@ -2,6 +2,7 @@ import {GlobalOptions} from './common.ts';
 import type {Command} from "commander";
 import {ApplyFunc, Cli, VarsSchema} from 'src/index.ts';
 import {Project} from "@qpa/core";
+import {z} from "zod/v4";
 
 import * as p from '@clack/prompts';
 
@@ -10,7 +11,7 @@ interface ApplyOptions extends GlobalOptions {
 }
 
 // 导出一个函数，用于注册 apply 子命令
-function checkCancel(value: unknown) :void {
+function checkCancel(value: unknown): void {
   if (p.isCancel(value)) {
     p.cancel('Operation cancelled.');
     process.exit(0);
@@ -18,7 +19,7 @@ function checkCancel(value: unknown) :void {
 }
 
 // 接受父命令 (通常是 program 实例) 作为参数
-export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, varsSchema: VarsSchema<Vars>, apply: ApplyFunc<Vars>): void {
+export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, varsSchemaCreator: VarsSchema<Vars>, apply: ApplyFunc<Vars>): void {
   // 在父命令上创建 'apply' 子命令
   parentCommand.command('apply')
     .description('apply config')
@@ -26,12 +27,31 @@ export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, 
     .action(async (options: ApplyOptions) => {
       p.intro(`apply`);
 
+      const schema = varsSchemaCreator({});
+      // p.log.message(`schema: ${JSON.stringify(schema,null,2)}`)
+
+      for (const [key, field] of Object.entries(schema.shape)) {
+        if (field instanceof z.ZodType) {
+          p.log.message(`${key}: ${field.description}. ${JSON.stringify(field)}`)
+          if (!field.meta) {
+            p.log.message(`${key}: ${field.description} - ${field.meta}`)
+
+            // const qpa$OptionTable= field.meta().qpa$OptionTable;
+            // if(qpa$OptionTable && qpa$OptionTable.type="qpa$optionTable"){
+            //   const options = await qpa$OptionTable.fetchData();
+            //
+            // }
+
+          }
+        }
+      }
+
 
       const log = p.taskLog({
         title: 'Running npm install'
       });
 
-      for await (const line of ["a","b"]) {
+      for await (const line of ["a", "b"]) {
         log.message(line);
       }
 
@@ -47,27 +67,26 @@ export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, 
       s.stop('Installed via npm');
 
 
-
       const group = await p.group(
         {
-          name: () => p.text({ message: 'What is your name?' }),
-          age: () => p.text({ message: 'What is your age?' }),
-          color: ({ results }) =>
+          name: () => p.text({message: 'What is your name?'}),
+          age: () => p.text({message: 'What is your age?'}),
+          color: ({results}) =>
             p.multiselect({
               message: `What is your favorite color ${results.name}?`,
               options: [
-                { value: 'red', label: 'Red' },
-                { value: 'green', label: 'Green' },
-                { value: 'blue', label: 'Blue' },
+                {value: 'red', label: 'Red'},
+                {value: 'green', label: 'Green'},
+                {value: 'blue', label: 'Blue'},
               ],
-              initialValues:['red','green'],
+              initialValues: ['red', 'green'],
               // required:false,
             }),
         },
         {
           // On Cancel callback that wraps the group
           // So if the user cancels one of the prompts in the group this function will be called
-          onCancel: ({ results }) => {
+          onCancel: ({results}) => {
             p.cancel('Operation cancelled.');
             process.exit(0);
           },
@@ -85,14 +104,12 @@ export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, 
       const projectType = await p.select({
         message: 'Pick a project type.',
         options: [
-          { value: 'ts', label: 'TypeScript' },
-          { value: 'js', label: 'JavaScript' },
-          { value: 'coffee', label: 'CoffeeScript', hint: 'oh no' },
+          {value: 'ts', label: 'TypeScript'},
+          {value: 'js', label: 'JavaScript'},
+          {value: 'coffee', label: 'CoffeeScript', hint: 'oh no'},
         ],
       });
       checkCancel(projectType);
-
-
 
 
       p.outro(`You're all set!`);
@@ -103,7 +120,7 @@ export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, 
           project: project,
           vars: {
             //todo 获取 vars
-          }
+          } as Vars
         });
       })
     });

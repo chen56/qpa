@@ -3,7 +3,7 @@ import {z} from 'zod/v4';
 
 // 定义扁平选项表的元数据结构
 interface OptionTableMetadata<Row, K extends Extract<keyof Row, string>> {
-  type: 'qpa$optionTable';
+  type: '@qpa/cli/OptionTable';
   fetchData: () => Promise<Row[]>; // fetchData 接收整个表单的当前值
   valueKey: K;
   schema: z.ZodObject<Record<keyof Row, z.ZodTypeAny>>;
@@ -92,7 +92,7 @@ z.ZodType.prototype.qpa$optionTable = function <T extends object, K extends Extr
 ) {
   const {fetchData, valueKey} = table;
   return this.meta({
-    qpa$OptionTable: {type: 'qpa$optionTable', fetchData, valueKey},
+    qpa$OptionTable: {type: '@qpa/cli/OptionTable', fetchData, valueKey},
   });
 };
 

@@ -1,7 +1,7 @@
 import {Project} from "@qpa/core";
 import * as console from "node:console";
 import {z} from "zod/v4";
-import {Cli} from "../src";
+import {Cli, VarsSchema} from "../src";
 
 /*
  * 模仿一个QPA项目
@@ -89,7 +89,7 @@ interface MyVars {
   imageId: string;
 }
 
-const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentValues 参数，所有验证数据从 data 参数获取
+const createVarsSchema: VarsSchema<MyVars> = (values: Partial<MyVars>) => { // 不再接收 currentValues 参数，所有验证数据从 data 参数获取
   return z.object({
     region: z.string()
       .describe('选择区域')
@@ -99,6 +99,7 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         return availableRegions.some(opt => opt.RegionId === val)
       }, `无效区域`)
       .qpa$optionTable({
+        type: '@qpa/cli/OptionTable',
         fetchData: async (): Promise<RegionApiData[]> => { // fetchData 在这里仍然需要 `values.region`
           console.log("API Call: Fetching regions...");
           return fetchRegions();
@@ -120,6 +121,7 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         return availableZones.some(opt => opt.ZoneId === val)
       }, `无效可用区`)
       .qpa$optionTable({
+        type: '@qpa/cli/OptionTable',
         fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
           if (values.region) {
             return fetchZonesByRegion(values.region);
@@ -134,7 +136,6 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         }),
       }),
     instanceType: z.string()
-      .describe('选择实例类型')
       .refine((val) => !val, "请选择实例类型")
       .refine(async (val) => {
         if (!values.region) {
@@ -142,7 +143,9 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         }
         const types = await getTencentCloudInstanceTypesByRegion(values.region); // 依赖 data.region
         return types.includes(val)
-      }, `无效实例类型`),
+      }, `无效实例类型`)
+      .describe('选择实例类型')
+    ,
     imageId: z.string()
       .describe('选择镜像 ID')
       .refine((val) => !val, "请选择镜像 ID")
@@ -156,15 +159,27 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
   });
 };
 
-const cli=Cli.create(()=>{
-  const project=Project.of({name: "test"});
+// zod: bug
+// console.log("region:", z.string()
+//   .refine((val) => !val, "select region")
+//   .describe('region desc')
+//   .description);
+// console.log("region2", z.string()
+//   .describe('region desc')
+//   .refine((val) => !val, "select region").description);
+// output:
+// region: region desc
+// region2: undefined
+
+const cli = Cli.create(() => {
+  const project = Project.of({name: "test"});
 
   return {
-    project:project,
-    varsSchema:createVarsSchema,
-    apply:async (context) => {
-      const project=context.project;
-      const vars=context.vars;
+    project: project,
+    varsSchema: createVarsSchema,
+    apply: async (context) => {
+      const project = context.project;
+      const vars = context.vars;
 
       console.log("created vpc")
       console.log("created subnet")

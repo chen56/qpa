@@ -16,10 +16,10 @@ const MY_ENV = dotenv.config();
 dotenvExpand.expand(MY_ENV);
 
 // 定义扁平选项表的元数据结构
-export interface OptionTableMetadata<Row, K extends Extract<keyof Row, string>> {
-  type: 'qpa$optionTable';
+export interface OptionTable<Row, Key extends keyof Row> {
+  type: '@qpa/cli/OptionTable';
   fetchData: () => Promise<Row[]>; // fetchData 接收整个表单的当前值
-  valueKey: K;
+  valueKey: Key;
   schema: z.ZodObject<Record<keyof Row, z.ZodTypeAny>>;
 }
 
@@ -28,18 +28,20 @@ export interface OptionTableMetadata<Row, K extends Extract<keyof Row, string>> 
 // 扩展 ZodString 接口
 declare module 'zod/v4' {
   interface ZodType {
-    qpa$optionTable<Row extends object, ColumnName extends Extract<keyof Row, string>>(table: Omit<OptionTableMetadata<Row, ColumnName>, 'type'>): this;
+    qpa$optionTable<Row, Key extends keyof Row>(table: OptionTable<Row, Key>): this;
   }
 }
 
 // 实现扩展方法
 // 实现 optionTable 方法
-z.ZodType.prototype.qpa$optionTable = function <T extends object, K extends Extract<keyof T, string>>(
-  table: Omit<OptionTableMetadata<T, K>, 'type'>
+z.ZodType.prototype.qpa$optionTable = function <Row, Key extends keyof Row>(
+  table: Omit<OptionTable<Row, Key>, 'type'>
 ) {
   const {fetchData, valueKey} = table;
+
   return this.meta({
-    qpa$OptionTable: {type: 'qpa$optionTable', fetchData, valueKey},
+    ...this.meta(),
+    qpa$OptionTable: {type: '@qpa/cli/OptionTable', fetchData, valueKey: valueKey},
   });
 };
 
