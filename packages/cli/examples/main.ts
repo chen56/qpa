@@ -1,7 +1,7 @@
 import {Project} from "@qpa/core";
 import * as console from "node:console";
 import {z} from "zod/v4";
-import {Cli, VarsSchema} from "../src";
+import {Cli, VarsSchema} from "../src/index.ts";
 
 /*
  * 模仿一个QPA项目
@@ -28,7 +28,7 @@ interface ZoneApiData {
 }
 
 async function fetchRegions(): Promise<RegionApiData[]> {
-  console.log("API Call: Fetching regions...");
+  // console.log("API Call: Fetching regions...");
   return new Promise(resolve => setTimeout(() => resolve([
     {RegionId: 'ap-guangzhou', RegionName: '华南地区(广州)'},
     {RegionId: 'ap-shanghai', RegionName: '华东地区(上海)'},
@@ -54,32 +54,58 @@ async function fetchZonesByRegion(regionId: string): Promise<ZoneApiData[]> {
   }, 500));
 }
 
-async function getTencentCloudInstanceTypesByRegion(region: string): Promise<string[]> {
-  console.log(`API Call: Fetching instance types for region: ${region}...`);
+// ... 已有代码 ...
+
+// 定义新的接口
+interface InstanceTypeData {
+  InstanceType: string;
+}
+
+interface ImageIdData {
+  ImageId: string;
+}
+
+// 修改后的 getTencentCloudInstanceTypesByRegion 函数
+async function fetchInstanceTypesByRegion(region: string): Promise<InstanceTypeData[]> {
+  // console.log(`API Call: Fetching instance types for region: ${region}...`);
   return new Promise(resolve => setTimeout(() => {
     if (region === 'ap-guangzhou') {
-      resolve(['SA2.MEDIUM2', 'S5.LARGE8']);
+      resolve([
+        {InstanceType: 'SA2.MEDIUM2'},
+        {InstanceType: 'S5.LARGE8'}
+      ]);
     } else if (region === 'ap-shanghai') {
-      resolve(['S5.MEDIUM4', 'S5.LARGE16']);
+      resolve([
+        {InstanceType: 'S5.MEDIUM4'},
+        {InstanceType: 'S5.LARGE16'}
+      ]);
     } else {
       resolve([]);
     }
   }, 500));
 }
 
-async function getTencentCloudImageIdsByRegion(region: string): Promise<string[]> {
-  console.log(`API Call: Fetching image IDs for region: ${region}...`);
+// 修改后的 getTencentCloudImageIdsByRegion 函数
+async function fetchImageIdsByRegion(region: string): Promise<ImageIdData[]> {
+  // console.log(`API Call: Fetching image IDs for region: ${region}...`);
   return new Promise(resolve => setTimeout(() => {
     if (region === 'ap-guangzhou') {
-      resolve(['img-mmytdhbn', 'img-other-guangzhou']);
+      resolve([
+        {ImageId: 'img-mmytdhbn'},
+        {ImageId: 'img-other-guangzhou'}
+      ]);
     } else if (region === 'ap-shanghai') {
-      resolve(['img-shanghai-ubuntu', 'img-shanghai-centos']);
+      resolve([
+        {ImageId: 'img-shanghai-ubuntu'},
+        {ImageId: 'img-shanghai-centos'}
+      ]);
     } else {
       resolve([]);
     }
   }, 500));
 }
 
+// ... 已有代码 ...
 // 1. 公共类型定义
 // 定义最终表单数据结构
 interface MyVars {
@@ -92,26 +118,24 @@ interface MyVars {
 const createVarsSchema: VarsSchema<MyVars> = (values: Partial<MyVars>) => { // 不再接收 currentValues 参数，所有验证数据从 data 参数获取
   return z.object({
     region: z.string()
-      .describe('选择区域')
       .refine((val) => !val, "请选择区域")
       .refine(async (val) => {
         const availableRegions = await fetchRegions(); // 直接调用 API 获取数据
         return availableRegions.some(opt => opt.RegionId === val)
       }, `无效区域`)
-      .qpa$optionTable({
-        type: '@qpa/cli/OptionTable',
+      .meta({description: "选择区域"})
+      .meta$optionTable({
         fetchData: async (): Promise<RegionApiData[]> => { // fetchData 在这里仍然需要 `values.region`
-          console.log("API Call: Fetching regions...");
+          // console.log("API Call: Fetching regions...");
           return fetchRegions();
         },
         valueKey: 'RegionId',
         schema: z.object({
-          RegionId: z.string().describe('区域'),
-          RegionName: z.string().describe('区域名称'),
+          RegionId: z.string().meta({description: "区域"}),
+          RegionName: z.string().meta({description: "区域名称"}),
         }),
       }),
     zone: z.string()
-      .describe('选择可用区')
       .refine((val) => !val, "请选择可用区")
       .refine(async (val) => {
         if (!values.region) {
@@ -120,8 +144,8 @@ const createVarsSchema: VarsSchema<MyVars> = (values: Partial<MyVars>) => { // �
         const availableZones = await fetchZonesByRegion(values.region); // 依赖 data.region
         return availableZones.some(opt => opt.ZoneId === val)
       }, `无效可用区`)
-      .qpa$optionTable({
-        type: '@qpa/cli/OptionTable',
+      .meta({description: "选择可用区"})
+      .meta$optionTable({
         fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
           if (values.region) {
             return fetchZonesByRegion(values.region);
@@ -130,9 +154,9 @@ const createVarsSchema: VarsSchema<MyVars> = (values: Partial<MyVars>) => { // �
         },
         valueKey: 'ZoneId',
         schema: z.object({
-          ZoneId: z.string().describe('可用区'),
-          ZoneName: z.string().describe('可用区名称'),
-          RegionId: z.string().describe('区域'),
+          ZoneId: z.string().meta({description: "可用区"}),
+          ZoneName: z.string().meta({description: "可用区名称"}),
+          RegionId: z.string().meta({description: "区域"}),
         }),
       }),
     instanceType: z.string()
@@ -141,32 +165,75 @@ const createVarsSchema: VarsSchema<MyVars> = (values: Partial<MyVars>) => { // �
         if (!values.region) {
           return false;
         }
-        const types = await getTencentCloudInstanceTypesByRegion(values.region); // 依赖 data.region
-        return types.includes(val)
+        const types = await fetchInstanceTypesByRegion(values.region); // 依赖 data.region
+        return types.map(e => e.InstanceType).includes(val)
       }, `无效实例类型`)
-      .describe('选择实例类型')
+      .meta({description: "选择实例类型"})
+      .meta$optionTable({
+        fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
+          if (values.region) {
+            return fetchInstanceTypesByRegion(values.region);
+          }
+          return [];
+        },
+        valueKey: 'InstanceType',
+        schema: z.object({
+          InstanceType: z.string().meta({description: "实例类型"}),
+        }),
+      })
     ,
     imageId: z.string()
-      .describe('选择镜像 ID')
-      .refine((val) => !val, "请选择镜像 ID")
+      .refine((val) => !val, "请选择镜像")
       .refine(async (val) => {
         if (!values.region) {
           return false;
         }
-        const imageIds = await getTencentCloudImageIdsByRegion(values.region); // 依赖 data.region
-        return imageIds.includes(val)
-      }, `无效实例类型`),
+        const imageIds = await fetchImageIdsByRegion(values.region); // 依赖 data.region
+        return imageIds.map(e => e.ImageId).includes(val)
+      }, `无效实例类型`)
+      .meta({description: "选择镜像"})
+      .meta$optionTable({
+        fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
+          if (values.region) {
+            return fetchImageIdsByRegion(values.region);
+          }
+          return [];
+        },
+        valueKey: 'ImageId',
+        schema: z.object({
+          ImageId: z.string().meta({description: "镜像ID"}),
+        }),
+      })
+    ,
   });
 };
+
 
 // zod: bug
 // console.log("region:", z.string()
 //   .refine((val) => !val, "select region")
-//   .describe('region desc')
-//   .description);
+//   .meta$description('region desc')
+//   // .describe('region desc')
+//   .description
+// );
 // console.log("region2", z.string()
-//   .describe('region desc')
-//   .refine((val) => !val, "select region").description);
+//   .refine((val) => !val, "select region")
+//   .meta({
+//     description: "region desc",
+//   })
+//   .meta$optionTable({
+//     fetchData: async (): Promise<RegionApiData[]> => { // fetchData 在这里仍然需要 `values.region`
+//       console.log("API Call: Fetching regions...");
+//       return fetchRegions();
+//     },
+//     valueKey: 'RegionId',
+//     schema: z.object({
+//       RegionId: z.string().describe('区域'),
+//       RegionName: z.string().describe('区域名称'),
+//     }),
+//   })
+//   .meta()
+// );
 // output:
 // region: region desc
 // region2: undefined

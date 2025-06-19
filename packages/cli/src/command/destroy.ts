@@ -1,6 +1,6 @@
 import type {Command} from "commander";
-import {Cli} from "src/index.ts";
 import console from "node:console";
+import {Cli} from "../cli.ts";
 
 // 导出一个函数，用于注册 plan 子命令
 // 接受父命令 (通常是 program 实例) 作为参数

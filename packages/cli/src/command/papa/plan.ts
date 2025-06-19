@@ -2,7 +2,8 @@ import type {GlobalOptions} from '../common.ts';
 import {loadPlannedConfig} from '../common.ts';
 import type {Command} from "commander";
 import {LazyProject} from "@qpa/core";
-import {Cli} from "src/index.ts";
+
+import {Cli} from "../../cli.ts";
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
 interface Options extends GlobalOptions {

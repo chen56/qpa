@@ -2,7 +2,8 @@ import * as apply from './apply.js';
 import * as destroy from './destroy.js';
 import * as plan from './plan.ts';
 import type {Command} from "commander";
-import {Cli} from "src/index.ts";
+
+import {Cli} from "../../cli.ts";
 
 
 export default function registerCommand(cli: Cli, parentCommand: Command): void {

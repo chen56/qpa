@@ -1,10 +1,13 @@
 import {GlobalOptions} from './common.ts';
 import type {Command} from "commander";
-import {ApplyFunc, Cli, VarsSchema} from 'src/index.ts';
 import {Project} from "@qpa/core";
 import {z} from "zod/v4";
 
 import * as p from '@clack/prompts';
+import {ApplyFunc, VarsSchema} from "../interface.ts";
+import {Cli} from "../cli.ts";
+import {_OptionTableImpl} from "../zod.ts";
+import { exit } from 'node:process';
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
 interface ApplyOptions extends GlobalOptions {
@@ -27,90 +30,21 @@ export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, 
     .action(async (options: ApplyOptions) => {
       p.intro(`apply`);
 
-      const schema = varsSchemaCreator({});
-      // p.log.message(`schema: ${JSON.stringify(schema,null,2)}`)
-
-      for (const [key, field] of Object.entries(schema.shape)) {
-        if (field instanceof z.ZodType) {
-          p.log.message(`${key}: ${field.description}. ${JSON.stringify(field)}`)
-          if (!field.meta) {
-            p.log.message(`${key}: ${field.description} - ${field.meta}`)
-
-            // const qpa$OptionTable= field.meta().qpa$OptionTable;
-            // if(qpa$OptionTable && qpa$OptionTable.type="qpa$optionTable"){
-            //   const options = await qpa$OptionTable.fetchData();
-            //
-            // }
-
-          }
-        }
-      }
-
-
-      const log = p.taskLog({
-        title: 'Running npm install'
-      });
-
-      for await (const line of ["a", "b"]) {
-        log.message(line);
-      }
-
-
       if (options.verbose) {
         p.log.info(`sssOptions:${JSON.stringify(options)}`);
       }
 
-      const s = p.spinner();
-      s.start('Installing via npm');
-// Do installation here
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      s.stop('Installed via npm');
+      const vars: Partial<Vars> = {};
+      const schema = varsSchemaCreator(vars);
 
-
-      const group = await p.group(
-        {
-          name: () => p.text({message: 'What is your name?'}),
-          age: () => p.text({message: 'What is your age?'}),
-          color: ({results}) =>
-            p.multiselect({
-              message: `What is your favorite color ${results.name}?`,
-              options: [
-                {value: 'red', label: 'Red'},
-                {value: 'green', label: 'Green'},
-                {value: 'blue', label: 'Blue'},
-              ],
-              initialValues: ['red', 'green'],
-              // required:false,
-            }),
-        },
-        {
-          // On Cancel callback that wraps the group
-          // So if the user cancels one of the prompts in the group this function will be called
-          onCancel: ({results}) => {
-            p.cancel('Operation cancelled.');
-            process.exit(0);
-          },
+      for (const [varKey, varField] of Object.entries(schema.shape)) {
+        if (!(varField instanceof z.ZodType)) {
+          continue;
         }
-      );
-
-      console.log(group.name, group.age, group.color);
-
-
-      const value = await p.text({
-        message: 'What is the meaning of life?',
-      });
-      checkCancel(value);
-
-      const projectType = await p.select({
-        message: 'Pick a project type.',
-        options: [
-          {value: 'ts', label: 'TypeScript'},
-          {value: 'js', label: 'JavaScript'},
-          {value: 'coffee', label: 'CoffeeScript', hint: 'oh no'},
-        ],
-      });
-      checkCancel(projectType);
-
+        const value = await readRarValue(varKey, varField)
+        checkCancel(value);
+        vars[varKey] = value;
+      }
 
       p.outro(`You're all set!`);
 
@@ -118,10 +52,55 @@ export default function registerCommand<Vars>(cli: Cli, parentCommand: Command, 
       await cli.project.apply(async (project: Project) => {
         await apply({
           project: project,
-          vars: {
-            //todo 获取 vars
-          } as Vars
+          vars: vars as Vars
         });
       })
     });
+}
+
+async function readRarValue(varKey: string, varField: z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>): Promise<unknown | symbol> {
+  const meta = varField.meta()
+  const varDescription = meta?.description ?? varKey;
+
+  // console.log(`. ${varDescription} ${JSON.stringify(meta)}`)
+
+
+  const optionTable = (meta?.optionTable instanceof _OptionTableImpl) ? meta.optionTable : null;
+
+  // 未提供选项表的字段让用户自己输入
+  if (!optionTable) {
+    return await p.text({message: varDescription})
+  }
+
+  const optionTableData = await optionTable.fetchData()
+  if (optionTableData.length == 0) {
+    p.cancel(`${varDescription} : no option data`)
+    exit(1)
+  }
+
+
+  const clackOptions: p.Option<typeof varField.type>[] = [];
+  for (const optionRow of optionTableData) {
+    // console.log(`. optionRow ${JSON.stringify(optionRow)}`)
+    let optionRowDescription = ""
+    for (const [optionKey, optionField] of Object.entries(optionTable.schema.shape)) {
+      // 使用方括号表示法从 optionRow 中获取 optionKey 对应的值
+      const optionFieldDesc = optionField.meta()?.description ?? optionKey;
+      // if (!(optionField instanceof z.ZodType)) {
+      //   continue;
+      // }
+      const optionValue = optionRow[optionKey as keyof typeof optionRow];
+      optionRowDescription += `${optionFieldDesc}:${optionValue},`
+      // console.log(`.   optionKey key:${optionKey}. value:${optionValue}  desc:${optionFieldDesc}`);
+    }
+    clackOptions.push({
+      value: optionRow[optionTable.valueKey],
+      label: optionRowDescription,
+    })
+    // console.log(`.   clackOptions:${JSON.stringify(clackOptions)}`)
+  }
+  return await p.select({
+    message: `${varDescription}`,
+    options: clackOptions,
+  });
 }

@@ -117,7 +117,7 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         const availableRegions = await fetchRegions(); // 直接调用 API 获取数据
         return availableRegions.some(opt => opt.RegionId === val)
       }, `无效区域`)
-      .qpa$optionTable({
+      .meta$optionTable({
         fetchData: async (): Promise<RegionApiData[]> => { // fetchData 在这里仍然需要 `values.region`
           console.log("API Call: Fetching regions...");
           return fetchRegions();
@@ -138,7 +138,7 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         const availableZones = await fetchZonesByRegion(values.region); // 依赖 data.region
         return availableZones.some(opt => opt.ZoneId === val)
       }, `无效可用区`)
-      .qpa$optionTable({
+      .meta$optionTable({
         fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
           if (values.region) {
             return fetchZonesByRegion(values.region);
@@ -176,11 +176,3 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
 };
 type SchemaFunc=( values: Partial<MyVars>)=> z.ZodObject<{imageId: z.ZodString, instanceType: z.ZodString, region: z.ZodString, zone: z.ZodString}>
 type SchemaFunc2<Vars>=( values: Partial<Vars>)=> z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>
-function xxx(createVarsSchema: SchemaFunc) {
-  throw new Error('Function not implemented.');
-}
-function xxx2<Vars>(createVarsSchema: SchemaFunc2<Vars>) {
-  throw new Error('Function not implemented.');
-}
-xxx(createVarsSchema)
-xxx2(createVarsSchema)

@@ -1,9 +1,8 @@
-import {Project, ProjectProps} from "@qpa/core";
+import {Project} from "@qpa/core";
 import {TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import * as console from "node:console";
-import {Cli} from "@qpa/cli";
 import {z} from "zod/v4";
 // 首先加载 .env ,存放SECRET_ID等
 const myEnv = dotenv.config();
@@ -102,7 +101,7 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         const availableRegions = await fetchRegions(); // 直接调用 API 获取数据
         return availableRegions.some(opt => opt.RegionId === val)
       }, `无效区域`)
-      .qpa$optionTable({
+      .meta$optionTable({
         fetchData: async (): Promise<RegionApiData[]> => { // fetchData 在这里仍然需要 `values.region`
           console.log("API Call: Fetching regions...");
           return fetchRegions();
@@ -123,7 +122,7 @@ const createVarsSchema = (values: Partial<MyVars>) => { // 不再接收 currentV
         const availableZones = await fetchZonesByRegion(values.region); // 依赖 data.region
         return availableZones.some(opt => opt.ZoneId === val)
       }, `无效可用区`)
-      .qpa$optionTable({
+      .meta$optionTable({
         fetchData: async () => { // fetchData 在这里仍然需要 `values.region`
           if (values.region) {
             return fetchZonesByRegion(values.region);

@@ -3,7 +3,8 @@ import {GlobalOptions, loadPlannedConfig} from '../common.ts';
 
 import type {Command} from "commander";
 import {LazyProject} from "@qpa/core";
-import {Cli} from "src/index.ts";
+
+import {Cli} from "../../cli.ts";
 
 interface Options extends GlobalOptions {
 }
