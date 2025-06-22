@@ -31,6 +31,13 @@ terraform是个nb的项目，但使用过程中，有些问题无法克服，遂
 
 原理上，不会存在工具无法发现的孤立资源，因为QPA工具会提供所有标记过的资源的查询接口，而减少人工比对。
 
+## 参数化UI
+
+ref:
+- <https://rjsf-team.github.io/>
+- <https://pro.form-create.com/view/>
+- <https://github.com/alibaba/formily>
+
 
 ### TODO
 

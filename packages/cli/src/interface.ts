@@ -7,9 +7,8 @@ export interface ApplyContext<Vars> {
 }
 
 export type ApplyFunc<Vars> = (context: ApplyContext<Vars>) => Promise<void>;
-export type VarsSchema<Vars> = (values: Partial<Vars>) => z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>;
 export type SetupFunc<Vars> = () => {
   project: Project;
   apply: ApplyFunc<Vars>;
-  varsSchema: VarsSchema<Vars>;
+  varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>;
 }

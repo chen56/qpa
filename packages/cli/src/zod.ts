@@ -7,35 +7,35 @@ import {z} from "zod/v4";
 // 扩展 ZodString 接口
 declare module 'zod/v4' {
   interface ZodType {
-    meta$optionTable<Row, Key extends keyof Row>(table: OptionTable<Row, Key>): this;
+    meta$optionTable<Model,FieldOption>(table: OptionTable<Model,FieldOption>): this;
   }
 }
 
 // 实现扩展方法
 // 实现 optionTable 方法
-z.ZodType.prototype.meta$optionTable = function <Row, Key extends keyof Row>(
-  table:_OptionTableImpl<Row, Key>
+z.ZodType.prototype.meta$optionTable = function <Model,FieldOption>(
+  table: _OptionTableImpl<Model,FieldOption>
 ) {
   return this.meta({
     ...this.meta(),
-    optionTable:new _OptionTableImpl(table),
+    optionTable: new _OptionTableImpl(table),
   });
 };
 
-export interface OptionTable<Row, Key extends keyof Row> {
-    fetchData: () => Promise<Row[]>; // fetchData 接收整个表单的当前值
-    valueKey: Key;
-    schema: z.ZodObject<Record<keyof Row, z.ZodTypeAny>>;
+export interface OptionTable<Model,FieldOption> {
+  fetchData: (model:Partial<Model>) => Promise<FieldOption[]>; // fetchData 接收整个表单的当前值
+  valueGetter: (row: FieldOption) => any;
+  schema: z.ZodObject<Record<keyof FieldOption, z.ZodTypeAny>>;
 }
 
-export class _OptionTableImpl<Row, Key extends keyof Row> implements OptionTable<Row,Key>{
-    public fetchData: () => Promise<Row[]>;
-    public valueKey: Key;
-    public schema: z.ZodObject<Record<keyof Row, z.ZodTypeAny>>;
+export class _OptionTableImpl<Model,FieldOption> implements OptionTable<Model,FieldOption> {
+  public fetchData: (model:Partial<Model>) => Promise<FieldOption[]>;
+  public valueGetter: (row: FieldOption) => any;
+  public schema: z.ZodObject<Record<keyof FieldOption, z.ZodTypeAny>>;
 
-    constructor({fetchData, valueKey, schema}: OptionTable<Row, Key>) {
-        this.fetchData = fetchData;
-        this.valueKey = valueKey;
-        this.schema = schema;
-    }
+  constructor(props: OptionTable<Model,FieldOption>) {
+    this.fetchData = props.fetchData;
+    this.valueGetter = props.valueGetter;
+    this.schema = props.schema;
+  }
 }
