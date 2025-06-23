@@ -6,9 +6,12 @@ export interface ApplyContext<Vars> {
   vars: Vars;
 }
 
-export type ApplyFunc<Vars> = (context: ApplyContext<Vars>) => Promise<void>;
-export type SetupFunc<Vars> = () => {
+export interface CliOptions<Vars> {
+  workdir: string;
   project: Project;
   apply: ApplyFunc<Vars>;
   varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>;
 }
+
+export type ApplyFunc<Vars> = (context: ApplyContext<Vars>) => Promise<void>;
+export type CliBuilder<Vars> = () => CliOptions<Vars>

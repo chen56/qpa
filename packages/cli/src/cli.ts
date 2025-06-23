@@ -3,7 +3,7 @@ import * as dotenvExpand from 'dotenv-expand';
 import {Command} from "commander";
 
 import {Project} from "@qpa/core";
-import {SetupFunc} from "./interface.ts";
+import {CliBuilder, CliOptions} from "./interface.ts";
 import * as apply from "./command/apply.ts";
 import * as destroy from "./command/destroy.ts";
 
@@ -19,17 +19,17 @@ export class Cli {
   private constructor(readonly project: Project, readonly rootCommand: Command) {
   }
 
-  static create<Vars>(setup: SetupFunc<Vars>): Cli {
-    const setupResult = setup();
-    const project = setupResult.project;
+  static create<Vars>(options: CliOptions<Vars>) {
+    const project = options.project;
 
     const cli = new Cli(project, new _RootCommand());
 
     // --- 注册子命令 ---
     // 调用每个子命令的注册函数，并将主 root 实例传递进去
-    apply.default(cli, cli.rootCommand, setupResult.varsSchema, setupResult.apply);
+    apply.default(cli, cli.rootCommand, options.varsSchema, options.apply);
     destroy.default(cli, cli.rootCommand);
     return cli;
+
   }
 }
 

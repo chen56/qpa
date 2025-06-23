@@ -1,19 +1,12 @@
 import {Project} from "@qpa/core";
 import * as console from "node:console";
 import {z} from "zod/v4";
-import {Cli} from "../src/index.ts";
+import * as zz from "zod/v4";
+import {Cli} from "../../src";
 
 /*
  * 模仿一个QPA项目
  */
-
-interface MyVars {
-  region: string,
-  zone: string;
-  instanceType: string;
-  imageId: string;
-}
-
 
 // 2. 模拟 API 函数 (返回 Promise)
 interface RegionApiData {
@@ -111,7 +104,7 @@ interface MyVars {
   imageId: string;
 }
 
-const varsSchema = z.object({
+const VarsSchema = z.object({
     region: z.string()
       .refine(async (val) => {
           const availableRegions = await fetchRegions(); // 直接调用 API 获取数据
@@ -188,23 +181,21 @@ const varsSchema = z.object({
     )
 ;
 
+const project = Project.of({name: "test"});
 
-const cli = Cli.create(() => {
-  const project = Project.of({name: "test"});
-
-  return {
-    project: project,
-    varsSchema: varsSchema,
-    apply: async (context) => {
-      const project = context.project;
-      const vars = context.vars;
-      console.log("load vars:",JSON.stringify(vars))
-      console.log("created vpc")
-      console.log("created subnet")
-      console.log("created cvmInstance1")
-      console.log("project:", project.resourceInstances.map(e => e.name))
-    },
-  }
+const cli = Cli.create<MyVars>({
+  workdir: __dirname,
+  project: project,
+  varsSchema: VarsSchema,
+  apply: async (context) => {
+    const project = context.project;
+    const vars = context.vars;
+    console.log("load vars:", JSON.stringify(vars))
+    console.log("created vpc")
+    console.log("created subnet")
+    console.log("created cvmInstance1")
+    console.log("project:", project.resourceInstances.map(e => e.name))
+  },
 })
 
 
