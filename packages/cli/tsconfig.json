@@ -5,7 +5,7 @@
   "references": [
     {
       "path": "../core"
-    },
+    }
   ],
 
   // 继承根目录的共享配置
@@ -16,16 +16,15 @@
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
     // paths基于baseUrl
     "paths": {
-      "@qpa/core": ["../core/src"],
+      "@qpa/core": ["../core/src"]
     }
   },
-
   "include": [
     "./**/*.ts"
   ],
   "exclude": [
     "./build",
     "./dist",
-    "**/node_modules",
+    "**/node_modules"
   ]
 }

@@ -4,7 +4,7 @@ import {Cli} from "../cli.ts";
 
 // 导出一个函数，用于注册 plan 子命令
 // 接受父命令 (通常是 program 实例) 作为参数
-export default function registerCommand(cli: Cli, parentCommand: Command): void {
+export default function registerCommand<Vars>(parentCommand: Command,cli: Cli): void {
   // 在父命令上创建 'plan' 子命令
   parentCommand.command('destroy')
   .description('destroy all Configured Resources and Deconfigured Resources')

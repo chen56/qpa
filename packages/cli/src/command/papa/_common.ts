@@ -2,13 +2,10 @@ import {LazyProject} from "@qpa/core";
 import process from "node:process";
 import path from "node:path";
 import fs from "node:fs";
+import {_GlobalOptions} from "../../cli.ts";
 
 
-export interface GlobalOptions {
-    verbose?: boolean;
-}
-
-export async function loadPlannedConfig(config: string, options:GlobalOptions): Promise<LazyProject> {
+export async function _loadPlannedConfig(config: string, options:_GlobalOptions): Promise<LazyProject> {
     const currentWorkingDirectory: string = process.cwd();
     const configPath = path.resolve(currentWorkingDirectory, config);
     if(options.verbose){

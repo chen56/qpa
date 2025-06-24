@@ -1,12 +1,11 @@
-import type {GlobalOptions} from '../common.ts';
-import {loadPlannedConfig} from '../common.ts';
+import {_loadPlannedConfig} from './_common.ts';
 import type {Command} from "commander";
 import {LazyProject} from "@qpa/core";
 
-import {Cli} from "../../cli.ts";
+import {_GlobalOptions, Cli} from "../../cli.ts";
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
-interface Options extends GlobalOptions {
+interface Options extends _GlobalOptions {
 }
 
 // 导出一个函数，用于注册 apply 子命令
@@ -20,7 +19,7 @@ export default function registerCommand(cli: Cli, parentCommand: Command): void 
             if (options.verbose) {
                 console.log('%s - apply <%s> options: %O',new Date().toISOString(),config, options);
             }
-            const project: LazyProject = await loadPlannedConfig(config,options);
+            const project: LazyProject = await _loadPlannedConfig(config,options);
             await project.refresh();
             for (const r of project._configuredResources) {
                 console.log('configuredResource[%s]: %O',project._configuredResources.length,{

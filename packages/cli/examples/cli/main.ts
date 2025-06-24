@@ -1,7 +1,6 @@
 import {Project} from "@qpa/core";
 import * as console from "node:console";
 import {z} from "zod/v4";
-import * as zz from "zod/v4";
 import {Cli} from "../../src";
 
 /*

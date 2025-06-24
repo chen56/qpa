@@ -3,10 +3,7 @@ import * as dotenvExpand from 'dotenv-expand';
 import {Command} from "commander";
 
 import {Project} from "@qpa/core";
-import {CliBuilder, CliOptions} from "./interface.ts";
-import * as apply from "./command/apply.ts";
-import * as destroy from "./command/destroy.ts";
-
+import {z} from "zod/v4";
 
 // 首先加载 .env 文件中的原始键值对
 // dotenv.config() 返回一个包含 parsed 属性的对象，其中是解析后的键值对
@@ -16,24 +13,11 @@ const MY_ENV = dotenv.config();
 dotenvExpand.expand(MY_ENV);
 
 export class Cli {
-  private constructor(readonly project: Project, readonly rootCommand: Command) {
-  }
-
-  static create<Vars>(options: CliOptions<Vars>) {
-    const project = options.project;
-
-    const cli = new Cli(project, new _RootCommand());
-
-    // --- 注册子命令 ---
-    // 调用每个子命令的注册函数，并将主 root 实例传递进去
-    apply.default(cli, cli.rootCommand, options.varsSchema, options.apply);
-    destroy.default(cli, cli.rootCommand);
-    return cli;
-
+  constructor(readonly workdir: string, readonly project: Project, readonly rootCommand: Command) {
   }
 }
 
-class _RootCommand extends Command {
+export class _RootCommand extends Command {
 
   // commander的设计，父选项是需要command.parent?.opts()获取的，很不方便
   // 覆盖命令创建的工厂方法，让每个命令都有一些公共父选项
@@ -41,4 +25,22 @@ class _RootCommand extends Command {
     return new Command(name)
       .option('-v, --verbose', 'use verbose logging');
   }
+}
+
+export interface ApplyContext<Vars> {
+  project: Project;
+  vars: Vars;
+}
+
+export interface CliConfig<Vars> {
+  workdir: string;
+  project: Project;
+  apply: ApplyFunc<Vars>;
+  varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>;
+}
+
+export type ApplyFunc<Vars> = (context: ApplyContext<Vars>) => Promise<void>;
+
+export interface _GlobalOptions {
+  verbose?: boolean;
 }
