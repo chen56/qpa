@@ -2,7 +2,7 @@ import {LazyProject} from "@qpa/core";
 import process from "node:process";
 import path from "node:path";
 import fs from "node:fs";
-import {_GlobalOptions} from "../../cli.ts";
+import {_GlobalOptions} from "../../../cli.ts";
 
 
 export async function _loadPlannedConfig(config: string, options:_GlobalOptions): Promise<LazyProject> {

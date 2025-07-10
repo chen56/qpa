@@ -1,5 +1,5 @@
 import {Project} from "@qpa/core";
-import {Cli, CliConfig} from "@qpa/cli";
+import {Cli} from "@qpa/cli";
 import {TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
@@ -117,9 +117,9 @@ const VarsSchema = z.object({
       )
       .meta({title: "选择区域", description: "如果您在中国附近, 要快就选香港,要用gemini、chatgpt就选硅谷、弗吉尼亚"})
       .meta$optionTable({
-        fetchData: async (_: Partial<MyVars>): Promise<RegionApiData[]> => fetchRegions(),
-        valueGetter: (row) => row.RegionId,
-        schema: z.object({
+        query: async (_: Partial<MyVars>): Promise<RegionApiData[]> => fetchRegions(),
+        getValue: (row) => row.RegionId,
+        optionSchema: z.object({
           RegionId: z.string().meta({title: "区域"}),
           RegionName: z.string().meta({title: "区域名称"}),
         }),
@@ -127,10 +127,10 @@ const VarsSchema = z.object({
     zone: z.string()
       .meta({title: "选择可用区"})
       .meta$optionTable({
-        fetchData: async (vars: Partial<MyVars>) => vars.region ? fetchZonesByRegion(vars.region) : [],
-        valueGetter: (row) => row.ZoneId,
+        query: async (vars: Partial<MyVars>) => vars.region ? fetchZonesByRegion(vars.region) : [],
+        getValue: (row) => row.ZoneId,
 
-        schema: z.object({
+        optionSchema: z.object({
           ZoneId: z.string().meta({title: "可用区"}),
           ZoneName: z.string().meta({title: "可用区名称"}),
           RegionId: z.string().meta({title: "区域"}),
@@ -139,9 +139,9 @@ const VarsSchema = z.object({
     instanceType: z.string()
       .meta({title: "选择实例类型"})
       .meta$optionTable({
-        fetchData: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypesByRegion(vars.region) : [],
-        valueGetter: (row) => row.InstanceType,
-        schema: z.object({
+        query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypesByRegion(vars.region) : [],
+        getValue: (row) => row.InstanceType,
+        optionSchema: z.object({
           InstanceType: z.string().meta({title: "实例类型"}),
         }),
       })
@@ -149,9 +149,9 @@ const VarsSchema = z.object({
     imageId: z.string()
       .meta({title: "选择镜像"})
       .meta$optionTable({
-        fetchData: async (vars: Partial<MyVars>) => vars.region ? fetchImageIdsByRegion(vars.region) : [],
-        valueGetter: (row) => row.ImageId,
-        schema: z.object({
+        query: async (vars: Partial<MyVars>) => vars.region ? fetchImageIdsByRegion(vars.region) : [],
+        getValue: (row) => row.ImageId,
+        optionSchema: z.object({
           ImageId: z.string().meta({title: "镜像ID"}),
         }),
       }),

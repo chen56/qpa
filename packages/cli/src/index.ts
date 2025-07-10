@@ -1,6 +1,7 @@
-import {_RootCommand, Cli, CliConfig} from "./cli.ts"
-import * as apply from "./command/apply.ts";
-import * as destroy from "./command/destroy.ts";
+import {Cli, CliConfig} from "./cli.ts"
+import * as apply from "./internal/command/apply.ts";
+import * as destroy from "./internal/command/destroy.ts";
+import {Command} from "commander";
 
 export {Cli} from "./cli.ts"
 export {OptionTable} from "./zod_ext.ts"
@@ -10,10 +11,9 @@ export {ApplyContext} from "./cli.ts";
 
 
 /*
- * Cli 扩展-工厂函数
+ * Cli 扩展-Cli.create工厂方法
  *
- * 模块增强，扩展 Cli 类的类型定义
- * 用这种方式增加静态方法的原因是依赖倒置问题：Cli作为其他Command的公共依赖，而此方法是依赖所有命令的工厂
+ * Cli类和Cli.create分避免和ApplyCommand等命令的循环依赖（依赖倒置）
  */
 declare module './cli.ts' {
   // 扩展 Cli 类的静态函数
@@ -35,3 +35,13 @@ Cli.create = function <Vars>(config: CliConfig<Vars>): Cli {
   destroy.default(cli.rootCommand, cli);
   return cli;
 };
+
+export class _RootCommand extends Command {
+
+  // commander的设计，父选项是需要command.parent?.opts()获取的，很不方便
+  // 覆盖命令创建的工厂方法，让每个命令都有一些公共父选项
+  createCommand(name: string) {
+    return new Command(name)
+      .option('-v, --verbose', 'use verbose logging');
+  }
+}

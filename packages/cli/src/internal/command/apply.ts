@@ -2,21 +2,21 @@ import type {Command} from "commander";
 import {Project} from "@qpa/core";
 import {z} from "zod/v4";
 
-import {_OptionTableImpl} from "../zod_ext.ts";
+import {_OptionTableImpl} from "../../zod_ext.ts";
 import {exit} from 'node:process';
 import * as inquirer from '@inquirer/prompts';
 
 import _ from 'lodash';
 import path from "node:path";
 import fs from 'fs/promises';
-import {_GlobalOptions, ApplyFunc, Cli} from 'src/cli.ts';
+import {_GlobalOptions, ApplyFunc, Cli} from '../../cli.ts';
 
 // 定义 apply 子命令选项的接口 (继承全局选项)
 interface ApplyOptions extends _GlobalOptions {
 }
 
 // 接受父命令 (通常是 program 实例) 作为参数
-export default function registerCommand<Vars>(parentCommand: Command, cli: Cli,  varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>, apply: ApplyFunc<Vars>): void {
+export default function registerCommand<Vars>(parentCommand: Command, cli: Cli, varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>, apply: ApplyFunc<Vars>): void {
   // 在父命令上创建 'apply' 子命令
   parentCommand.command('apply')
     .description('apply config')
@@ -26,21 +26,20 @@ export default function registerCommand<Vars>(parentCommand: Command, cli: Cli, 
         console.log(`Options:${JSON.stringify(options)}`);
       }
 
+
       let vars: any = {};
 
-      await fs.mkdir(cli.workdir,{recursive:true})
+      await fs.mkdir(cli.workdir, {recursive: true})
       const varsJsonPath = path.join(cli.workdir, 'vars.json');
 
-      const varConfigContent=await readFile(varsJsonPath)
-      if(varConfigContent){
+      const varConfigContent = await readFile(varsJsonPath)
+      if (varConfigContent) {
         vars = JSON.parse(varConfigContent);
         const safeParseVars = await varsSchema.safeParseAsync(vars);
-        if(safeParseVars.success){
+        if (safeParseVars.success) {
 
         }
       }
-
-
 
 
       for (const [varKey, varField] of Object.entries(varsSchema.shape)) {
@@ -72,9 +71,11 @@ async function readVarValue<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.Z
     varTitle += ` (${meta?.description})`;
   }
 
-  // console.log(`. ${varDescription} ${JSON.stringify(meta)}`)
-
   const optionTable = (meta?.optionTable instanceof _OptionTableImpl) ? meta.optionTable : null;
+  const n = await inquirer.number({
+    message: `[数字输入] ${varTitle}`,
+  })
+  console.log('number', n)
 
   // 未提供选项表的字段让用户自己输入
   if (!optionTable) {
@@ -104,7 +105,7 @@ async function readVarValue<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.Z
     });
   }
 
-  const optionTableData = await optionTable.fetchData(vars as any)
+  const optionTableData = await optionTable.query(vars as any)
   if (optionTableData.length == 0) {
     console.log(`${varTitle} : no option data`)
     exit(1)
@@ -114,7 +115,7 @@ async function readVarValue<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.Z
     message: `[单选] ${varTitle} `,
     choices: optionTableData.map((optionRow) => {
       let optionRowDescription = ""
-      for (const [optionKey, optionField] of Object.entries(optionTable.schema.shape)) {
+      for (const [optionKey, optionField] of Object.entries(optionTable.optionSchema.shape)) {
         // 使用方括号表示法从 optionRow 中获取 optionKey 对应的值
         const optionFieldDesc = optionField.meta()?.description ?? optionKey;
         const optionValue = optionRow[optionKey as keyof typeof optionRow];
@@ -122,7 +123,7 @@ async function readVarValue<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.Z
       }
       return {
         pageSize: 10,
-        value: optionTable.valueGetter(optionRow),
+        value: optionTable.getValue(optionRow),
         name: optionRowDescription,
       };
     }),
@@ -133,7 +134,7 @@ function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
   return e instanceof Error && 'code' in e && 'errno' in e;
 }
 
-async function readFile(filePath:string):Promise<string|null>{
+async function readFile(filePath: string): Promise<string | null> {
   try {
     return await fs.readFile(filePath, {encoding: 'utf-8'});
   } catch (error) {

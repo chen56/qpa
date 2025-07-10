@@ -1,9 +1,9 @@
-import * as apply from './apply.js';
-import * as destroy from './destroy.js';
+import * as apply from './apply.ts';
+import * as destroy from './destroy.ts';
 import * as plan from './plan.ts';
 import type {Command} from "commander";
 
-import {Cli} from "../../cli.ts";
+import {Cli} from "../../../cli.ts";
 
 
 export default function registerCommand(cli: Cli, parentCommand: Command): void {
