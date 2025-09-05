@@ -20,6 +20,7 @@ _load_nodejs_group_defaults
 # app cmd script
 # 独立于项目组的特殊命令
 ##########################################
+example() {  _run pnpm exec jiti examples/cli/main.ts "$@" || printf "%b\n" "------------------\n run examples/cli/main.ts, exit code($?)" ;}
 
 
 

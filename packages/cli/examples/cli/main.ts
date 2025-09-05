@@ -121,7 +121,7 @@ const VarsSchema = z.object({
         }),
       }),
     zone: z.string()
-      .meta({title: "选择可用区"})
+      .meta({title: "可用区"})
       .meta$optionTable({
         type:"qpa.OptionTable",
 
@@ -135,7 +135,7 @@ const VarsSchema = z.object({
         }),
       }),
     instanceType: z.string()
-      .meta({title: "选择实例类型"})
+      .meta({title: "实例类型"})
       .meta$optionTable({
         type:"qpa.OptionTable",
 
@@ -147,7 +147,7 @@ const VarsSchema = z.object({
       })
     ,
     imageId: z.string()
-      .meta({title: "选择镜像"})
+      .meta({title: "镜像"})
       .meta$optionTable({
         type:"qpa.OptionTable",
 
@@ -188,7 +188,6 @@ const VarsSchema = z.object({
 ;
 
 const project = Project.of({name: "test"});
-
 const cli = Cli.create<MyVars>({
   workdir: __dirname,
   project: project,

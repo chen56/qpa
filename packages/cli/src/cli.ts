@@ -12,6 +12,7 @@ const MY_ENV = dotenv.config();
 // 它会修改 process.env，并返回一个包含所有扩展后变量的对象
 dotenvExpand.expand(MY_ENV);
 
+// todo 应实现Cli<Vars>
 export class Cli {
   constructor(readonly workdir: string, readonly project: Project, readonly rootCommand: Command) {
   }

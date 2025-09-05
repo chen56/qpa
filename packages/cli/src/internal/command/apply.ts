@@ -26,41 +26,46 @@ export default function registerCommand<Vars>(parentCommand: Command, cli: Cli, 
         console.log(`Options:${JSON.stringify(options)}`);
       }
 
-
-      let vars: any = {};
-
-      await fs.mkdir(cli.workdir, {recursive: true})
-      const varsJsonPath = path.join(cli.workdir, 'vars.json');
-
-      const varConfigContent = await readFile(varsJsonPath)
-      if (varConfigContent) {
-        vars = JSON.parse(varConfigContent);
-        const safeParseVars = await varsSchema.safeParseAsync(vars);
-        if (safeParseVars.success) {
-
-        }
-      }
-
-
-      for (const [varKey, varField] of Object.entries(varsSchema.shape)) {
-        if (!(varField instanceof z.ZodType)) {
-          continue;
-        }
-        vars[varKey] = await readVarValue(varsSchema, vars, varKey, varField);
-      }
-      vars = await varsSchema.parseAsync(vars);
-
+      let vars: Vars = await _readVars(cli.workdir, varsSchema)
 
       await cli.project.apply(async (project: Project) => {
         await apply({
           project: project,
-          vars: vars as Vars
+          vars: vars
         });
       })
     });
 }
 
-async function readVarValue<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>>, z.core.$strip>, vars: Vars, varKey: string, varField: z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>): Promise<unknown | symbol> {
+async function _readVars<Vars>(workdir: string, varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>): Promise<Vars> {
+
+  let vars: any = {};
+
+  await fs.mkdir(workdir, {recursive: true})
+  const varsJsonPath = path.join(workdir, 'vars.json');
+
+  const varConfigContent = await _readFile(varsJsonPath)
+  if (varConfigContent) {
+    vars = JSON.parse(varConfigContent);
+    const safeParseVars = await varsSchema.safeParseAsync(vars);
+    if (safeParseVars.success) {
+      return vars;
+    }
+    console.error("vars.json 格式错误, 重新设置参数值")
+  }
+
+  for (const [varKey, varField] of Object.entries(varsSchema.shape)) {
+    if (!(varField instanceof z.ZodType)) {
+      continue;
+    }
+    vars[varKey] = await _readVarField(varsSchema, vars, varKey, varField);
+  }
+  vars = await varsSchema.parseAsync(vars);
+  await fs.writeFile(varsJsonPath, JSON.stringify(vars, null, 2))
+  return vars;
+}
+
+async function _readVarField<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>>, z.core.$strip>, vars: Vars, varKey: string, varField: z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>): Promise<unknown | symbol> {
   const meta = varField.meta()
 
   var varTitle = `${varKey}`;
@@ -72,10 +77,6 @@ async function readVarValue<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.Z
   }
 
   const optionTable = (meta?.optionTable instanceof _OptionTableImpl) ? meta.optionTable : null;
-  const n = await inquirer.number({
-    message: `[数字输入] ${varTitle}`,
-  })
-  console.log('number', n)
 
   // 未提供选项表的字段让用户自己输入
   if (!optionTable) {
@@ -134,7 +135,7 @@ function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
   return e instanceof Error && 'code' in e && 'errno' in e;
 }
 
-async function readFile(filePath: string): Promise<string | null> {
+async function _readFile(filePath: string): Promise<string | null> {
   try {
     return await fs.readFile(filePath, {encoding: 'utf-8'});
   } catch (error) {
