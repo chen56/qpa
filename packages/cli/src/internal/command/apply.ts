@@ -2,11 +2,10 @@ import type {Command} from "commander";
 import {Project} from "@qpa/core";
 import {z} from "zod/v4";
 
-import {_OptionTableImpl} from "../../zod_ext.ts";
+import {VarUI, VariableFactory, OptionTable} from "../../zod_ext.ts";
 import {exit} from 'node:process';
 import * as inquirer from '@inquirer/prompts';
 
-import _ from 'lodash';
 import path from "node:path";
 import fs from 'fs/promises';
 import {_GlobalOptions, ApplyFunc, Cli} from '../../cli.ts';
@@ -16,7 +15,11 @@ interface ApplyOptions extends _GlobalOptions {
 }
 
 // 接受父命令 (通常是 program 实例) 作为参数
-export default function registerCommand<Vars>(parentCommand: Command, cli: Cli, varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>, apply: ApplyFunc<Vars>): void {
+export default function registerCommand<Vars>(parentCommand: Command,
+                                              cli: Cli,
+                                              apply: ApplyFunc<Vars>,
+                                              varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>,
+                                              varsUI: Map<z.ZodType, VarUI>): void {
   // 在父命令上创建 'apply' 子命令
   parentCommand.command('apply')
     .description('apply config')
@@ -26,7 +29,7 @@ export default function registerCommand<Vars>(parentCommand: Command, cli: Cli, 
         console.log(`Options:${JSON.stringify(options)}`);
       }
 
-      let vars: Vars = await _readVars(cli.workdir, varsSchema)
+      let vars: Vars = await _readVars(cli.workdir, varsSchema, varsUI)
 
       await cli.project.apply(async (project: Project) => {
         await apply({
@@ -37,7 +40,7 @@ export default function registerCommand<Vars>(parentCommand: Command, cli: Cli, 
     });
 }
 
-async function _readVars<Vars>(workdir: string, varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>): Promise<Vars> {
+async function _readVars<Vars>(workdir: string, varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>, varsUI: Map<z.ZodType, VarUI>): Promise<Vars> {
 
   let vars: any = {};
 
@@ -51,84 +54,94 @@ async function _readVars<Vars>(workdir: string, varsSchema: z.ZodObject<Record<k
     if (safeParseVars.success) {
       return vars;
     }
-    console.error("vars.json 格式错误, 重新设置参数值")
+    console.error("ERROR - vars.json 格式错误, 重新设置参数值")
   }
 
+  // 遍历 varsSchema 的字段,当前只遍历第一层，后续可能考虑遍历整棵object 树
   for (const [varKey, varField] of Object.entries(varsSchema.shape)) {
+    // 忽略非schema字段
     if (!(varField instanceof z.ZodType)) {
       continue;
     }
-    vars[varKey] = await _readVarField(varsSchema, vars, varKey, varField);
+    if (varField instanceof z.ZodObject) {
+      throw new Error(`当前不支持嵌套对象: ${varKey}:${varField.shape}`)
+    }
+    const varUI = varsUI.get(varField as z.ZodType) ?? VariableFactory.createTextInput();
+    vars[varKey] = await _readVarField(vars, varKey, varField, varUI);
   }
-  vars = await varsSchema.parseAsync(vars);
+  const safeParseVars = await varsSchema.safeParseAsync(vars);
+  if (!safeParseVars.success) {
+    const issues = safeParseVars.error.issues.map(issue => `- ${issue.path}: ${issue.message}`).join("\n");
+    console.error(`ERROR - vars.json 格式错误: \n${issues}`)
+    exit(1);
+  }
+
   await fs.writeFile(varsJsonPath, JSON.stringify(vars, null, 2))
   return vars;
 }
 
-async function _readVarField<Vars>(varsSchema: z.ZodObject<Record<keyof Vars, z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>>, z.core.$strip>, vars: Vars, varKey: string, varField: z.ZodType<unknown, unknown, z.core.$ZodTypeInternals<unknown, unknown>>): Promise<unknown | symbol> {
-  const meta = varField.meta()
+async function _readVarField<Vars>(
+  vars: Vars,
+  varKey: string,
+  varField: z.ZodType,
+  varUI: VarUI,
+): Promise<unknown | symbol> {
+  let varTitle = (() => {
+    const meta = varField.meta()
+    let varTitle = `${varKey}`;
+    if (meta?.title) {
+      varTitle += `: ${meta?.title}`;
+    }
+    if (meta?.description) {
+      varTitle += ` (${meta?.description})`;
+    }
+    return varTitle;
+  })()
 
-  var varTitle = `${varKey}`;
-  if (meta?.title) {
-    varTitle += `: ${meta?.title}`;
-  }
-  if (meta?.description) {
-    varTitle += ` (${meta?.description})`;
-  }
+  switch (varUI.type) {
+    case "qpa.TextInput":
+      return inquirer.input({
+        message: `[文本输入] ${varTitle}`,
+        validate: async (value) => {
+          // check field is not required
+          const parsedResult = await varField.safeParseAsync(value)
 
-  const optionTable = (meta?.optionTable instanceof _OptionTableImpl) ? meta.optionTable : null;
-
-  // 未提供选项表的字段让用户自己输入
-  if (!optionTable) {
-    return inquirer.input({
-      message: `[文本输入] ${varTitle}`,
-      validate: async (value) => {
-        // check field is not required
-        // const feildParsedResult = await varField.safeParseAsync(value)
-
-        const errors = [];
-
-        const tempVars = {
-          ...vars,
-          [varKey]: value
+          const errors = parsedResult.error?.issues ?? [];
+          if (errors.length === 0) {
+            return true;
+          }
+          return `ERROR:\n ${errors.map((value, index) => `${index + 1} ${value} \n`)} `;
         }
-        const modelParseResult = await varsSchema.safeParseAsync(tempVars);
-        console.log("debug2", modelParseResult, value, tempVars)
-        if (!modelParseResult.success) {
-          errors.push(...modelParseResult.error.issues.filter(e => _.isEqual(e.path, [varKey])).map(e => e.message))
-        }
-
-        if (errors.length === 0) {
-          return true;
-        }
-        return errors.length === 0 ? true : `ERROR:\n ${errors.map((value, index) => `${index + 1} ${value} \n`)} `;
+      });
+    case "qpa.OptionTable":
+      const optionTable = varUI as OptionTable<Vars, any, any>;
+      const optionTableData = await optionTable.query(vars as any)
+      if (optionTableData.length == 0) {
+        console.log(`${varTitle} : no option data`)
+        exit(1)
       }
-    });
-  }
 
-  const optionTableData = await optionTable.query(vars as any)
-  if (optionTableData.length == 0) {
-    console.log(`${varTitle} : no option data`)
-    exit(1)
-  }
+      return inquirer.select({
+        message: `[单选] ${varTitle} `,
+        choices: optionTableData.map((optionRow) => {
+          let optionRowDescription = ""
+          for (const [optionKey, optionField] of Object.entries(optionTable.optionSchema.shape)) {
+            // 使用方括号表示法从 optionRow 中获取 optionKey 对应的值
+            const optionFieldDesc = optionField.meta()?.description ?? optionKey;
+            const optionValue = optionRow[optionKey as keyof typeof optionRow];
+            optionRowDescription += `${optionFieldDesc}:${optionValue}, `
+          }
 
-  return inquirer.select({
-    message: `[单选] ${varTitle} `,
-    choices: optionTableData.map((optionRow) => {
-      let optionRowDescription = ""
-      for (const [optionKey, optionField] of Object.entries(optionTable.optionSchema.shape)) {
-        // 使用方括号表示法从 optionRow 中获取 optionKey 对应的值
-        const optionFieldDesc = optionField.meta()?.description ?? optionKey;
-        const optionValue = optionRow[optionKey as keyof typeof optionRow];
-        optionRowDescription += `${optionFieldDesc}:${optionValue}, `
-      }
-      return {
-        pageSize: 10,
-        value: optionTable.getValue(optionRow),
-        name: optionRowDescription,
-      };
-    }),
-  });
+          return {
+            pageSize: 10,
+            value: optionTable.getValue(optionRow),
+            name: optionRowDescription,
+          };
+        }),
+      });
+    default:
+      throw new Error(`Unsupported VarUI type: ${varUI.type}`);
+  }
 }
 
 function isErrnoException(e: unknown): e is NodeJS.ErrnoException {

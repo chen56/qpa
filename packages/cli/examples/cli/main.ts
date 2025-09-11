@@ -2,6 +2,7 @@ import {Project} from "@qpa/core";
 import * as console from "node:console";
 import {z} from "zod/v4";
 import {Cli} from "../../src";
+import {VarUI, VariableFactory} from "../../src/zod_ext.ts";
 
 /*
  * 模仿一个QPA项目
@@ -93,70 +94,25 @@ async function fetchImageIdsByRegion(region: string): Promise<ImageIdData[]> {
   }, 500));
 }
 
-// ... 已有代码 ...
-// 1. 公共类型定义
-// 定义最终表单数据结构
-interface MyVars {
-  region: string;
-  zone: string;
-  instanceType: string;
-  imageId: string;
-}
 
 const VarsSchema = z.object({
     region: z.string()
+      .meta({title: "选择区域", description: "如果您在中国附近, 要快就选香港,要用gemini、chatgpt就选硅谷、弗吉尼亚"})
       .refine(async (val) => {
           const availableRegions = await fetchRegions(); // 直接调用 API 获取数据
           return availableRegions.some(opt => opt.RegionId === val)
         }, "无效区域(region)"
       )
-      .meta({title: "选择区域", description: "如果您在中国附近, 要快就选香港,要用gemini、chatgpt就选硅谷、弗吉尼亚"})
-      .meta$optionTable({
-        type:"qpa.OptionTable",
-        query: async (_: Partial<MyVars>): Promise<RegionApiData[]> => fetchRegions(),
-        getValue: (data) => data.RegionId,
-        optionSchema: z.object({
-          RegionId: z.string().meta({title: "区域"}),
-          RegionName: z.string().meta({title: "区域名称"}),
-        }),
-      }),
+    ,
     zone: z.string()
       .meta({title: "可用区"})
-      .meta$optionTable({
-        type:"qpa.OptionTable",
-
-        query: async (vars: Partial<MyVars>) => vars.region ? fetchZonesByRegion(vars.region) : [],
-        getValue: (row) => row.ZoneId,
-
-        optionSchema: z.object({
-          ZoneId: z.string().meta({title: "可用区"}),
-          ZoneName: z.string().meta({title: "可用区名称"}),
-          RegionId: z.string().meta({title: "区域"}),
-        }),
-      }),
+    ,
     instanceType: z.string()
       .meta({title: "实例类型"})
-      .meta$optionTable({
-        type:"qpa.OptionTable",
-
-        query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypesByRegion(vars.region) : [],
-        getValue: (row) => row.InstanceType,
-        optionSchema: z.object({
-          InstanceType: z.string().meta({title: "实例类型"}),
-        }),
-      })
     ,
     imageId: z.string()
       .meta({title: "镜像"})
-      .meta$optionTable({
-        type:"qpa.OptionTable",
-
-        query: async (vars: Partial<MyVars>) => vars.region ? fetchImageIdsByRegion(vars.region) : [],
-        getValue: (row) => row.ImageId,
-        optionSchema: z.object({
-          ImageId: z.string().meta({title: "镜像ID"}),
-        }),
-      }),
+    ,
   })
     .refine(async val => {
         if (!val.region) {
@@ -187,11 +143,45 @@ const VarsSchema = z.object({
     )
 ;
 
-const project = Project.of({name: "test"});
-const cli = Cli.create<MyVars>({
+type MyVars = z.infer<typeof VarsSchema>;
+let varsUI: Map<z.ZodType, VarUI> = new Map();
+varsUI.set(VarsSchema.shape.region, VariableFactory.createOptionTable({
+  query: async (_: Partial<MyVars>): Promise<RegionApiData[]> => fetchRegions(),
+  getValue: (data) => data.RegionId,
+  optionSchema: z.object({
+    RegionId: z.string().meta({title: "区域"}),
+    RegionName: z.string().meta({title: "区域名称"}),
+  }),
+}))
+varsUI.set(VarsSchema.shape.zone, VariableFactory.createOptionTable({
+  query: async (vars: Partial<MyVars>) => vars.region ? fetchZonesByRegion(vars.region) : [],
+  getValue: (row) => row.ZoneId,
+  optionSchema: z.object({
+    ZoneId: z.string().meta({title: "可用区"}),
+    ZoneName: z.string().meta({title: "可用区名称"}),
+    RegionId: z.string().meta({title: "区域"}),
+  }),
+}))
+varsUI.set(VarsSchema.shape.instanceType, VariableFactory.createOptionTable({
+  query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypesByRegion(vars.region) : [],
+  getValue: (row) => row.InstanceType,
+  optionSchema: z.object({
+    InstanceType: z.string().meta({title: "实例类型"}),
+  }),
+}))
+varsUI.set(VarsSchema.shape.imageId, VariableFactory.createOptionTable({
+  query: async (vars: Partial<MyVars>) => vars.region ? fetchImageIdsByRegion(vars.region) : [],
+  getValue: (row) => row.ImageId,
+  optionSchema: z.object({
+    ImageId: z.string().meta({title: "镜像ID"}),
+  }),
+}))
+
+await Cli.run<MyVars>({
   workdir: __dirname,
-  project: project,
+  project: Project.of({name: "test"}),
   varsSchema: VarsSchema,
+  varsUI: varsUI,
   apply: async (context) => {
     const project = context.project;
     const vars = context.vars;
@@ -202,6 +192,3 @@ const cli = Cli.create<MyVars>({
     console.log("project:", project.resourceInstances.map(e => e.name))
   },
 })
-
-
-cli.rootCommand.parse(process.argv);

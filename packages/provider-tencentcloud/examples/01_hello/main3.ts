@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import * as console from "node:console";
 import {z} from "zod/v4";
+import {VariableFactory, VarUI} from "@qpa/cli";
 // 首先加载 .env ,存放SECRET_ID等
 const myEnv = dotenv.config();
 // 然后使用 dotenvExpand.expand() 来处理变量扩展
@@ -116,45 +117,16 @@ const VarsSchema = z.object({
         }, "无效区域(region)"
       )
       .meta({title: "选择区域", description: "如果您在中国附近, 要快就选香港,要用gemini、chatgpt就选硅谷、弗吉尼亚"})
-      .meta$optionTable({
-        query: async (_: Partial<MyVars>): Promise<RegionApiData[]> => fetchRegions(),
-        getValue: (row) => row.RegionId,
-        optionSchema: z.object({
-          RegionId: z.string().meta({title: "区域"}),
-          RegionName: z.string().meta({title: "区域名称"}),
-        }),
-      }),
+    ,
     zone: z.string()
       .meta({title: "选择可用区"})
-      .meta$optionTable({
-        query: async (vars: Partial<MyVars>) => vars.region ? fetchZonesByRegion(vars.region) : [],
-        getValue: (row) => row.ZoneId,
-
-        optionSchema: z.object({
-          ZoneId: z.string().meta({title: "可用区"}),
-          ZoneName: z.string().meta({title: "可用区名称"}),
-          RegionId: z.string().meta({title: "区域"}),
-        }),
-      }),
+    ,
     instanceType: z.string()
       .meta({title: "选择实例类型"})
-      .meta$optionTable({
-        query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypesByRegion(vars.region) : [],
-        getValue: (row) => row.InstanceType,
-        optionSchema: z.object({
-          InstanceType: z.string().meta({title: "实例类型"}),
-        }),
-      })
     ,
     imageId: z.string()
       .meta({title: "选择镜像"})
-      .meta$optionTable({
-        query: async (vars: Partial<MyVars>) => vars.region ? fetchImageIdsByRegion(vars.region) : [],
-        getValue: (row) => row.ImageId,
-        optionSchema: z.object({
-          ImageId: z.string().meta({title: "镜像ID"}),
-        }),
-      }),
+    ,
   })
     .refine(async val => {
         if (!val.region) {
@@ -184,6 +156,39 @@ const VarsSchema = z.object({
       {path: ["imageId"], error: "无效镜像(imageId)"}
     )
 ;
+const varsUI = new Map<z.ZodType, VarUI>();
+varsUI.set(VarsSchema.shape.region, VariableFactory.createOptionTable({
+  query: async (_: Partial<MyVars>) => fetchRegions(),
+  getValue: (row: RegionApiData) => row.RegionId,
+  optionSchema: z.object({
+    RegionId: z.string().meta({title: "区域"}),
+    RegionName: z.string().meta({title: "区域名称"}),
+  }),
+}))
+varsUI.set(VarsSchema.shape.zone, VariableFactory.createOptionTable({
+  query: async (vars: Partial<MyVars>) => vars.region ? fetchZonesByRegion(vars.region) : [],
+  getValue: (row: ZoneApiData) => row.ZoneId,
+
+  optionSchema: z.object({
+    ZoneId: z.string().meta({title: "可用区"}),
+    ZoneName: z.string().meta({title: "可用区名称"}),
+    RegionId: z.string().meta({title: "区域"}),
+  }),
+}))
+varsUI.set(VarsSchema.shape.instanceType, VariableFactory.createOptionTable({
+  query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypesByRegion(vars.region) : [],
+  getValue: (row: InstanceTypeData) => row.InstanceType,
+  optionSchema: z.object({
+    InstanceType: z.string().meta({title: "实例类型"}),
+  }),
+}))
+varsUI.set(VarsSchema.shape.imageId, VariableFactory.createOptionTable({
+  query: async (vars: Partial<MyVars>) => vars.region ? fetchImageIdsByRegion(vars.region) : [],
+  getValue: (row: ImageIdData) => row.ImageId,
+  optionSchema: z.object({
+    ImageId: z.string().meta({title: "镜像ID"}),
+  }),
+}))
 
 const project = Project.of({name: "test"});
 const tc = new TencentCloud(project, {
@@ -194,7 +199,7 @@ const tc = new TencentCloud(project, {
 });
 
 
-const cli = Cli.create<MyVars>({
+await Cli.run<MyVars>({
   workdir: __dirname,
   project: project,
   varsSchema: VarsSchema,
@@ -257,4 +262,3 @@ const cli = Cli.create<MyVars>({
   },
 })
 
-cli.rootCommand.parse(process.argv);

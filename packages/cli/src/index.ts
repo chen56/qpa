@@ -2,13 +2,18 @@ import {Cli, CliConfig} from "./cli.ts"
 import * as apply from "./internal/command/apply.ts";
 import * as destroy from "./internal/command/destroy.ts";
 import {Command} from "commander";
+import {z} from "zod/v4";
+import { VarUI } from "./zod_ext.ts";
 
 export {Cli} from "./cli.ts"
+export {VarUI} from "./zod_ext.ts"
 export {OptionTable} from "./zod_ext.ts"
+export {TextInput} from "./zod_ext.ts"
+export {VariableFactory} from "./zod_ext.ts"
+
 export {ApplyFunc} from "./cli.ts";
 export {CliConfig} from "./cli.ts";
 export {ApplyContext} from "./cli.ts";
-
 
 /*
  * Cli 扩展-Cli.create工厂方法
@@ -19,21 +24,22 @@ declare module './cli.ts' {
   // 扩展 Cli 类的静态函数
   // 1.使用 namespace 语法来声明对函数/类对象的属性扩展
   namespace Cli {
-    function create<Vars>(config: CliConfig<Vars>): Cli;
+    function run<Vars>(config: CliConfig<Vars>): Promise<void>;
   }
 }
-
 // 扩展 Cli 类的静态函数
 // 2.使用 namespace 语法来声明对函数/类对象的属性扩展
-Cli.create = function <Vars>(config: CliConfig<Vars>): Cli {
+Cli.run = async function <Vars>(config: CliConfig<Vars>): Promise<void> {
+  const root = new _RootCommand();
   // 注意这里需要使用 BaseCli 来引用原始的 Cli 类构造函数
-  const cli = new Cli(config.workdir, config.project, new _RootCommand());
+  const cli = new Cli(config.workdir, config.project);
 
   // --- 注册子命令 ---
   // 调用每个子命令的注册函数，并将主 root 实例传递进去
-  apply.default(cli.rootCommand, cli, config.varsSchema, config.apply);
-  destroy.default(cli.rootCommand, cli);
-  return cli;
+  apply.default(root, cli, config.apply, config.varsSchema, config.varsUI ?? new Map<z.ZodType, VarUI>());
+  destroy.default(root, cli);
+
+  await root.parseAsync(process.argv);
 };
 
 export class _RootCommand extends Command {
