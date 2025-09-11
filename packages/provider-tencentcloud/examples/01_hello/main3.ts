@@ -198,11 +198,12 @@ const tc = new TencentCloud(project, {
   },
 });
 
-
 await Cli.run<MyVars>({
   workdir: __dirname,
   project: project,
   varsSchema: VarsSchema,
+  varsUI:varsUI,
+
   apply: async (context) => {
     const project = context.project;
     const vars = context.vars;

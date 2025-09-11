@@ -1,11 +1,11 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {describe, expect, it} from "vitest";
-import { TextFixture } from "../test/fixture.ts";
+import {TextFixture} from "../test/fixture.ts";
 
-describe('cvm', () => {
+describe('cvm', {timeout: 15000}, async () => {
   const fixture = TextFixture.of();
-  const { tc} = fixture;
+  const {tc} = fixture;
   const cvmGuangzhou = tc.cvm.getClient("ap-guangzhou");
   it('DescribeZones', async () => {
     const zonesResponse = await cvmGuangzhou.DescribeZones()
@@ -18,9 +18,9 @@ describe('cvm', () => {
         // 不合法查询形式：
         // {Name: "zone", Values: ["ap-guangzhou-6","ap-guangzhou-7"]},
         // 合法查询形式：
-        { Name: "zone", Values: ["ap-guangzhou-6"] },
-        { Name: "zone", Values: ["ap-guangzhou-7"] },
-        { Name: "instance-charge-type", Values: ["SPOTPAID"] },
+        {Name: "zone", Values: ["ap-guangzhou-6"]},
+        {Name: "zone", Values: ["ap-guangzhou-7"]},
+        {Name: "instance-charge-type", Values: ["SPOTPAID"]},
 
         // 按实例类型家族过滤（可选）
         // {  Name: "instance-family", Values: ["S5"]    },
@@ -44,42 +44,42 @@ describe('cvm', () => {
   it('DescribeImages', async () => {
     const imagesResponse = await cvmGuangzhou.DescribeImages({
       Filters: [
-        { Name: "image-type", Values: ["PUBLIC_IMAGE"] },
-        { Name: "platform", Values: ["Ubuntu"] },
+        {Name: "image-type", Values: ["PUBLIC_IMAGE"]},
+        {Name: "platform", Values: ["Ubuntu"]},
         // { Name: "image-name", Values: ["Ubuntu Server 24.04 LTS 64bit"] },
       ],
       Limit: 100,
     });
-    console.log("imagesResponse: ", imagesResponse.ImageSet?.map(e => JSON.stringify({ ImageId: e.ImageId, ImageName: e.ImageName, ImageSize: e.ImageSize, Platform: e.Platform })))
+    console.log("imagesResponse: ", imagesResponse.ImageSet?.map(e => JSON.stringify({ImageId: e.ImageId, ImageName: e.ImageName, ImageSize: e.ImageSize, Platform: e.Platform})))
 
   })
 
   it('DescribeInstances', async () => {
     const response = await cvmGuangzhou.DescribeInstances({
-      InstanceIds:["ins-xxxxxxxx"],//not exists
+      InstanceIds: ["ins-xxxxxxxx"],//not exists
     });
     expect(response.InstanceSet?.length).toBe(0)
   })
 
   it('InquiryPriceRunInstances', async () => {
-    const inquiryPriceRunInstancesResponse = await cvmGuangzhou.InquiryPriceRunInstances({
-      Placement: {
-        Zone: "ap-guangzhou-7", // 可用区
-      },
-      ImageId: "img-mmytdhbn",
-      InstanceChargeType: "SPOTPAID",
-      InstanceType: "SA2.MEDIUM2",
-      SystemDisk: {
-        DiskType: "CLOUD_PREMIUM",
-        DiskSize: 20,
-      },
-      InternetAccessible: {
-        InternetChargeType: "TRAFFIC_POSTPAID_BY_HOUR",
-        InternetMaxBandwidthOut: 1,
-        PublicIpAssigned: true,
-      }
-    });
-    console.log("inquiryPriceRunInstancesResponse: ", JSON.stringify(inquiryPriceRunInstancesResponse, null, 2))
-  }
+      const inquiryPriceRunInstancesResponse = await cvmGuangzhou.InquiryPriceRunInstances({
+        Placement: {
+          Zone: "ap-guangzhou-7", // 可用区
+        },
+        ImageId: "img-mmytdhbn",
+        InstanceChargeType: "SPOTPAID",
+        InstanceType: "SA2.MEDIUM2",
+        SystemDisk: {
+          DiskType: "CLOUD_PREMIUM",
+          DiskSize: 20,
+        },
+        InternetAccessible: {
+          InternetChargeType: "TRAFFIC_POSTPAID_BY_HOUR",
+          InternetMaxBandwidthOut: 1,
+          PublicIpAssigned: true,
+        }
+      });
+      console.log("inquiryPriceRunInstancesResponse: ", JSON.stringify(inquiryPriceRunInstancesResponse, null, 2))
+    }
   );
-}, { timeout: 15000 });
+});

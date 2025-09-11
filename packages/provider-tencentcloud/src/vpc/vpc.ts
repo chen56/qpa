@@ -14,6 +14,7 @@ export interface VpcSpec extends tc_CreateVpcRequest {
 
 export interface VpcState extends tc_Vpc {
   Region: string;
+  toString(): string;
 }
 
 /**
@@ -87,13 +88,17 @@ export class _VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   }
 
   _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): ResourceInstance<VpcState>[] {
+    const _this=this;
     const result = new Array<ResourceInstance<VpcState>>;
     for (const vpc of tc_vpcSet ?? []) {
       const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === SpiConstants.tagNames.resource)?.Value;
       const toState: VpcState = {
         ...vpc,
         // 如果有自己的字段
-        Region: region
+        Region: region,
+        toString() {
+          return `${_this.resourceType.name}:${region}:${resourceName}:${this.VpcId}:${this.VpcName}`
+        }
       };
       result.push(new ResourceInstance(this, resourceName || "", toState));
     }

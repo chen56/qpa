@@ -1,6 +1,8 @@
 import {Cli, CliConfig} from "./cli.ts"
 import * as apply from "./internal/command/apply.ts";
 import * as destroy from "./internal/command/destroy.ts";
+import * as list from "./internal/command/list.ts";
+
 import {Command} from "commander";
 import {z} from "zod/v4";
 import { VarUI } from "./zod_ext.ts";
@@ -38,6 +40,7 @@ Cli.run = async function <Vars>(config: CliConfig<Vars>): Promise<void> {
   // 调用每个子命令的注册函数，并将主 root 实例传递进去
   apply.default(root, cli, config.apply, config.varsSchema, config.varsUI ?? new Map<z.ZodType, VarUI>());
   destroy.default(root, cli);
+  list.default(root, cli);
 
   await root.parseAsync(process.argv);
 };
