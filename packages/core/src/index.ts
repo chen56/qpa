@@ -11,8 +11,3 @@ export {BaseProject} from "./core.ts";
 export {ProviderRuntime} from "./core.ts";
 export type {ResourceType} from "./core.ts";
 
-
-
-export {LazyConfig} from "./lazy.ts"
-export {LazyProject} from "./lazy.ts"
-export {LazyResource} from "./lazy.ts"
