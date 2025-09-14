@@ -46,9 +46,13 @@ export abstract class _TaggableResourceService<SPEC, STATE> extends _TencentClou
  */
 export class TencentCloudResourceType implements ResourceType {
   private static _types = new Map<string, TencentCloudResourceType>();
-  static vpc_vpc = TencentCloudResourceType.put("vpc", "vpc", 100, 100, [])
-  static vpc_subnet = TencentCloudResourceType.put("vpc", "subnet", 100, 100, [TencentCloudResourceType.vpc_vpc])
-  static cvm_instance = TencentCloudResourceType.put("cvm", "instance", 100, 100, [TencentCloudResourceType.vpc_subnet, TencentCloudResourceType.vpc_vpc]) // ref: DescribeInstancesRequest
+
+  static vpc_vpc = TencentCloudResourceType.put("vpc", "vpc", 100, 100,
+    [])
+  static vpc_subnet = TencentCloudResourceType.put("vpc", "subnet", 100, 100,
+    [TencentCloudResourceType.vpc_vpc])
+  static cvm_instance = TencentCloudResourceType.put("cvm", "instance", 100, 100,
+    [TencentCloudResourceType.vpc_subnet, TencentCloudResourceType.vpc_vpc]) // ref: DescribeInstancesRequest
 
   /**
    * 私有构造函数，防止外部直接 new跨过注册过程
@@ -68,7 +72,6 @@ export class TencentCloudResourceType implements ResourceType {
     readonly deleteLimit: number,
     /**
      * 依赖项, 比如cvm_instance依赖vpc_subnet和vpc_vpc。
-     * @remark 此值需人工在每个请求API的文档中确认其最大限制。
      */
     readonly dependencies: TencentCloudResourceType[]) {
   }

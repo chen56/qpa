@@ -4,18 +4,18 @@ import {afterEach, beforeEach, describe, expect, it} from "vitest";
 import {VpcState} from "../src";
 import {TextFixture} from "./fixture.ts";
 
-describe('vpc', () => {
+describe('vpc_vpc', () => {
   const fixture = TextFixture.of();
   const {tc, project} = fixture;
 
   beforeEach(async () => {
     await fixture.reset();
   })
-  afterEach(async ()=>{
+  afterEach(async () => {
     await fixture.reset();
   })
 
-  it('vpc apply', async () => {
+  it('vpc apply', {timeout: 15000}, async () => {
     await project.apply(async _ => {
       const vpc = await tc.vpc.vpc({
         name: "vpc1",
@@ -29,8 +29,7 @@ describe('vpc', () => {
       expect(project.resourceInstances.length).toBe(1);
       expect(project.resourceInstances[0].name).toBe("vpc1");
       expect((project.resourceInstances[0].state as VpcState).VpcId).toBe(vpc.actualInstance.state.VpcId);
-
     });
-  }, {timeout: 15000});
+  });
 
 });

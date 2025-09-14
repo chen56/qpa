@@ -1,8 +1,6 @@
-import {SpiConstants} from "../spi/spiConstants.ts";
-
-// src/graph.ts
-
-// 保持泛型函数签名不变
+/**
+ * 依赖集合排序：不允许循环依赖
+ */
 export function topologicalSortDFS<T>(dependenciesTree: Map<T, T[]>): T[] {
   const adjList = new Map<T, Set<T>>();
   const allNodes = new Set<T>();

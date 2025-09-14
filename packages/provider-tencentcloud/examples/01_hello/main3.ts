@@ -36,13 +36,13 @@ async function fetchZonesByRegion(regionId: string): Promise<ZoneApiData[]> {
   return new Promise(resolve => setTimeout(() => {
     if (regionId === 'ap-guangzhou') {
       resolve([
-        {ZoneId: 'gz-7', ZoneName: '广州七区', RegionId: 'ap-guangzhou'},
-        {ZoneId: 'gz-6', ZoneName: '广州六区', RegionId: 'ap-guangzhou'},
+        {ZoneId: 'ap-guangzhou-7', ZoneName: '广州七区', RegionId: 'ap-guangzhou'},
+        {ZoneId: 'ap-guangzhou-6', ZoneName: '广州六区', RegionId: 'ap-guangzhou'},
       ]);
     } else if (regionId === 'ap-shanghai') {
       resolve([
-        {ZoneId: 'sh-5', ZoneName: '上海五区', RegionId: 'ap-shanghai'},
-        {ZoneId: 'sh-4', ZoneName: '上海四区', RegionId: 'ap-shanghai'},
+        {ZoneId: 'ap-shanghai-5', ZoneName: '上海五区', RegionId: 'ap-shanghai'},
+        {ZoneId: 'ap-shanghai-4', ZoneName: '上海四区', RegionId: 'ap-shanghai'},
       ]);
     } else {
       resolve([]);

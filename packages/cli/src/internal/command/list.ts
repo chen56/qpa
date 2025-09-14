@@ -14,7 +14,8 @@ export default function registerCommand<Vars>(parentCommand: Command,cli: Cli): 
     console.log(`list...`)
     await cli.project.refresh();
     for (const resourceInstance of cli.project.resourceInstances) {
-      console.log(`- ${resourceInstance.state}`)
+      // console.log(`- ${resourceInstance.state} - ${JSON.stringify(resourceInstance.state, null, 2)}`)
+      console.log(`- ${resourceInstance.state} - ${JSON.stringify(resourceInstance.state, null, 0)}`)
     }
   });
 }

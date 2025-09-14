@@ -6,6 +6,7 @@ import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
 
 
+const _INSTANCE_CHARGE_TYPES = ["SPOTPAID", "POSTPAID_BY_HOUR"] as const;
 /**
  *
  *  CVM实例
@@ -19,14 +20,13 @@ import {_VpcClientWarp} from "../vpc/client.ts";
  *   - SPOTPAID：竞价付费
  *
  *   不支持以下属性:
- *   - InstanceChargePrepaid 不支持包年包月模式
- *   - InstanceCount  不支持实例数量参数， 简化为只创建1个实例
- *   - LaunchTemplate
- *   - DisasterRecoverGroupIds
- *   - HpcClusterId
- *   - DedicatedClusterId
- *   - ChcIds
- *
+ *   - InstanceChargePrepaid 不支持包年包月模式(因为本工具认为自动化部署只应该负责按量付费的简单模式，另外测试也难)
+ *   - InstanceCount  不支持实例数量参数， 简化为每次只创建1个实例(因为每个新实例要分配标识符)
+ *   - LaunchTemplate 目前不支持启动模板
+ *   - DisasterRecoverGroupIds 目前不支持置放群组参数(因为难以测试)
+ *   - HpcClusterId  目前不支持高性能计算集群(因为难以测试)
+ *   - DedicatedClusterId  目前不支持专有集群(因为难以测试)
+ *   - ChcIds  目前不支持超算集群(因为难以测试)
  **/
 export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChargePrepaid'  | 'InstanceCount' | 'LaunchTemplate' | 'DisasterRecoverGroupIds' | 'HpcClusterId' | 'DedicatedClusterId' | 'ChcIds'> {
   // todo temp waiting to remove
@@ -38,8 +38,8 @@ export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChar
    *   SPOTPAID：竞价付费
    *   默认值：POSTPAID_BY_HOUR。
    */
-  InstanceChargeType: "SPOTPAID" | "POSTPAID_BY_HOUR";
-
+  //等效于： InstanceChargeType: "SPOTPAID" | "POSTPAID_BY_HOUR";
+  InstanceChargeType: typeof _INSTANCE_CHARGE_TYPES[number];
 }
 
 export interface CvmInstanceState extends Instance {
@@ -74,8 +74,8 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
   }
 
   async create(config: ResourceConfig<CvmInstanceSpec>): Promise<ResourceInstance<CvmInstanceState>> {
-    if (!["POSTPAID_BY_HOUR", "SPOTPAID"].includes(config.spec.InstanceChargeType)) {
-      throw new Error(`实例计费类型(InstanceChargeType)只支持: POSTPAID_BY_HOUR, SPOTPAID`);
+    if (!_INSTANCE_CHARGE_TYPES.includes(config.spec.InstanceChargeType)) {
+      throw new Error(`实例计费类型(InstanceChargeType)只支持按量付费和竞价付费: POSTPAID_BY_HOUR, SPOTPAID`);
     }
 
     const client = this.cvmClient.getClient(config.spec.Region);
@@ -108,7 +108,6 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
     const resourceId = response.InstanceIdSet[0];
     console.log(`cvm instance 创建成功，ID: ${resourceId}`);
 
-
     // 5. 调用 DescribeInstances 获取完整实例状态（Terraform 模式）
     const describeResponse = await client.DescribeInstances({
       InstanceIds: [resourceId],
@@ -118,7 +117,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
       throw new Error("创建 cvm instance 失败，DescribeInstances 未返回 InstanceSet");
     }
 
-    // 当前未实现对tags的 waiting, 暂时忽略
+    // todo 当前未实现对tags的 waiting
     // Wait for the tags attached to the vm since tags attachment it's async while vm creation.
     return this._toResourceInstanceFunc(config.spec.Region)(describeResponse.InstanceSet![0]);
   }

@@ -219,6 +219,7 @@ export class ProviderRuntime<T extends Provider> {
 
   async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<Resource<TSpec, TState>> {
     let actual = await service.load(expected);
+    // todo 已存在的应该删除？
     if (actual.length == 0) {
       actual = [await service.create(expected)];
     }

@@ -5,17 +5,17 @@ import * as list from "./internal/command/list.ts";
 
 import {Command} from "commander";
 import {z} from "zod/v4";
-import { VarUI } from "./zod_ext.ts";
+import type { VarUI } from "./zod_ext.ts";
 
 export {Cli} from "./cli.ts"
-export {VarUI} from "./zod_ext.ts"
-export {OptionTable} from "./zod_ext.ts"
-export {TextInput} from "./zod_ext.ts"
+export type {VarUI} from "./zod_ext.ts"
+export type {OptionTable} from "./zod_ext.ts"
+export type {TextInput} from "./zod_ext.ts"
 export {VariableFactory} from "./zod_ext.ts"
 
-export {ApplyFunc} from "./cli.ts";
-export {CliConfig} from "./cli.ts";
-export {ApplyContext} from "./cli.ts";
+export type {ApplyFunc} from "./cli.ts";
+export type {CliConfig} from "./cli.ts";
+export type {ApplyContext} from "./cli.ts";
 
 /*
  * Cli 扩展-Cli.create工厂方法
