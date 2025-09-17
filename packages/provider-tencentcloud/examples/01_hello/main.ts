@@ -4,7 +4,7 @@ import {TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import * as console from "node:console";
-import {z} from "zod/v4";
+import * as z from "zod";
 import {VariableFactory, VarUI} from "@qpa/cli";
 import {
     Image,
@@ -13,6 +13,7 @@ import {
     RegionInfo,
     ZoneInfo
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models";
+
 
 // 首先加载 .env ,存放SECRET_ID等
 const myEnv = dotenv.config();
@@ -41,6 +42,7 @@ async function fetchZones(region: string): Promise<ZoneInfo[]> {
     return (response.ZoneSet || [])
         .filter(e => e.ZoneState === "AVAILABLE")
 }
+
 async function fetchInstanceFamilies(region: string): Promise<InstanceFamilyConfig[]> {
     const response = await tc.cvm.getClient(region).DescribeInstanceFamilyConfigs()
     return (response.InstanceFamilyConfigSet || [])
@@ -55,15 +57,6 @@ async function fetchInstanceTypes(region: string): Promise<InstanceTypeConfig[]>
 async function fetchImageIds(region: string): Promise<Image[]> {
     const response = await tc.cvm.getClient(region).DescribeImages({})
     return (response.ImageSet || [])
-}
-
-// 1. 公共类型定义
-// 定义最终表单数据结构
-interface MyVars {
-    region: string;
-    zone: string;
-    instanceType: string;
-    imageId: string;
 }
 
 const VarsSchema = z.object({
@@ -125,36 +118,40 @@ const VarsSchema = z.object({
             {path: ["imageId"], error: "无效镜像(imageId)"}
         )
 ;
-const varsUI = new Map<z.ZodType, VarUI>();
-varsUI.set(VarsSchema.shape.region, VariableFactory.createOptionTable({
-    query: async (_: Partial<MyVars>) => fetchRegions(),
-    getValue: (row: RegionInfo) => row.Region,
-    columns:["Region","RegionName"],
-}))
-varsUI.set(VarsSchema.shape.zone, VariableFactory.createOptionTable({
-    query: async (vars: Partial<MyVars>) => vars.region ? fetchZones(vars.region) : [],
-    getValue: (row) => row.Zone,
-    // columns:["Zone","ZoneName"],
-}))
-varsUI.set(VarsSchema.shape.instanceFamily, VariableFactory.createOptionTable({
-    query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceFamilies(vars.region) : [],
-    getValue: (row) => row.InstanceFamily,
-    // columns:["InstanceFamily","InstanceFamilyName"],
-}))
-varsUI.set(VarsSchema.shape.instanceType, VariableFactory.createOptionTable({
-    query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypes(vars.region) : [],
-    getValue: (row) => row.InstanceType,
-}))
-varsUI.set(VarsSchema.shape.imageId, VariableFactory.createOptionTable({
-    query: async (vars: Partial<MyVars>) => vars.region ? fetchImageIds(vars.region) : [],
-    getValue: (row) => row.ImageId,
-    columns: [
-        {name: "镜像ID", getValue: (row) => row.ImageId},
-        {name: "镜像名称", getValue: (row) => row.ImageName},
-    ]
-}))
 
-await Cli.run<MyVars>({
+type Vars = z.infer<typeof VarsSchema>;
+
+const varsUI = new Map<z.ZodType, VarUI>([
+    [VarsSchema.shape.region, VariableFactory.createOptionTable({
+        query: async (_: Partial<Vars>) => fetchRegions(),
+        getValue: (row: RegionInfo) => row.Region,
+        columns: ["Region", "RegionName"],
+    })],
+    [VarsSchema.shape.zone, VariableFactory.createOptionTable({
+        query: async (vars: Partial<Vars>) => vars.region ? fetchZones(vars.region) : [],
+        getValue: (row) => row.Zone,
+        // columns:["Zone","ZoneName"],
+    })],
+    [VarsSchema.shape.instanceFamily, VariableFactory.createOptionTable({
+        query: async (vars: Partial<Vars>) => vars.region ? fetchInstanceFamilies(vars.region) : [],
+        getValue: (row) => row.InstanceFamily,
+        // columns:["InstanceFamily","InstanceFamilyName"],
+    })],
+    [VarsSchema.shape.instanceType, VariableFactory.createOptionTable({
+        query: async (vars: Partial<Vars>) => vars.region ? fetchInstanceTypes(vars.region) : [],
+        getValue: (row) => row.InstanceType,
+    })],
+    [VarsSchema.shape.imageId, VariableFactory.createOptionTable({
+        query: async (vars: Partial<Vars>) => vars.region ? fetchImageIds(vars.region) : [],
+        getValue: (row) => row.ImageId,
+        columns: [
+            {name: "镜像ID", getValue: (row) => row.ImageId},
+            {name: "镜像名称", getValue: (row) => row.ImageName},
+        ]
+    })],
+]);
+
+await Cli.run<Vars>({
     workdir: __dirname,
     project: project,
     varsSchema: VarsSchema,

@@ -1,6 +1,6 @@
 import type {Command} from "commander";
 import {Project} from "@qpa/core";
-import {z} from "zod/v4";
+import * as z from "zod";
 
 import {VarUI, VariableFactory, OptionTable} from "../../zod_ext.ts";
 import {exit} from 'node:process';

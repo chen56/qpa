@@ -4,7 +4,7 @@ import * as destroy from "./internal/command/destroy.ts";
 import * as list from "./internal/command/list.ts";
 
 import {Command} from "commander";
-import {z} from "zod/v4";
+import * as z from "zod";
 import type { VarUI } from "./zod_ext.ts";
 
 export {Cli} from "./cli.ts"

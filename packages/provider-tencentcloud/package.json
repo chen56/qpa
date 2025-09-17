@@ -60,6 +60,6 @@
     "@qpa/core": "workspace:*",
     "cockatiel": "^3.2.1",
     "tencentcloud-sdk-nodejs": "^4.0.973",
-    "zod": "^3.25.64"
+    "zod": "^4.1.9"
   }
 }

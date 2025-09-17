@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
 import {Project} from "@qpa/core";
-import {z} from "zod/v4";
+import * as z from "zod";
 import {VarUI} from "./zod_ext.ts";
 
 // 首先加载 .env 文件中的原始键值对
@@ -26,7 +26,7 @@ export interface CliConfig<Vars> {
   workdir: string;
   project: Project;
   apply: ApplyFunc<Vars>;
-  varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>;
+  varsSchema: z.ZodObject<Record<keyof Vars, z.ZodType>>;
   varsUI?: Map<z.ZodType, VarUI>;
 }
 

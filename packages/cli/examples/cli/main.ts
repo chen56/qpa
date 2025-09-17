@@ -1,6 +1,6 @@
 import {Project} from "@qpa/core";
 import * as console from "node:console";
-import {z} from "zod/v4";
+import * as z from "zod";
 import {Cli} from "../../src";
 import {VarUI, VariableFactory} from "../../src/zod_ext.ts";
 
@@ -148,33 +148,18 @@ let varsUI: Map<z.ZodType, VarUI> = new Map();
 varsUI.set(VarsSchema.shape.region, VariableFactory.createOptionTable({
   query: async (_: Partial<MyVars>): Promise<RegionApiData[]> => fetchRegions(),
   getValue: (data) => data.RegionId,
-  optionSchema: z.object({
-    RegionId: z.string().meta({title: "区域"}),
-    RegionName: z.string().meta({title: "区域名称"}),
-  }),
 }))
 varsUI.set(VarsSchema.shape.zone, VariableFactory.createOptionTable({
   query: async (vars: Partial<MyVars>) => vars.region ? fetchZonesByRegion(vars.region) : [],
   getValue: (row) => row.ZoneId,
-  optionSchema: z.object({
-    ZoneId: z.string().meta({title: "可用区"}),
-    ZoneName: z.string().meta({title: "可用区名称"}),
-    RegionId: z.string().meta({title: "区域"}),
-  }),
 }))
 varsUI.set(VarsSchema.shape.instanceType, VariableFactory.createOptionTable({
   query: async (vars: Partial<MyVars>) => vars.region ? fetchInstanceTypesByRegion(vars.region) : [],
   getValue: (row) => row.InstanceType,
-  optionSchema: z.object({
-    InstanceType: z.string().meta({title: "实例类型"}),
-  }),
 }))
 varsUI.set(VarsSchema.shape.imageId, VariableFactory.createOptionTable({
   query: async (vars: Partial<MyVars>) => vars.region ? fetchImageIdsByRegion(vars.region) : [],
   getValue: (row) => row.ImageId,
-  optionSchema: z.object({
-    ImageId: z.string().meta({title: "镜像ID"}),
-  }),
 }))
 
 await Cli.run<MyVars>({
