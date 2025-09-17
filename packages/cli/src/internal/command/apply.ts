@@ -117,19 +117,26 @@ async function _readVarField<Vars>(
       const optionTable = varUI as OptionTable<Vars, any, any>;
       const optionTableData = await optionTable.query(vars as any)
       if (optionTableData.length == 0) {
-        console.log(`${varTitle} : no option data`)
+        console.log(`${varTitle} : FAIL: no option data`)
+
         exit(1)
       }
-
       return inquirer.select({
         message: `[单选] ${varTitle} `,
         choices: optionTableData.map((optionRow) => {
           let optionRowDescription = ""
-          for (const [optionKey, optionField] of Object.entries(optionTable.optionSchema.shape)) {
-            // 使用方括号表示法从 optionRow 中获取 optionKey 对应的值
-            const optionFieldDesc = optionField.meta()?.description ?? optionKey;
-            const optionValue = optionRow[optionKey as keyof typeof optionRow];
-            optionRowDescription += `${optionFieldDesc}:${optionValue}, `
+          if (optionTable.columns) {
+            for (const column of optionTable.columns) {
+              if (typeof column === 'string') {
+                optionRowDescription += `${column}:${optionRow[column as keyof typeof optionRow]}, `
+              } else {
+                optionRowDescription += `${column.name}:${column.getValue(optionRow)}, `
+              }
+            }
+          } else {
+            for (const [optionKey, optionValue] of Object.entries(optionRow)) {
+              optionRowDescription += `${optionKey}:${optionValue}, `
+            }
           }
 
           return {

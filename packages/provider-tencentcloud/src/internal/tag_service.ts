@@ -7,8 +7,10 @@ import {SpiConstants} from "@qpa/core/spi";
 
 const pageLimit = 100;
 
+
 /**
  * 非资源性
+ * TODO : tag不可靠，和资源的创建是分离的，1.还要等待，2.中途报错会不一致之类的情况发生，是否直接每个资源类型去分别查询比较靠谱，因为咱管理的本身资源类型就限定的很少？
  */
 export class _TagClient {
 
