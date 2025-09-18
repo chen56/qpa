@@ -1,7 +1,7 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {afterEach, beforeEach, describe, expect, it} from "vitest";
-import {VpcVpcState} from "../src";
+import {VpcSubnetState} from "../src";
 import {TextFixture} from "./fixture.ts";
 import {ResourceInstance} from "@qpa/core";
 
@@ -27,19 +27,32 @@ describe('vpc_vpc', () => {
         }
       });
 
-      expect(project.resourceInstances.length).toBe(1);
-      expect(project.resourceInstances[0]).toBe(vpc.actualInstance);
+      let expectedSubnet = {
+        name: "test-subnet1",
+        spec: {
+          Region: vpc.actualInstance.state.Region,
+          Zone: "ap-guangzhou-2",
+          VpcId: vpc.actualInstance.state.VpcId!,
+          SubnetName: "test-subnet",
+          CidrBlock: '10.0.1.0/24',
+        }
+      };
+      const subnet = await tc.vpc.subnet(expectedSubnet);
 
-      expect(vpc.actualInstance).toMatchObject({
-        name: "vpc1",
+      expect(project.resourceInstances.length).toBe(2);
+      expect(project.resourceInstances[0]).toBe(vpc.actualInstance);
+      expect(project.resourceInstances[1]).toBe(subnet.actualInstance);
+
+      expect(subnet.actualInstance).toMatchObject({
+        name: expectedSubnet.name,
         state: {
-          Region: "ap-guangzhou",
-          VpcName: "test-vpc",
-          CidrBlock: '10.0.0.0/16',
+          Region: expectedSubnet.spec.Region,
+          Zone: expectedSubnet.spec.Zone,
+          SubnetName: expectedSubnet.spec.SubnetName,
+          CidrBlock: expectedSubnet.spec.CidrBlock,
           VpcId: vpc.actualInstance.state.VpcId,
         }
-      } as ResourceInstance<VpcVpcState>);
-
+      } as ResourceInstance<VpcSubnetState> );
 
     });
   });

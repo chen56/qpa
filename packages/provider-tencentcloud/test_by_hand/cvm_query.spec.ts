@@ -39,6 +39,7 @@ describe('cvm', {timeout: 15000}, async () => {
       Status: e.Status,
       StatusCategory: e.StatusCategory
     })))
+    console.log("zoneInstanceConfigInfosResponse: ", zoneInstanceConfigInfos.length + "/" + zoneInstanceConfigInfosResponse.InstanceTypeQuotaSet?.length, zoneInstanceConfigInfos)
   });
 
   it('DescribeImages', async () => {

@@ -1,5 +1,5 @@
 import {ProviderRuntime, Resource, ResourceConfig} from "@qpa/core";
-import {_VpcService, VpcSpec, VpcState} from "./vpc.ts";
+import {_VpcService, VpcSpec, VpcVpcState} from "./vpc.ts";
 import {_TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
 import {_SubnetService, VpcSubnetSpec, VpcSubnetState} from "./subnet.ts";
@@ -17,7 +17,7 @@ export class VpcFactory {
     return this.vpcClient.getClient(region)!;
   }
 
-  async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcState>> {
+  async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcVpcState>> {
     const service = this.provider._getService(TencentCloudResourceType.vpc_vpc) as _VpcService;
     return await this.providerRuntime.apply(expected, service)
   }
