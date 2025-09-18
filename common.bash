@@ -94,8 +94,7 @@ _load_nodejs_group_defaults() {
         mkdir -p ./dist
     #    _run npx tsc --noEmit
         _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/index.ts
-        [[  -f ./src/spi/index.ts  ]] && _run bun build --root ./src --outdir=./dist --sourcemap=linked --format=esm --target=node --entry-as-name src/spi/index.ts
-#    npm install --save-dev esbuild
+    #    npm install --save-dev esbuild
 
         # 构建 Composite 项目 (带有 references 时推荐): tsc --build 或 tsc -b。这是用于协调 Monorepo 中 Composite 项目构建的命令。
         # 它会读取 tsconfig.json 并根据 composite 和 references 来决定做什么（包括检查依赖、使用 .tsbuildinfo、生成 .js 和/或 .d.ts）。

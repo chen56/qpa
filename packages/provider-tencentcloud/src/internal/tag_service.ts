@@ -3,7 +3,7 @@ import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20
 import {Project, ResourceInstance} from "@qpa/core";
 import {Arrays, Paging} from "./common.ts";
 import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
-import {SpiConstants} from "@qpa/core/spi";
+import {Constants} from "@qpa/core";
 
 const pageLimit = 100;
 
@@ -23,7 +23,7 @@ export class _TagClient {
 
       const response = await this.tagClient.DescribeResourcesByTags({
         TagFilters: [{
-          TagKey: SpiConstants.tagNames.project,
+          TagKey: Constants.tagNames.project,
           TagValue: [projectName]
         }],
         Limit: pageLimit, // 分页大小

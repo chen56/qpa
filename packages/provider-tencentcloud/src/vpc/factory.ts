@@ -4,7 +4,7 @@ import {_TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
 import {_SubnetService, VpcSubnetSpec, VpcSubnetState} from "./subnet.ts";
 import {_VpcClientWarp} from "./client.ts";
-import {ProviderRuntime} from "@qpa/core/spi";
+import {ProviderRuntime} from "@qpa/core";
 
 export class VpcFactory {
   constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>,private readonly vpcClient: _VpcClientWarp) {

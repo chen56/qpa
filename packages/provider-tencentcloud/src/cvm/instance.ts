@@ -1,7 +1,7 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
 import { ResourceConfig, ResourceInstance} from "@qpa/core";
 import {_Runners, _TaggableResourceService, _TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
-import {ProviderRuntime, SpiConstants} from "@qpa/core/spi";
+import {ProviderRuntime, Constants} from "@qpa/core";
 import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
 
@@ -91,8 +91,8 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
         //再附带上项目标签和资源标签
         {
           ResourceType: "instance", Tags: [
-            {Key: SpiConstants.tagNames.project, Value: this.project.name},
-            {Key: SpiConstants.tagNames.resource, Value: config.name},
+            {Key: Constants.tagNames.project, Value: this.project.name},
+            {Key: Constants.tagNames.resource, Value: config.name},
           ]
         },
       ],
@@ -178,8 +178,8 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
     const response = await client.DescribeInstances({
       // 按标签过滤
       Filters: [
-        {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.project.name]},
-        {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [config.name]},
+        {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.project.name]},
+        {Name: `tag:${(Constants.tagNames.resource)}`, Values: [config.name]},
       ],
       Limit: this.resourceType.queryLimit,
     });
@@ -188,7 +188,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
 
   private _toResourceInstanceFunc(region: string): (e: Instance) => ResourceInstance<CvmInstanceState> {
     return (e: Instance) => {
-      const resourceName = (e.Tags ?? []).find(tag => tag.Key === SpiConstants.tagNames.resource)?.Value;
+      const resourceName = (e.Tags ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
       return new ResourceInstance(this, resourceName || "", {
         ...e,
         Region: region,

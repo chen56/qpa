@@ -1,4 +1,4 @@
-import {Provider, ProviderRuntime, ResourceService} from "./spi/provider.ts";
+import {Provider, ProviderRuntime, ResourceService} from "./provider.ts";
 
 abstract class BaseProject {
   public name: string;

@@ -1,6 +1,6 @@
 import {Client} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
 import {_TencentCloudProvider} from "../provider.ts";
-import {ProviderRuntime} from "@qpa/core/spi";
+import {ProviderRuntime} from "@qpa/core";
 
 export class _CvmClientWrap {
   private readonly vpcClients: Map<string, Client> = new Map();

@@ -33,10 +33,6 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./spi": {
-      "import": "./dist/spi/index.js",
-      "types": "./dist/spi/index.d.ts"
-    },
     "./package.json": "./package.json"
   },
   "bin": {

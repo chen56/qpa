@@ -5,8 +5,8 @@
  *
  * @return 获取查询出ResourceScope内的所有的资源状态
  */
-import {Project, Resource_, ResourceConfig, ResourceInstance, ResourceType} from "../core.ts";
-import * as common from "../internal/_common.ts";
+import {Project, Resource_, ResourceConfig, ResourceInstance, ResourceType} from "./core.ts";
+import * as common from "./internal/_common.ts";
 
 
 /**

@@ -19,7 +19,6 @@
     // paths基于baseUrl
     "paths": {
       "@qpa/*": ["../*/src"],
-      "@qpa/core/spi": ["../core/src/spi"],
     },
   },
 

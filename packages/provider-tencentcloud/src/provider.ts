@@ -2,7 +2,7 @@ import {Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/
 import {Project, ResourceInstance, ResourceType} from "@qpa/core";
 import {_TagClient} from "./internal/tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
-import {Provider, ResourceService} from "@qpa/core/spi";
+import {Provider, ResourceService} from "@qpa/core";
 import {retry, handleAll, ConstantBackoff, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
 import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 

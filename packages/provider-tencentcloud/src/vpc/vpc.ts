@@ -4,7 +4,7 @@ import {
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import { ResourceConfig, ResourceInstance} from "@qpa/core";
 import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
-import {ProviderRuntime, SpiConstants} from "@qpa/core/spi";
+import {ProviderRuntime, Constants} from "@qpa/core";
 import {_VpcClientWarp} from "./client.ts";
 
 /*
@@ -55,8 +55,8 @@ export class _VpcService extends _TaggableResourceService<VpcSpec, VpcVpcState> 
       DnsServers: specPart.spec.DnsServers,
       DomainName: specPart.spec.DomainName,
       Tags: [...(specPart.spec.Tags ?? []),
-        {Key: SpiConstants.tagNames.project, Value: this.project.name},
-        {Key: SpiConstants.tagNames.resource, Value: specPart.name},
+        {Key: Constants.tagNames.project, Value: this.project.name},
+        {Key: Constants.tagNames.resource, Value: specPart.name},
       ],
     });
     const vpcId = vpcResponse.Vpc?.VpcId;
@@ -83,8 +83,8 @@ export class _VpcService extends _TaggableResourceService<VpcSpec, VpcVpcState> 
       // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤
       Filters: [
-        {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.project.name]},
-        {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [declare.name]},
+        {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.project.name]},
+        {Name: `tag:${(Constants.tagNames.resource)}`, Values: [declare.name]},
       ],
       Limit: this.resourceType!.queryLimit.toString(),
     });
@@ -95,7 +95,7 @@ export class _VpcService extends _TaggableResourceService<VpcSpec, VpcVpcState> 
     const _this=this;
     const result = new Array<ResourceInstance<VpcVpcState>>;
     for (const vpc of tc_vpcSet ?? []) {
-      const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === SpiConstants.tagNames.resource)?.Value;
+      const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
       const toState: VpcVpcState = {
         ...vpc,
         // 如果有自己的字段

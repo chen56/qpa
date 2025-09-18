@@ -4,7 +4,7 @@ import {
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {Project, ResourceConfig, ResourceInstance} from "@qpa/core";
 import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
-import {ProviderRuntime, SpiConstants} from "@qpa/core/spi";
+import {ProviderRuntime, Constants} from "@qpa/core";
 import {_VpcClientWarp} from "./client.ts";
 
 export interface VpcSubnetSpec extends CreateSubnetRequest {
@@ -47,8 +47,8 @@ export class _SubnetService extends _TaggableResourceService<VpcSubnetSpec, VpcS
       CidrBlock: specPart.spec.CidrBlock,
       Zone: specPart.spec.Zone,
       Tags: [...(specPart.spec.Tags ?? []),
-        {Key: SpiConstants.tagNames.project, Value: this.project.name},
-        {Key: SpiConstants.tagNames.resource, Value: specPart.name},
+        {Key: Constants.tagNames.project, Value: this.project.name},
+        {Key: Constants.tagNames.resource, Value: specPart.name},
       ],
     });
     const subnetId = response.Subnet?.SubnetId;
@@ -75,8 +75,8 @@ export class _SubnetService extends _TaggableResourceService<VpcSubnetSpec, VpcS
       // VpcIds: resource.states.map(s => s.VpcId!)!,
       // 按标签过滤
       Filters: [
-        {Name: `tag:${(SpiConstants.tagNames.project)}`, Values: [this.project.name]},
-        {Name: `tag:${(SpiConstants.tagNames.resource)}`, Values: [declare.name]},
+        {Name: `tag:${(Constants.tagNames.project)}`, Values: [this.project.name]},
+        {Name: `tag:${(Constants.tagNames.resource)}`, Values: [declare.name]},
       ],
       Limit: this.resourceType!.queryLimit.toString(),
     });
@@ -85,7 +85,7 @@ export class _SubnetService extends _TaggableResourceService<VpcSubnetSpec, VpcS
 
   private _toResourceInstanceFunc(region: string): (e: tc_Subnet) => ResourceInstance<VpcSubnetState> {
     return (e: tc_Subnet) => {
-      const resourceName = (e.TagSet ?? []).find(tag => tag.Key === SpiConstants.tagNames.resource)?.Value;
+      const resourceName = (e.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
       return new ResourceInstance(this, resourceName || "", {
         ...e,
         // 如果有自己的字段

@@ -1,4 +1,4 @@
-import {ProviderRuntime} from "@qpa/core/spi";
+import {ProviderRuntime} from "@qpa/core";
 import {_TencentCloudProvider} from "../provider.ts";
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
 
