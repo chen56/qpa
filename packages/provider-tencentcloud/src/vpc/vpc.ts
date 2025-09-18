@@ -7,6 +7,10 @@ import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvide
 import {SpiConstants} from "@qpa/core/spi";
 import {_VpcClientWarp} from "./client.ts";
 
+/*
+ref:
+  - terraform-provider-tencentcloud/tencentcloud/services/vpc/resource_tc_vpc.go
+ */
 
 export interface VpcSpec extends tc_CreateVpcRequest {
   Region: string;
