@@ -169,35 +169,35 @@ await Cli.run<Vars>({
                 CidrBlock: '10.0.0.0/16',
             }
         });
-        console.log("created vpc:", vpc.actualInstance.toJson())
-        console.log("project:", project.resourceInstances.map(e => e.name))
+        console.log("created vpc:", JSON.stringify(vpc.state))
+        console.log("project:", project.resources.map(e => e.name))
 
         const subnet = await tc.vpc.subnet({
             name: "test-subnet1",
             spec: {
                 Region: vars.region,
                 Zone: vars.zone,
-                VpcId: vpc.actualInstance.state.VpcId!,
+                VpcId: vpc.state.VpcId!,
                 SubnetName: "test-subnet",
                 CidrBlock: '10.0.1.0/24',
             }
         });
-        console.log("created subnet:", subnet.actualInstance.toJson())
+        console.log("created subnet:", JSON.stringify(subnet.state))
 
         const cvmInstance1 = await tc.cvm.instance({
                 name: "cvmInstance1",
                 spec: {
                     Region: vars.region,
                     Placement: {
-                        Zone: subnet.actualInstance.state.Zone!,
+                        Zone: subnet.state.Zone!,
                     },
                     InstanceChargeType: "SPOTPAID",
                     InstanceType: vars.instanceType,
                     ImageId: vars.imageId,
                     InstanceName: "test-cvm-instance1",
                     VirtualPrivateCloud: {
-                        VpcId: vpc.actualInstance.state.VpcId!,
-                        SubnetId: subnet.actualInstance.state.SubnetId!,
+                        VpcId: vpc.state.VpcId!,
+                        SubnetId: subnet.state.SubnetId!,
                     },
                     SystemDisk: {
                         DiskType: "CLOUD_PREMIUM",
@@ -212,7 +212,7 @@ await Cli.run<Vars>({
             }
         );
         console.log("created cvmInstance1:", cvmInstance1, cvmInstance1.actualInstance.toJson())
-        console.log("project:", project.resourceInstances.map(e => e.name))
+        console.log("project:", project.resources.map(e => e.name))
     },
 })
 

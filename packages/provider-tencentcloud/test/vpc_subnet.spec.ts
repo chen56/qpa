@@ -30,18 +30,18 @@ describe('vpc_vpc', () => {
       let expectedSubnet = {
         name: "test-subnet1",
         spec: {
-          Region: vpc.actualInstance.state.Region,
+          Region: vpc.state.Region,
           Zone: "ap-guangzhou-2",
-          VpcId: vpc.actualInstance.state.VpcId!,
+          VpcId: vpc.state.VpcId!,
           SubnetName: "test-subnet",
           CidrBlock: '10.0.1.0/24',
         }
       };
       const subnet = await tc.vpc.subnet(expectedSubnet);
 
-      expect(project.resourceInstances.length).toBe(2);
-      expect(project.resourceInstances[0]).toBe(vpc.actualInstance);
-      expect(project.resourceInstances[1]).toBe(subnet.actualInstance);
+      expect(project.resources.length).toBe(2);
+      expect(project.resources[0]).toBe(vpc);
+      expect(project.resources[1]).toBe(subnet);
 
       expect(subnet.actualInstance).toMatchObject({
         name: expectedSubnet.name,

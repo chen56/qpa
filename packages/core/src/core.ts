@@ -64,7 +64,9 @@ export interface ResourceType {
 }
 
 export interface Resource<SPEC, STATE> extends ResourceConfig<SPEC> {
-  actualInstance: ResourceInstance<STATE>;
+  get actualInstance(): ResourceInstance<STATE>;
+
+  get state(): STATE;
 }
 
 /**
@@ -74,7 +76,7 @@ export interface Resource<SPEC, STATE> extends ResourceConfig<SPEC> {
  *
  * 资源的最终状态，LazyResource加载后也会变成完全体的Resource
  */
-export class ResourceImpl<SPEC, STATE> implements Resource<SPEC, STATE> {
+export class Resource_<SPEC, STATE> implements Resource<SPEC, STATE> {
 
   // todo actual要改为单数，集合放到核心api有点难以理解和应用，这个类就应该是完整的
   constructor(private readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
@@ -107,6 +109,9 @@ export class ResourceImpl<SPEC, STATE> implements Resource<SPEC, STATE> {
     return this.actual[0];
   }
 
+  get state(): STATE {
+    return this.actualInstance.state;
+  }
 }
 
 export interface ProjectProps {
@@ -225,7 +230,7 @@ export class ProviderRuntime<T extends Provider> {
     console.log('所有指定资源删除完成。');
   }
 
-  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<ResourceImpl<TSpec, TState>> {
+  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<Resource_<TSpec, TState>> {
     let actual = await service.load(expected);
     // todo 已存在的应该删除？
     if (actual.length == 0) {
@@ -239,7 +244,7 @@ export class ProviderRuntime<T extends Provider> {
       throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行destroy后apply重建,冲突实例：${actual.map(e => e.toJson())}`)
     }
 
-    const result = new ResourceImpl(expected, actual);
+    const result = new Resource_(expected, actual);
     this._resources.set(result.name, result);
     this._resourceInstances.push(...actual);
     return result;
@@ -265,6 +270,13 @@ export class Project extends BaseProject {
   get resourceInstances(): ResourceInstance<unknown>[] {
     return Array.from(this._providers.values()).flatMap(p => p._resourceInstances);
   }
+  get resources(): Resource<unknown,unknown>[] {
+    return Array.from(this._providers.values())
+      .flatMap(p => Array.from(p._resources.values()));
+  }
+
+
+
 
   static of(props: ProjectProps): Project {
     return new Project({name: props.name});
@@ -302,8 +314,8 @@ export class Project extends BaseProject {
 /**
  * @internal
  */
-class __Resources extends Map<string, ResourceImpl<unknown, unknown>> {
-  constructor(...args: [string, ResourceImpl<unknown, unknown>][]) {
+class __Resources extends Map<string, Resource_<unknown, unknown>> {
+  constructor(...args: [string, Resource_<unknown, unknown>][]) {
     super(args);
     //typescript原型链修复
     Object.setPrototypeOf(this, __Resources.prototype);

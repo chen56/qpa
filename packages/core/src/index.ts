@@ -2,7 +2,7 @@ export type {ProjectProps} from "./core.ts";
 export {Project} from "./core.ts";
 export type {Apply} from "./core.ts";
 
-export {ResourceImpl} from "./core.ts";
+export {Resource_} from "./core.ts";
 export type {Resource} from "./core.ts";
 export {ResourceInstance} from "./core.ts";
 export type {ResourceConfig} from "./core.ts";

@@ -174,6 +174,6 @@ await Cli.run<MyVars>({
     console.log("created vpc")
     console.log("created subnet")
     console.log("created cvmInstance1")
-    console.log("project:", project.resourceInstances.map(e => e.name))
+    console.log("project:", project.resources.map(e => e.name))
   },
 })

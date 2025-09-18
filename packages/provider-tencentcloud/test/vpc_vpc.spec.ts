@@ -26,9 +26,8 @@ describe('vpc_vpc', () => {
           CidrBlock: '10.0.0.0/16',
         }
       });
-
-      expect(project.resourceInstances.length).toBe(1);
-      expect(project.resourceInstances[0]).toBe(vpc.actualInstance);
+      expect(project.resources.length).toBe(1);
+      expect(project.resources[0]).toBe(vpc);
 
       expect(vpc.actualInstance).toMatchObject({
         name: "vpc1",
@@ -36,7 +35,7 @@ describe('vpc_vpc', () => {
           Region: "ap-guangzhou",
           VpcName: "test-vpc",
           CidrBlock: '10.0.0.0/16',
-          VpcId: vpc.actualInstance.state.VpcId,
+          VpcId: vpc.state.VpcId,
         }
       } as ResourceInstance<VpcVpcState>);
 
