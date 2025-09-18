@@ -1,7 +1,7 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
-import {ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
+import { ResourceConfig, ResourceInstance} from "@qpa/core";
 import {_Runners, _TaggableResourceService, _TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
-import {SpiConstants} from "@qpa/core/spi";
+import {ProviderRuntime, SpiConstants} from "@qpa/core/spi";
 import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
 

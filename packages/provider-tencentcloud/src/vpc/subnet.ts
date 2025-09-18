@@ -2,9 +2,9 @@ import {
   CreateSubnetRequest,
   Subnet as tc_Subnet
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
-import {Project, ProviderRuntime, ResourceConfig, ResourceInstance} from "@qpa/core";
+import {Project, ResourceConfig, ResourceInstance} from "@qpa/core";
 import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
-import {SpiConstants} from "@qpa/core/spi";
+import {ProviderRuntime, SpiConstants} from "@qpa/core/spi";
 import {_VpcClientWarp} from "./client.ts";
 
 export interface VpcSubnetSpec extends CreateSubnetRequest {

@@ -34,5 +34,9 @@ export default defineConfig({
       // include: ['test/**/*.test.{ts,tsx,js,jsx}', 'test/**/*.spec.{ts,tsx,js,jsx}'],
       include: ['**/*.test.{ts,tsx,js,jsx}', '**/*.spec.{ts,tsx,js,jsx}'],
 
+      isolate: false, // 禁用隔离，测试间共享相同环境
+
+      // 设置为单线程模式, 因为云只有一个，文件并行执行会导致同步更新同一个云
+      fileParallelism: false,
     },
 })
