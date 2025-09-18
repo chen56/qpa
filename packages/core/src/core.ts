@@ -1,7 +1,7 @@
 import {Provider, ResourceService} from "./spi/provider.ts";
 import {topologicalSortDFS} from "./internal/_common.ts";
 
-export abstract class BaseProject {
+abstract class BaseProject {
   public name: string;
 
   protected constructor(props: { name: string }) {
@@ -249,7 +249,7 @@ export class Project extends BaseProject {
   }
 
   registerProvider<T extends Provider>(provider: T): ProviderRuntime<T> {
-    const result=new ProviderRuntime(provider);
+    const result = new ProviderRuntime(provider);
     this._providers.set(provider, result);
     return result;
   }
