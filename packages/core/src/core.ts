@@ -1,5 +1,5 @@
 import {Provider, ResourceService} from "./spi/provider.ts";
-import {topologicalSortDFS} from "./internal/_common.ts";
+import * as common from "./internal/_common.ts";
 
 abstract class BaseProject {
   public name: string;
@@ -63,6 +63,9 @@ export interface ResourceType {
   get dependencies(): ResourceType[];
 }
 
+export interface Resource<SPEC, STATE> extends ResourceConfig<SPEC> {
+  actualInstance: ResourceInstance<STATE>;
+}
 
 /**
  * 一个完整的受管理资源，包括
@@ -71,10 +74,10 @@ export interface ResourceType {
  *
  * 资源的最终状态，LazyResource加载后也会变成完全体的Resource
  */
-export class Resource<SPEC, STATE> {
+export class ResourceImpl<SPEC, STATE> implements Resource<SPEC, STATE> {
 
   // todo actual要改为单数，集合放到核心api有点难以理解和应用，这个类就应该是完整的
-  constructor(readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
+  constructor(private readonly expected: ResourceConfig<SPEC>, readonly actual: ResourceInstance<STATE>[]) {
     if (actual.length == 0) {
       throw new Error("Resource为非惰性资源，创建Resource必须提供对应云上实例");
     }
@@ -85,6 +88,11 @@ export class Resource<SPEC, STATE> {
     }
   }
 
+
+  get spec(): SPEC {
+    return this.expected.spec;
+  }
+
   /**
    * name 是区分资源的关键, 我们会把name 用tag的形式打在每个实际的资源上, 以此对齐声明的资源配置和实际资源实例
    */
@@ -92,7 +100,7 @@ export class Resource<SPEC, STATE> {
     return this.expected.name;
   }
 
-  get actualInstance() {
+  get actualInstance(): ResourceInstance<STATE> {
     if (this.actual.length != 1) {
       throw new Error(`正常资源应该对应云上1个云上实际实例，但现在有${this.actual.length}个,请检查:${this.actual.map(it => (it.toJson()))}`);
     }
@@ -143,7 +151,7 @@ export class ProviderRuntime<T extends Provider> {
       for (const [type, _] of this.provider.resourceServices) {
         resourceTypeDependencies.set(type, type.dependencies);
       }
-      this.sortedResourceTypesCache = topologicalSortDFS(resourceTypeDependencies);
+      this.sortedResourceTypesCache = common.topologicalSortDFS(resourceTypeDependencies);
     }
 
     return this.sortedResourceTypesCache;
@@ -217,7 +225,7 @@ export class ProviderRuntime<T extends Provider> {
     console.log('所有指定资源删除完成。');
   }
 
-  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<Resource<TSpec, TState>> {
+  async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<ResourceImpl<TSpec, TState>> {
     let actual = await service.load(expected);
     // todo 已存在的应该删除？
     if (actual.length == 0) {
@@ -231,7 +239,7 @@ export class ProviderRuntime<T extends Provider> {
       throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行destroy后apply重建,冲突实例：${actual.map(e => e.toJson())}`)
     }
 
-    const result = new Resource(expected, actual);
+    const result = new ResourceImpl(expected, actual);
     this._resources.set(result.name, result);
     this._resourceInstances.push(...actual);
     return result;
@@ -294,8 +302,8 @@ export class Project extends BaseProject {
 /**
  * @internal
  */
-class __Resources extends Map<string, Resource<unknown, unknown>> {
-  constructor(...args: [string, Resource<unknown, unknown>][]) {
+class __Resources extends Map<string, ResourceImpl<unknown, unknown>> {
+  constructor(...args: [string, ResourceImpl<unknown, unknown>][]) {
     super(args);
     //typescript原型链修复
     Object.setPrototypeOf(this, __Resources.prototype);

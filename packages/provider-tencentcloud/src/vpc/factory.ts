@@ -1,4 +1,4 @@
-import {ProviderRuntime, Resource, ResourceConfig} from "@qpa/core";
+import {ProviderRuntime, ResourceConfig, Resource} from "@qpa/core";
 import {_VpcService, VpcSpec, VpcVpcState} from "./vpc.ts";
 import {_TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
