@@ -1,5 +1,5 @@
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
-import {_TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
+import {_TencentCloudProviderConfig, TencentCloudResourceType} from "../provider.ts";
 import { ResourceConfig, Resource} from "@qpa/core";
 import {_CvmInstanceService, CvmInstanceSpec, CvmInstanceState} from "./instance.ts";
 import {ProviderRuntime} from "@qpa/core";
@@ -7,10 +7,10 @@ import {ProviderRuntime} from "@qpa/core";
 export class CvmFactory {
   private readonly vpcClients: Map<string, CvmClient> = new Map();
 
-  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>) {
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>) {
   }
 
-  private get provider(): _TencentCloudProvider {
+  private get provider(): _TencentCloudProviderConfig {
     return this.providerRuntime.provider;
   }
 

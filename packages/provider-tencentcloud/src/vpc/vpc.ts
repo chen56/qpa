@@ -3,7 +3,7 @@ import {
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import { ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProvider} from "../provider.ts";
+import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProviderConfig} from "../provider.ts";
 import {ProviderRuntime, Constants} from "@qpa/core";
 import {_VpcClientWarp} from "./client.ts";
 
@@ -29,7 +29,7 @@ export class _VpcService extends _TaggableResourceService<VpcSpec, VpcVpcState> 
   }
   resourceType: TencentCloudResourceType = TencentCloudResourceType.vpc_vpc
 
-  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly vpcClient: _VpcClientWarp) {
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>, private readonly vpcClient: _VpcClientWarp) {
     super();
   }
 

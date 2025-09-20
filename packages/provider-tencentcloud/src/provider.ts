@@ -2,7 +2,7 @@ import {Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/
 import {Project, ResourceInstance, ResourceType} from "@qpa/core";
 import {_TagClient} from "./internal/tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
-import {Provider, ResourceService} from "@qpa/core";
+import {ProviderConfig, ResourceService} from "@qpa/core";
 import {retry, handleAll, ConstantBackoff, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
 import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 
@@ -127,31 +127,26 @@ export class TencentCloudResourceType implements ResourceType {
   }
 }
 
-export interface TencentCloudProviderProps {
-  credential: TencentCloudCredential
-  /**
-   * **重要**，由于腾讯云不保证TAG和资源的一致性，所以用Tag查询资源会有找不到(延迟)，
-   * 导致destroy时漏掉资源,所以我们只能用这种列表的方式罗列遍历查询，如不提供，则会查询所有类型.
-   */
-  // includedResourceTypes?: TencentCloudResourceType[],
-}
+
+
 
 /**
- * @internal
+ * @internal 内部类，不应该被客户程序直接使用
  * 无状态服务提供者
  *
  * 这里的方法不应该被客户程序直接执行，应该通过Project.apply()等执行
  *
  *
  */
-export class _TencentCloudProvider extends Provider {
+export class _TencentCloudProviderConfig implements ProviderConfig {
   readonly resourceServices = new _ResourceServices();
   private readonly credential: TencentCloudCredential;
   private readonly tagClient: _TagClient;
   readonly runners: _Runners = new _Runners();
 
-  constructor(readonly project: Project, props: TencentCloudProviderProps) {
-    super(project);
+  constructor(readonly project: Project, props: {
+    credential: TencentCloudCredential
+  }) {
     this.credential = props.credential;
     const tagClient = new tc_TagClient({
       credential: props.credential,
@@ -167,7 +162,7 @@ export class _TencentCloudProvider extends Provider {
     // for (const [_,service] of this.resourceServices) {
     //   result.push(...await service.loadAll());
     // }
-    return this.tagClient.findResourceInstances(this);
+    return this.tagClient.findResourceInstances(this.resourceServices);
   }
 
   public getClientConfigByRegion(region: string): tc_ClientConfig {

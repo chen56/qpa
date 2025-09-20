@@ -1,14 +1,14 @@
 import {ProviderRuntime} from "@qpa/core";
-import {_TencentCloudProvider} from "../provider.ts";
+import {_TencentCloudProviderConfig} from "../provider.ts";
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
 
 export class _VpcClientWarp {
   private readonly vpcClients: Map<string, tc_VpcClient> = new Map();
 
-  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>) {
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>) {
   }
 
-  private get provider(): _TencentCloudProvider {
+  private get provider(): _TencentCloudProviderConfig {
     return this.providerRuntime.provider;
   }
 

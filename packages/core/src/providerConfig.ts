@@ -10,15 +10,16 @@ import * as common from "./internal/_common.ts";
 
 
 /**
+ * @internal
+ *
+ *
  * 无状态服务提供者, 状态由每个Provider对应的 ProviderRuntime 维护
  *
  * todo 既然已经拆分ProviderRuntime,为啥不直接用接口呢？
  */
-export abstract class Provider {
-  protected constructor(readonly project: Project) {
-  }
+export interface ProviderConfig {
 
-  abstract get resourceServices(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
+  get resourceServices(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
 
   /**
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
@@ -27,8 +28,9 @@ export abstract class Provider {
    *
    * @return 获取查询出ResourceScope内的所有的资源状态
    */
-  abstract findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
+  findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
 }
+
 /**
  * SPI 接口，并不直接暴露给api客户程序。
  *
@@ -40,7 +42,7 @@ export abstract class Provider {
  * ProviderRuntime的逻辑原先用继承实现，由Provider父类型提供公共逻辑，我们拆离为组合模式，这样SPI实现者只关注Provider的接口实现即可
  * 避免SPI客户面对ProviderRuntime和云实现无关的接口，减少信息过载
  */
-export class ProviderRuntime<T extends Provider> {
+export class ProviderRuntime<T extends ProviderConfig> {
   /**
    * @internal
    * */
@@ -51,11 +53,14 @@ export class ProviderRuntime<T extends Provider> {
   _resources: __Resources = new __Resources();
   private sortedResourceTypesCache!: ResourceType[];
 
-  constructor(readonly provider: T) {
+  private constructor(readonly project: Project, readonly provider: T) {
   }
 
-  get project(): Project {
-    return this.provider.project;
+  /**
+   * @internal
+   */
+  static _create<T extends ProviderConfig>(project: Project, provider: T) {
+    return new ProviderRuntime(project, provider);
   }
 
   private get sortedResourceTypes(): ResourceType[] {
@@ -174,7 +179,6 @@ export abstract class ResourceService<SPEC, STATE> {
    */
   abstract load(config: ResourceConfig<SPEC>): Promise<ResourceInstance<STATE>[]> ;
 }
-
 
 
 /**

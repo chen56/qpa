@@ -1,6 +1,6 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
 import { ResourceConfig, ResourceInstance} from "@qpa/core";
-import {_Runners, _TaggableResourceService, _TencentCloudProvider, TencentCloudResourceType} from "../provider.ts";
+import {_Runners, _TaggableResourceService, _TencentCloudProviderConfig, TencentCloudResourceType} from "../provider.ts";
 import {ProviderRuntime, Constants} from "@qpa/core";
 import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
@@ -52,7 +52,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
   readonly resourceType = TencentCloudResourceType.cvm_instance;
   private readonly runners: _Runners;
 
-  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProvider>, private readonly cvmClient: _CvmClientWrap, private readonly vpcClient: _VpcClientWarp) {
+  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>, private readonly cvmClient: _CvmClientWrap, private readonly vpcClient: _VpcClientWarp) {
     super();
     this.runners = providerRuntime.provider.runners;
   }
