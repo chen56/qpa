@@ -11,7 +11,7 @@ export class VpcFactory {
   }
 
   private get provider(): _TencentCloudProviderConfig {
-    return this.providerRuntime.provider;
+    return this.providerRuntime.providerConfig;
   }
 
   getClient(region: string): tc_VpcClient {

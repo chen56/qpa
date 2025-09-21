@@ -54,7 +54,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
 
   constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>, private readonly cvmClient: _CvmClientWrap, private readonly vpcClient: _VpcClientWarp) {
     super();
-    this.runners = providerRuntime.provider.runners;
+    this.runners = providerRuntime.providerConfig.runners;
   }
 
   get project() {

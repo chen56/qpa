@@ -5,6 +5,26 @@ import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/servi
 import {ProviderConfig, ResourceService} from "@qpa/core";
 import {retry, handleAll, ConstantBackoff, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
 import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
+import {TencentCloudConfig} from "./factory.ts";
+
+export interface _TencentCloudClientConfig extends TencentCloudConfig {
+}
+
+export abstract class _BaseClientWarp {
+  protected readonly credential: TencentCloudCredential;
+
+  protected constructor(config: _TencentCloudClientConfig) {
+    this.credential = config.credential;
+  }
+
+  protected getClientConfigByRegion(region: string): tc_ClientConfig {
+    return {
+      credential: this.credential,
+      region: region,
+    }
+  }
+
+}
 
 export abstract class _TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor() {
@@ -128,8 +148,6 @@ export class TencentCloudResourceType implements ResourceType {
 }
 
 
-
-
 /**
  * @internal 内部类，不应该被客户程序直接使用
  * 无状态服务提供者
@@ -140,7 +158,7 @@ export class TencentCloudResourceType implements ResourceType {
  */
 export class _TencentCloudProviderConfig implements ProviderConfig {
   readonly resourceServices = new _ResourceServices();
-  private readonly credential: TencentCloudCredential;
+  readonly credential: TencentCloudCredential;
   private readonly tagClient: _TagClient;
   readonly runners: _Runners = new _Runners();
 
@@ -165,12 +183,6 @@ export class _TencentCloudProviderConfig implements ProviderConfig {
     return this.tagClient.findResourceInstances(this.resourceServices);
   }
 
-  public getClientConfigByRegion(region: string): tc_ClientConfig {
-    return {
-      credential: this.credential,
-      region: region,
-    }
-  }
 
   _getService(type: TencentCloudResourceType): _TencentCloudResourceService<unknown, unknown> {
     const result = this.resourceServices.get(type);

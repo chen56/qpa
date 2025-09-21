@@ -1,22 +1,18 @@
 import {Client} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
-import {_TencentCloudProviderConfig} from "../provider.ts";
-import {ProviderRuntime} from "@qpa/core";
+import {_BaseClientWarp, _TencentCloudClientConfig} from "../provider.ts";
 
-export class _CvmClientWrap {
-  private readonly vpcClients: Map<string, Client> = new Map();
+export class _CvmClientWrap extends _BaseClientWarp {
+  private readonly client: Map<string, Client> = new Map();
 
-  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>) {
-  }
-
-  private get provider(): _TencentCloudProviderConfig {
-    return this.providerRuntime.provider;
+  constructor(config: _TencentCloudClientConfig) {
+    super(config)
   }
 
   getClient(region: string): Client {
-    let result = this.vpcClients.get(region);
+    let result = this.client.get(region);
     if (!result) {
-      result = new Client(this.provider.getClientConfigByRegion(region));
-      this.vpcClients.set(region, result);
+      result = new Client(this.getClientConfigByRegion(region));
+      this.client.set(region, result);
     }
     return result;
   }

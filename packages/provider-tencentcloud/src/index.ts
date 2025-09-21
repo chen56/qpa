@@ -16,5 +16,5 @@ export * from './cvm/index.ts';
 export type{TencentCloudCredential} from './provider.ts';
 export {TencentCloudResourceType} from './provider.ts';
 
-export type{TencentCloudProps} from './factory.ts';
+export type{TencentCloudConfig} from './factory.ts';
 export {TencentCloud} from './factory.ts'

@@ -46,14 +46,20 @@ export class ProviderRuntime<T extends ProviderConfig> {
   /**
    * @internal
    * */
-  _resourceInstances: __ResourceInstances = new __ResourceInstances();
+  private _resourceInstances: __ResourceInstances = new __ResourceInstances();
+  resourceServices: ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
   /**
    * @internal
    * */
   _resources: __Resources = new __Resources();
   private sortedResourceTypesCache!: ResourceType[];
 
-  private constructor(readonly project: Project, readonly provider: T) {
+  private constructor(readonly project: Project, readonly providerConfig: T) {
+    this.resourceServices = providerConfig.resourceServices;
+  }
+
+  get resourceInstances(): ReadonlyArray<ResourceInstance<unknown>> {
+    return this._resourceInstances;
   }
 
   /**
@@ -67,7 +73,7 @@ export class ProviderRuntime<T extends ProviderConfig> {
     // init
     if (!this.sortedResourceTypesCache) {
       const resourceTypeDependencies = new Map<ResourceType, ResourceType[]>();
-      for (const [type, _] of this.provider.resourceServices) {
+      for (const [type, _] of this.resourceServices) {
         resourceTypeDependencies.set(type, type.dependencies);
       }
       this.sortedResourceTypesCache = common.topologicalSortDFS(resourceTypeDependencies);
@@ -80,7 +86,7 @@ export class ProviderRuntime<T extends ProviderConfig> {
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
    **/
   async refresh(): Promise<void> {
-    this._resourceInstances = new __ResourceInstances(...await this.provider.findResourceInstances());
+    this._resourceInstances = new __ResourceInstances(...await this.providerConfig.findResourceInstances());
   }
 
   /**

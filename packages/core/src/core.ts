@@ -135,7 +135,7 @@ export class Project extends BaseProject {
   }
 
   get resourceInstances(): ResourceInstance<unknown>[] {
-    return Array.from(this._providers.values()).flatMap(p => p._resourceInstances);
+    return Array.from(this._providers.values()).flatMap(p => p.resourceInstances);
   }
   get resources(): Resource<unknown, unknown>[] {
     return Array.from(this._providers.values())
