@@ -2,13 +2,13 @@ import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services
 import {_TencentCloud, _TencentCloudResourceFactory, TencentCloudResourceType} from "../provider.ts";
 import {ResourceConfig, Resource} from "@qpa/core";
 import {_CvmInstanceService, CvmInstanceSpec, CvmInstanceState} from "./instance.ts";
-import {ProviderRuntime} from "@qpa/core";
+import {Vendor} from "@qpa/core";
 import {_CvmClientWrap} from "./client.ts";
 
 export class CvmFactory extends _TencentCloudResourceFactory {
 
   constructor(tc: _TencentCloud,
-              private readonly providerRuntime: ProviderRuntime, private cvmClient: _CvmClientWrap) {
+              private readonly vendor: Vendor, private cvmClient: _CvmClientWrap) {
     super(tc);
   }
 
@@ -17,7 +17,7 @@ export class CvmFactory extends _TencentCloudResourceFactory {
   }
 
   async instance(expected: ResourceConfig<CvmInstanceSpec>): Promise<Resource<CvmInstanceSpec, CvmInstanceState>> {
-    const service = this.providerRuntime.resourceServices.get(TencentCloudResourceType.cvm_instance) as _CvmInstanceService;
-    return await this.providerRuntime.apply(expected, service)
+    const service = this.vendor.resourceServices.get(TencentCloudResourceType.cvm_instance) as _CvmInstanceService;
+    return await this.vendor.apply(expected, service)
   }
 }

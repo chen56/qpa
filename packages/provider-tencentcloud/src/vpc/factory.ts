@@ -4,10 +4,10 @@ import {_TencentCloud, _TencentCloudResourceFactory, TencentCloudResourceType} f
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
 import {_SubnetService, VpcSubnetSpec, VpcSubnetState} from "./subnet.ts";
 import {_VpcClientWarp} from "./client.ts";
-import {ProviderRuntime} from "@qpa/core";
+import {Vendor} from "@qpa/core";
 
 export class VpcFactory extends _TencentCloudResourceFactory {
-  constructor(tc: _TencentCloud, private readonly providerRuntime: ProviderRuntime, private readonly vpcClient: _VpcClientWarp) {
+  constructor(tc: _TencentCloud, private readonly vendor: Vendor, private readonly vpcClient: _VpcClientWarp) {
     super(tc);
   }
 
@@ -16,12 +16,12 @@ export class VpcFactory extends _TencentCloudResourceFactory {
   }
 
   async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcVpcState>> {
-    const service = this.providerRuntime.resourceServices.get(TencentCloudResourceType.vpc_vpc) as _VpcService;
-    return await this.providerRuntime.apply(expected, service)
+    const service = this.vendor.resourceServices.get(TencentCloudResourceType.vpc_vpc) as _VpcService;
+    return await this.vendor.apply(expected, service)
   }
 
   async subnet(expected: ResourceConfig<VpcSubnetSpec>): Promise<Resource<VpcSubnetSpec, VpcSubnetState>> {
-    const service = this.providerRuntime.resourceServices.get(TencentCloudResourceType.vpc_subnet) as _SubnetService;
-    return await this.providerRuntime.apply(expected, service)
+    const service = this.vendor.resourceServices.get(TencentCloudResourceType.vpc_subnet) as _SubnetService;
+    return await this.vendor.apply(expected, service)
   }
 }

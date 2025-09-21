@@ -1,4 +1,4 @@
-import {Provider, ProviderRuntime, ResourceService} from "./provider.ts";
+import {Provider, Vendor, ResourceService} from "./provider.ts";
 
 abstract class BaseProject {
   public name: string;
@@ -120,7 +120,7 @@ export interface ProjectProps {
 export type Apply = (project: Project) => Promise<void>;
 
 export class Project extends BaseProject {
-  public _providers = new Map<Provider, ProviderRuntime>();
+  public _providers = new Map<Provider, Vendor>();
 
   private constructor(props: {
     name: string;
@@ -128,8 +128,8 @@ export class Project extends BaseProject {
     super({name: props.name});
   }
 
-  registerProvider(provider: Provider): ProviderRuntime {
-    const result = ProviderRuntime._create(provider);
+  registerVendor(provider: Provider): Vendor {
+    const result = Vendor._create(provider);
     this._providers.set(provider, result);
     return result;
   }
@@ -154,8 +154,8 @@ export class Project extends BaseProject {
     await apply(this);
 
     // cleanup
-    for (const [_, providerRuntime] of this._providers) {
-      await providerRuntime.cleanup();
+    for (const [_, vendor] of this._providers) {
+      await vendor.cleanup();
     }
   }
 
@@ -171,8 +171,8 @@ export class Project extends BaseProject {
    * - 各Provider按资源类型固定的顺序进行删除，比如先删除虚拟机、再删除网络等等。
    */
   async destroy(): Promise<void> {
-    for (const [_, providerRuntime] of this._providers) {
-      await providerRuntime.destroy();
+    for (const [_, vendor] of this._providers) {
+      await vendor.destroy();
     }
   }
 }

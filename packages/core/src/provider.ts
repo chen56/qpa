@@ -13,9 +13,9 @@ import * as common from "./internal/_common.ts";
  * @internal
  *
  *
- * 无状态服务提供者, 状态由每个Provider对应的 ProviderRuntime 维护
+ * 无状态服务提供者, 状态由每个Provider对应的 Vendor 维护
  *
- * todo 既然已经拆分ProviderRuntime,为啥不直接用接口呢？
+ * todo 既然已经拆分Vendor,为啥不直接用接口呢？
  */
 export interface Provider {
 
@@ -39,10 +39,10 @@ export interface Provider {
  * 1. 使用继承：用父类型实现对资源的管理公共逻辑
  * 2. 使用隔离的组合composite模型
  *
- * ProviderRuntime的逻辑原先用继承实现，由Provider父类型提供公共逻辑，我们拆离为组合模式，这样SPI实现者只关注Provider的接口实现即可
- * 避免SPI客户面对ProviderRuntime和云实现无关的接口，减少信息过载
+ * Vendor的逻辑原先用继承实现，由Provider父类型提供公共逻辑，我们拆离为组合模式，这样SPI实现者只关注Provider的接口实现即可
+ * 避免SPI客户面对Vendor和云实现无关的接口，减少信息过载
  */
-export class ProviderRuntime  {
+export class Vendor {
   /**
    * @internal
    * */
@@ -65,7 +65,7 @@ export class ProviderRuntime  {
    * @internal
    */
   static _create (provider: Provider) {
-    return new ProviderRuntime(provider);
+    return new Vendor(provider);
   }
 
   private get sortedResourceTypes(): ResourceType[] {

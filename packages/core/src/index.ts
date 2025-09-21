@@ -10,5 +10,5 @@ export type {ResourceType} from "./core.ts";
 
 export {Constants} from "./constants.ts";
 export {Provider} from "./provider.ts";
-export {ProviderRuntime} from "./provider.ts";
+export {Vendor} from "./provider.ts";
 export {ResourceService} from "./provider.ts";
