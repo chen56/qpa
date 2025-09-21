@@ -1,4 +1,4 @@
-import {ProviderConfig, ProviderRuntime, ResourceService} from "./providerConfig.ts";
+import {Provider, ProviderRuntime, ResourceService} from "./provider.ts";
 
 abstract class BaseProject {
   public name: string;
@@ -120,7 +120,7 @@ export interface ProjectProps {
 export type Apply = (project: Project) => Promise<void>;
 
 export class Project extends BaseProject {
-  public _providers = new Map<ProviderConfig, ProviderRuntime<ProviderConfig>>();
+  public _providers = new Map<Provider, ProviderRuntime>();
 
   private constructor(props: {
     name: string;
@@ -128,8 +128,8 @@ export class Project extends BaseProject {
     super({name: props.name});
   }
 
-  registerProvider<T extends ProviderConfig>(provider: T): ProviderRuntime<T> {
-    const result = ProviderRuntime._create(this, provider);
+  registerProvider(provider: Provider): ProviderRuntime {
+    const result = ProviderRuntime._create(provider);
     this._providers.set(provider, result);
     return result;
   }
@@ -137,6 +137,7 @@ export class Project extends BaseProject {
   get resourceInstances(): ResourceInstance<unknown>[] {
     return Array.from(this._providers.values()).flatMap(p => p.resourceInstances);
   }
+
   get resources(): Resource<unknown, unknown>[] {
     return Array.from(this._providers.values())
       .flatMap(p => Array.from(p._resources.values()));

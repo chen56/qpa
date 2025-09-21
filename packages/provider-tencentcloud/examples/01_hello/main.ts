@@ -21,7 +21,7 @@ const myEnv = dotenv.config();
 // 它会修改 process.env，并返回一个包含所有扩展后变量的对象
 dotenvExpand.expand(myEnv);
 
-const project = Project.of({name: "examples1"});
+const project = Project.of({name: "unit_test"});
 const tc = new TencentCloud(project, {
     credential: {
         secretId: process.env.TENCENTCLOUD_SECRET_ID!,

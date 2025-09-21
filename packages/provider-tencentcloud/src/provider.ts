@@ -2,7 +2,7 @@ import {Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/
 import {Project, ProviderRuntime, ResourceInstance, ResourceType} from "@qpa/core";
 import {_TagClient} from "./internal/tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
-import {ProviderConfig, ResourceService} from "@qpa/core";
+import {Provider, ResourceService} from "@qpa/core";
 import {retry, handleAll, ConstantBackoff, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
 import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {TencentCloudConfig} from "./factory.ts";
@@ -158,6 +158,10 @@ export class TencentCloudResourceType implements ResourceType {
 export abstract class _TencentCloudResourceFactory {
   protected constructor(protected tc: _TencentCloud) {
   }
+
+  protected getService(type: TencentCloudResourceType): ResourceService<unknown, unknown> {
+    return this.tc._getService(type)
+  }
 }
 
 /**
@@ -172,7 +176,7 @@ export class _TencentCloud {
   readonly runners: _Runners = new _Runners();
 
   constructor(readonly project: Project,
-              private readonly provider: ProviderRuntime<_TencentCloudProvider>) {
+              private readonly provider: ProviderRuntime) {
   }
 
 
@@ -183,7 +187,7 @@ export class _TencentCloud {
   }
 }
 
-export class _TencentCloudProvider implements ProviderConfig {
+export class _TencentCloudProvider implements Provider {
   readonly resourceServices = new _ResourceServices();
   private readonly tagClient: _TagClient;
 
@@ -207,8 +211,8 @@ export class _TencentCloudProvider implements ProviderConfig {
   }
 }
 
-class _ResourceServices extends Map<TencentCloudResourceType, _TencentCloudResourceService<unknown, unknown>> {
-  constructor(...args: [TencentCloudResourceType, _TencentCloudResourceService<unknown, unknown>][]) {
+class _ResourceServices extends Map<ResourceType, ResourceService<unknown, unknown>> {
+  constructor(...args: [ResourceType, ResourceService<unknown, unknown>][]) {
     super(args);
     // 确保原型链正确
     Object.setPrototypeOf(this, _ResourceServices.prototype);

@@ -9,6 +9,6 @@ export type {ResourceConfig} from "./core.ts";
 export type {ResourceType} from "./core.ts";
 
 export {Constants} from "./constants.ts";
-export {ProviderConfig} from "./providerConfig.ts";
-export {ProviderRuntime} from "./providerConfig.ts";
-export {ResourceService} from "./providerConfig.ts";
+export {Provider} from "./provider.ts";
+export {ProviderRuntime} from "./provider.ts";
+export {ResourceService} from "./provider.ts";

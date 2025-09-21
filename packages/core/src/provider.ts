@@ -5,7 +5,7 @@
  *
  * @return 获取查询出ResourceScope内的所有的资源状态
  */
-import {Project, Resource_, ResourceConfig, ResourceInstance, ResourceType} from "./core.ts";
+import {Resource_, ResourceConfig, ResourceInstance, ResourceType} from "./core.ts";
 import * as common from "./internal/_common.ts";
 
 
@@ -17,7 +17,7 @@ import * as common from "./internal/_common.ts";
  *
  * todo 既然已经拆分ProviderRuntime,为啥不直接用接口呢？
  */
-export interface ProviderConfig {
+export interface Provider {
 
   get resourceServices(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
 
@@ -42,20 +42,19 @@ export interface ProviderConfig {
  * ProviderRuntime的逻辑原先用继承实现，由Provider父类型提供公共逻辑，我们拆离为组合模式，这样SPI实现者只关注Provider的接口实现即可
  * 避免SPI客户面对ProviderRuntime和云实现无关的接口，减少信息过载
  */
-export class ProviderRuntime<T extends ProviderConfig> {
+export class ProviderRuntime  {
   /**
    * @internal
    * */
   private _resourceInstances: __ResourceInstances = new __ResourceInstances();
-  resourceServices: ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
+  resourceServices=new _ResourceServices();
   /**
    * @internal
    * */
   _resources: __Resources = new __Resources();
   private sortedResourceTypesCache!: ResourceType[];
 
-  private constructor(readonly project: Project, readonly providerConfig: T) {
-    this.resourceServices = providerConfig.resourceServices;
+  private constructor( private readonly provider: Provider) {
   }
 
   get resourceInstances(): ReadonlyArray<ResourceInstance<unknown>> {
@@ -65,8 +64,8 @@ export class ProviderRuntime<T extends ProviderConfig> {
   /**
    * @internal
    */
-  static _create<T extends ProviderConfig>(project: Project, provider: T) {
-    return new ProviderRuntime(project, provider);
+  static _create (provider: Provider) {
+    return new ProviderRuntime(provider);
   }
 
   private get sortedResourceTypes(): ResourceType[] {
@@ -86,7 +85,7 @@ export class ProviderRuntime<T extends ProviderConfig> {
    * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
    **/
   async refresh(): Promise<void> {
-    this._resourceInstances = new __ResourceInstances(...await this.providerConfig.findResourceInstances());
+    this._resourceInstances = new __ResourceInstances(...await this.provider.findResourceInstances());
   }
 
   /**
@@ -217,3 +216,19 @@ class __ResourceInstances extends Array<ResourceInstance<unknown>> {
   }
 }
 
+
+class _ResourceServices extends Map<ResourceType, ResourceService<unknown, unknown>> {
+  constructor(...args: [ResourceType, ResourceService<unknown, unknown>][]) {
+    super(args);
+    // 确保原型链正确
+    Object.setPrototypeOf(this, _ResourceServices.prototype);
+  }
+
+  register(service: ResourceService<unknown, unknown>) {
+    const type = service.resourceType;
+    if (this.has(type)) {
+      throw Error(`resource service[${type}] already registered`);
+    }
+    this.set(type, service);
+  }
+}
