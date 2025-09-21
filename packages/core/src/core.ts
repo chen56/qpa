@@ -3,8 +3,8 @@ import {Provider, Vendor, ResourceService} from "./provider.ts";
 abstract class BaseProject {
   public name: string;
 
-  protected constructor(props: { name: string }) {
-    this.name = props.name;
+  protected constructor(config: ProjectConfig) {
+    this.name = config.name;
   }
 }
 
@@ -20,7 +20,9 @@ export class ResourceInstance<STATE> {
   /**
    * @internal
    */
-  constructor(resourceService: ResourceService<unknown, STATE>, readonly name: string, readonly state: STATE) {
+  constructor(resourceService: ResourceService<unknown, STATE>,
+              readonly name: string,
+              readonly state: STATE) {
     this.resourceService = resourceService;
     this.resourceType = resourceService.resourceType;
   }
@@ -113,39 +115,37 @@ export class Resource_<SPEC, STATE> implements Resource<SPEC, STATE> {
   }
 }
 
-export interface ProjectProps {
+export interface ProjectConfig {
   name: string;
 }
 
 export type Apply = (project: Project) => Promise<void>;
 
 export class Project extends BaseProject {
-  public _providers = new Map<Provider, Vendor>();
+  private _vendors: Vendor[] = [];
 
-  private constructor(props: {
-    name: string;
-  }) {
-    super({name: props.name});
+  private constructor(config: ProjectConfig) {
+    super(config);
   }
 
   registerVendor(provider: Provider): Vendor {
     const result = Vendor._create(provider);
-    this._providers.set(provider, result);
+    this._vendors.push(result);
     return result;
   }
 
   get resourceInstances(): ResourceInstance<unknown>[] {
-    return Array.from(this._providers.values()).flatMap(p => p.resourceInstances);
+    return this._vendors.flatMap(p => p.resourceInstances);
   }
 
   get resources(): Resource<unknown, unknown>[] {
-    return Array.from(this._providers.values())
+    return this._vendors
       .flatMap(p => Array.from(p._resources.values()));
   }
 
 
-  static of(props: ProjectProps): Project {
-    return new Project({name: props.name});
+  static of(config: ProjectConfig): Project {
+    return new Project(config);
   }
 
   async apply(apply: Apply): Promise<void> {
@@ -154,14 +154,14 @@ export class Project extends BaseProject {
     await apply(this);
 
     // cleanup
-    for (const [_, vendor] of this._providers) {
+    for (const vendor of this._vendors) {
       await vendor.cleanup();
     }
   }
 
   async refresh(): Promise<void> {
-    for (const [_, state] of this._providers) {
-      await state.refresh();
+    for (const vendor of this._vendors) {
+      await vendor.refresh();
     }
   }
 
@@ -171,7 +171,7 @@ export class Project extends BaseProject {
    * - 各Provider按资源类型固定的顺序进行删除，比如先删除虚拟机、再删除网络等等。
    */
   async destroy(): Promise<void> {
-    for (const [_, vendor] of this._providers) {
+    for (const vendor of this._vendors) {
       await vendor.destroy();
     }
   }

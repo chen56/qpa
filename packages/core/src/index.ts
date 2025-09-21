@@ -1,4 +1,4 @@
-export type {ProjectProps} from "./core.ts";
+export type {ProjectConfig} from "./core.ts";
 export {Project} from "./core.ts";
 export type {Apply} from "./core.ts";
 
