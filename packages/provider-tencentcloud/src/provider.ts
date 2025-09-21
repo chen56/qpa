@@ -1,5 +1,5 @@
 import {Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {Project, ResourceInstance, ResourceType} from "@qpa/core";
+import {Project, ProviderRuntime, ResourceInstance, ResourceType} from "@qpa/core";
 import {_TagClient} from "./internal/tag_service.ts";
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ProviderConfig, ResourceService} from "@qpa/core";
@@ -27,9 +27,17 @@ export abstract class _BaseClientWarp {
 }
 
 export abstract class _TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
-  protected constructor() {
+  protected constructor(protected tc: _TencentCloud) {
     super();
   }
+
+  protected get project(): Project {
+    return this.tc.project;
+  };
+
+  protected get runner(): _Runners {
+    return this.tc.runners;
+  };
 
   abstract get resourceType(): TencentCloudResourceType ;
 
@@ -44,8 +52,8 @@ export interface TencentCloudCredential extends tc_Credential {
  * 支持tag的资源 Taggable
  */
 export abstract class _TaggableResourceService<SPEC, STATE> extends _TencentCloudResourceService<SPEC, STATE> {
-  protected constructor() {
-    super();
+  constructor(tc: _TencentCloud) {
+    super(tc);
   }
 
   /**
@@ -147,6 +155,10 @@ export class TencentCloudResourceType implements ResourceType {
   }
 }
 
+export abstract class _TencentCloudResourceFactory {
+  protected constructor(protected tc: _TencentCloud) {
+  }
+}
 
 /**
  * @internal 内部类，不应该被客户程序直接使用
@@ -156,20 +168,31 @@ export class TencentCloudResourceType implements ResourceType {
  *
  *
  */
-export class _TencentCloudProviderConfig implements ProviderConfig {
-  readonly resourceServices = new _ResourceServices();
-  readonly credential: TencentCloudCredential;
-  private readonly tagClient: _TagClient;
+export class _TencentCloud {
   readonly runners: _Runners = new _Runners();
+
+  constructor(readonly project: Project,
+              private readonly provider: ProviderRuntime<_TencentCloudProvider>) {
+  }
+
+
+  _getService(type: TencentCloudResourceType): ResourceService<unknown, unknown> {
+    const result = this.provider.resourceServices.get(type);
+    if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或放弃使用此资源类型`);
+    return result;
+  }
+}
+
+export class _TencentCloudProvider implements ProviderConfig {
+  readonly resourceServices = new _ResourceServices();
+  private readonly tagClient: _TagClient;
 
   constructor(readonly project: Project, props: {
     credential: TencentCloudCredential
   }) {
-    this.credential = props.credential;
     const tagClient = new tc_TagClient({
       credential: props.credential,
     });
-
     this.tagClient = new _TagClient(project, tagClient);
   }
 
@@ -181,13 +204,6 @@ export class _TencentCloudProviderConfig implements ProviderConfig {
     //   result.push(...await service.loadAll());
     // }
     return this.tagClient.findResourceInstances(this.resourceServices);
-  }
-
-
-  _getService(type: TencentCloudResourceType): _TencentCloudResourceService<unknown, unknown> {
-    const result = this.resourceServices.get(type);
-    if (!result) throw Error(`resource service[${type}] not found, 请给出需要支持的资源，或放弃使用此资源类型`);
-    return result;
   }
 }
 

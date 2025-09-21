@@ -2,9 +2,9 @@ import {
   CreateVpcRequest as tc_CreateVpcRequest,
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
-import { ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudProviderConfig} from "../provider.ts";
-import {ProviderRuntime, Constants} from "@qpa/core";
+import {ResourceConfig, ResourceInstance} from "@qpa/core";
+import {TencentCloudResourceType, _TaggableResourceService, _TencentCloud} from "../provider.ts";
+import {Constants} from "@qpa/core";
 import {_VpcClientWarp} from "./client.ts";
 
 /*
@@ -24,17 +24,13 @@ export interface VpcVpcState extends tc_Vpc {
 /**
  */
 export class _VpcService extends _TaggableResourceService<VpcSpec, VpcVpcState> {
-  loadAll(): Promise<ResourceInstance<VpcVpcState>[]> {
-      throw new Error("Method not implemented.");
-  }
   resourceType: TencentCloudResourceType = TencentCloudResourceType.vpc_vpc
 
-  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>, private readonly vpcClient: _VpcClientWarp) {
-    super();
+  constructor(tc: _TencentCloud, private readonly vpcClient: _VpcClientWarp) {
+    super(tc);
   }
-
-  private get project(){
-    return this.providerRuntime.project;
+  loadAll(): Promise<ResourceInstance<VpcVpcState>[]> {
+    throw new Error("Method not implemented.");
   }
 
   async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<VpcVpcState>[]> {

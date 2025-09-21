@@ -1,12 +1,13 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
-import { ResourceConfig, ResourceInstance} from "@qpa/core";
-import {_Runners, _TaggableResourceService, _TencentCloudProviderConfig, TencentCloudResourceType} from "../provider.ts";
-import {ProviderRuntime, Constants} from "@qpa/core";
+import {ResourceConfig, ResourceInstance} from "@qpa/core";
+import {_Runners, _TaggableResourceService, _TencentCloud, TencentCloudResourceType} from "../provider.ts";
+import {Constants} from "@qpa/core";
 import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
 
 
 const _INSTANCE_CHARGE_TYPES = ["SPOTPAID", "POSTPAID_BY_HOUR"] as const;
+
 /**
  *
  *  CVM实例
@@ -28,7 +29,7 @@ const _INSTANCE_CHARGE_TYPES = ["SPOTPAID", "POSTPAID_BY_HOUR"] as const;
  *   - DedicatedClusterId  目前不支持专有集群(因为难以测试)
  *   - ChcIds  目前不支持超算集群(因为难以测试)
  **/
-export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChargePrepaid'  | 'InstanceCount' | 'LaunchTemplate' | 'DisasterRecoverGroupIds' | 'HpcClusterId' | 'DedicatedClusterId' | 'ChcIds'> {
+export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChargePrepaid' | 'InstanceCount' | 'LaunchTemplate' | 'DisasterRecoverGroupIds' | 'HpcClusterId' | 'DedicatedClusterId' | 'ChcIds'> {
   // todo temp waiting to remove
   Region: string;
 
@@ -52,14 +53,14 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
   readonly resourceType = TencentCloudResourceType.cvm_instance;
   private readonly runners: _Runners;
 
-  constructor(private readonly providerRuntime: ProviderRuntime<_TencentCloudProviderConfig>, private readonly cvmClient: _CvmClientWrap, private readonly vpcClient: _VpcClientWarp) {
-    super();
-    this.runners = providerRuntime.providerConfig.runners;
+  constructor(
+    tc: _TencentCloud,
+    private readonly cvmClient: _CvmClientWrap,
+    private readonly vpcClient: _VpcClientWarp) {
+    super(tc);
+    this.runners = tc.runners;
   }
 
-  get project() {
-    return this.providerRuntime.project;
-  }
   loadAll(): Promise<ResourceInstance<CvmInstanceState>[]> {
     throw new Error("Method not implemented.");
   }
