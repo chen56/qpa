@@ -8,7 +8,7 @@ import {_CvmClientWrap} from "./client.ts";
 export class CvmFactory extends _TencentCloudResourceFactory {
 
   constructor(tc: _TencentCloud,
-              private readonly provider: ProviderRuntime, private cvmClient: _CvmClientWrap) {
+              private readonly providerRuntime: ProviderRuntime, private cvmClient: _CvmClientWrap) {
     super(tc);
   }
 
@@ -17,7 +17,7 @@ export class CvmFactory extends _TencentCloudResourceFactory {
   }
 
   async instance(expected: ResourceConfig<CvmInstanceSpec>): Promise<Resource<CvmInstanceSpec, CvmInstanceState>> {
-    const service = this.getService(TencentCloudResourceType.cvm_instance) as _CvmInstanceService;
-    return await this.provider.apply(expected, service)
+    const service = this.providerRuntime.resourceServices.get(TencentCloudResourceType.cvm_instance) as _CvmInstanceService;
+    return await this.providerRuntime.apply(expected, service)
   }
 }

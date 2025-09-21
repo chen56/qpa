@@ -47,7 +47,7 @@ export class ProviderRuntime  {
    * @internal
    * */
   private _resourceInstances: __ResourceInstances = new __ResourceInstances();
-  resourceServices=new _ResourceServices();
+  resourceServices=new ResourceServices();
   /**
    * @internal
    * */
@@ -217,11 +217,11 @@ class __ResourceInstances extends Array<ResourceInstance<unknown>> {
 }
 
 
-class _ResourceServices extends Map<ResourceType, ResourceService<unknown, unknown>> {
+class ResourceServices extends Map<ResourceType, ResourceService<unknown, unknown>> {
   constructor(...args: [ResourceType, ResourceService<unknown, unknown>][]) {
     super(args);
     // 确保原型链正确
-    Object.setPrototypeOf(this, _ResourceServices.prototype);
+    Object.setPrototypeOf(this, ResourceServices.prototype);
   }
 
   register(service: ResourceService<unknown, unknown>) {
