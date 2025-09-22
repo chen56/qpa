@@ -1,12 +1,12 @@
 import {ResourceConfig, Resource} from "@qpa/core";
 import {_VpcService, VpcSpec, VpcVpcState} from "./vpc.ts";
-import {_TencentCloud, _TencentCloudResourceFactory, TencentCloudResourceType} from "../provider.ts";
+import {_TencentCloud, _BaseResourceFactory, TencentCloudResourceType} from "../provider.ts";
 import {Client as tc_VpcClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_client.js";
 import {_SubnetService, VpcSubnetSpec, VpcSubnetState} from "./subnet.ts";
 import {_VpcClientWarp} from "./client.ts";
 import {Vendor} from "@qpa/core";
 
-export class VpcFactory extends _TencentCloudResourceFactory {
+export class VpcFactory extends _BaseResourceFactory {
   constructor(tc: _TencentCloud, private readonly vendor: Vendor, private readonly vpcClient: _VpcClientWarp) {
     super(tc);
   }

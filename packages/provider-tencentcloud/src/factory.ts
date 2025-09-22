@@ -23,20 +23,21 @@ export class TencentCloud {
 
   constructor(project: Project, config: TencentCloudConfig) {
 
-    const vendor = project.vendors.register(new _TencentCloudProvider(project, config));
+    const provider = new _TencentCloudProvider(project, config);
+    const vendor = project.vendors.register(provider);
     const tc = new _TencentCloud(project);
 
     // vpc
     const vpcClient = new _VpcClientWarp(config);
     this.vpc = new VpcFactory(tc, vendor, vpcClient);
 
-    vendor.resourceServices.register(new _VpcService(tc, vpcClient));
-    vendor.resourceServices.register(new _SubnetService(tc, vpcClient));
+    provider.resourceServices.register(new _VpcService(tc, vpcClient));
+    provider.resourceServices.register(new _SubnetService(tc, vpcClient));
 
     // cvm
     const cvmClient = new _CvmClientWrap(config);
     this.cvm = new CvmFactory(tc, vendor, cvmClient);
-    vendor.resourceServices.register(new _CvmInstanceService(tc, cvmClient, vpcClient));
+    provider.resourceServices.register(new _CvmInstanceService(tc, cvmClient, vpcClient));
 
   }
 }

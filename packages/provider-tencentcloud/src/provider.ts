@@ -26,7 +26,7 @@ export abstract class _BaseClientWarp {
 
 }
 
-export abstract class _TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
+export abstract class _BaseResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor(protected tc: _TencentCloud) {
     super();
   }
@@ -51,8 +51,8 @@ export interface TencentCloudCredential extends tc_Credential {
 /**
  * 支持tag的资源 Taggable
  */
-export abstract class _TaggableResourceService<SPEC, STATE> extends _TencentCloudResourceService<SPEC, STATE> {
-  constructor(tc: _TencentCloud) {
+export abstract class _BaseTaggableResourceService<SPEC, STATE> extends _BaseResourceService<SPEC, STATE> {
+  protected constructor(tc: _TencentCloud) {
     super(tc);
   }
 
@@ -155,17 +155,15 @@ export class TencentCloudResourceType implements ResourceType {
   }
 }
 
-export abstract class _TencentCloudResourceFactory {
+export abstract class _BaseResourceFactory {
   protected constructor(protected tc: _TencentCloud) {
   }
 }
 
 /**
  * @internal 内部类，不应该被客户程序直接使用
- * 无状态服务提供者
  *
- * 这里的方法不应该被客户程序直接执行，应该通过Project.apply()等执行
- *
+ * 作为各类服务、工厂的参数，用来获取公共工具
  *
  */
 export class _TencentCloud {
@@ -176,13 +174,13 @@ export class _TencentCloud {
 
 }
 
-export class _TencentCloudProvider implements Provider {
-  readonly resourceServices = new _ResourceServices();
+export class _TencentCloudProvider extends Provider {
   private readonly tagClient: _TagClient;
 
   constructor(readonly project: Project, props: {
     credential: TencentCloudCredential
   }) {
+    super();
     const tagClient = new tc_TagClient({
       credential: props.credential,
     });
@@ -200,21 +198,21 @@ export class _TencentCloudProvider implements Provider {
   }
 }
 
-class _ResourceServices extends Map<ResourceType, ResourceService<unknown, unknown>> {
-  constructor(...args: [ResourceType, ResourceService<unknown, unknown>][]) {
-    super(args);
-    // 确保原型链正确
-    Object.setPrototypeOf(this, _ResourceServices.prototype);
-  }
-
-  register(service: _TencentCloudResourceService<unknown, unknown>) {
-    const type = service.resourceType;
-    if (this.has(type)) {
-      throw Error(`resource service[${type}] already registered`);
-    }
-    this.set(type, service);
-  }
-}
+// class _ResourceServices extends Map<ResourceType, ResourceService<unknown, unknown>> {
+//   constructor(...args: [ResourceType, ResourceService<unknown, unknown>][]) {
+//     super(args);
+//     // 确保原型链正确
+//     Object.setPrototypeOf(this, _ResourceServices.prototype);
+//   }
+//
+//   register(service: _BaseResourceService<unknown, unknown>) {
+//     const type = service.resourceType;
+//     if (this.has(type)) {
+//       throw Error(`resource service[${type}] already registered`);
+//     }
+//     this.set(type, service);
+//   }
+// }
 
 
 /**

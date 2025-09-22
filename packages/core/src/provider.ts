@@ -17,9 +17,12 @@ import * as common from "./internal/_common.ts";
  *
  * todo 既然已经拆分Vendor,为啥不直接用接口呢？
  */
-export interface Provider {
+export abstract class Provider {
 
-    get resourceServices(): ReadonlyMap<ResourceType, ResourceService<unknown, unknown>>;
+    protected constructor() {
+    }
+
+    readonly resourceServices = new ResourceServices();
 
     /**
      * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
@@ -28,7 +31,7 @@ export interface Provider {
      *
      * @return 获取查询出ResourceScope内的所有的资源状态
      */
-    findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
+    abstract findResourceInstances(): Promise<ResourceInstance<unknown>[]>;
 }
 
 /**
@@ -47,7 +50,7 @@ export class Vendor {
      * @internal
      * */
     private _resourceInstances: __ResourceInstances = new __ResourceInstances();
-    resourceServices = new ResourceServices();
+
     /**
      * @internal
      * */
@@ -55,7 +58,12 @@ export class Vendor {
     private sortedResourceTypesCache!: ResourceType[];
 
     private constructor(private readonly provider: Provider) {
+
     }
+
+    get resourceServices() {
+        return this.provider.resourceServices;
+    };
 
     get resourceInstances(): ReadonlyArray<ResourceInstance<unknown>> {
         return this._resourceInstances;
