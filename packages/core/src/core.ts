@@ -1,13 +1,5 @@
 import {Provider, Vendor, ResourceService} from "./provider.ts";
 
-abstract class BaseProject {
-  public name: string;
-
-  protected constructor(config: ProjectConfig) {
-    this.name = config.name;
-  }
-}
-
 /**
  * 实际资源，包含
  * - state字段: 特定于云厂商的实际资源状态信息，数据结构以云api资源数据结构为基础,可能会增加一些字段,比如region
@@ -140,11 +132,12 @@ export class Vendors extends Array<Vendor> {
   }
 }
 
-export class Project extends BaseProject {
+export class Project {
   vendors: Vendors = Vendors._create();
+  name: string;
 
   private constructor(config: ProjectConfig) {
-    super(config);
+    this.name = config.name;
   }
 
   get resourceInstances(): ResourceInstance<unknown>[] {
