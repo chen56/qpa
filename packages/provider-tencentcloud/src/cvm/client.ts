@@ -1,7 +1,7 @@
 import {Client} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
-import {_BaseClientWarp, _TencentCloudClientConfig} from "../provider.ts";
+import {_ClientWarp, _TencentCloudClientConfig} from "../provider.ts";
 
-export class _CvmClientWrap extends _BaseClientWarp {
+export class _CvmClientWrap extends _ClientWarp {
   private readonly client: Map<string, Client> = new Map();
 
   constructor(config: _TencentCloudClientConfig) {

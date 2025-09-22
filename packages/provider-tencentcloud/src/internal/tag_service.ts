@@ -2,7 +2,7 @@ import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/servi
 import {ResourceTag} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
 import {Project, ResourceInstance, ResourceService, ResourceType} from "@qpa/core";
 import {Arrays, Paging} from "./common.ts";
-import {TencentCloudResourceType, _BaseTaggableResourceService} from "../provider.ts";
+import {TencentCloudResourceType, _TaggableResourceService} from "../provider.ts";
 import {Constants} from "@qpa/core";
 
 const pageLimit = 100;
@@ -62,7 +62,7 @@ export class _TagClient {
         continue;
       }
 
-      if (!(resourceService instanceof _BaseTaggableResourceService)) {
+      if (!(resourceService instanceof _TaggableResourceService)) {
         throw Error(`resourceType:${resourceType} not support tag, may be your current version too old, upgrade and try`)
       }
       const region_resourceTags = new Map<string, string[]>;

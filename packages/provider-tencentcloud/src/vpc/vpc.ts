@@ -3,7 +3,7 @@ import {
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudResourceType, _BaseTaggableResourceService, _TencentCloud} from "../provider.ts";
+import {TencentCloudResourceType, _TaggableResourceService, _TencentCloud} from "../provider.ts";
 import {Constants} from "@qpa/core";
 import {_VpcClientWarp} from "./client.ts";
 
@@ -16,24 +16,24 @@ export interface VpcSpec extends tc_CreateVpcRequest {
   Region: string;
 }
 
-export interface VpcVpcState extends tc_Vpc {
+export interface VpcState extends tc_Vpc {
   Region: string;
   toString(): string;
 }
 
 /**
  */
-export class _VpcService extends _BaseTaggableResourceService<VpcSpec, VpcVpcState> {
+export class _VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   resourceType: TencentCloudResourceType = TencentCloudResourceType.vpc_vpc
 
   constructor(tc: _TencentCloud, private readonly vpcClient: _VpcClientWarp) {
     super(tc);
   }
-  loadAll(): Promise<ResourceInstance<VpcVpcState>[]> {
+  loadAll(): Promise<ResourceInstance<VpcState>[]> {
     throw new Error("Method not implemented.");
   }
 
-  async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<VpcVpcState>[]> {
+  async findOnePageInstanceByResourceId(region: string, resourceIds: string[], limit: number): Promise<ResourceInstance<VpcState>[]> {
     const client = this.vpcClient.getClient(region);
     const response = await client.DescribeVpcs({
       VpcIds: resourceIds,
@@ -42,7 +42,7 @@ export class _VpcService extends _BaseTaggableResourceService<VpcSpec, VpcVpcSta
     return this._tcVpcSet2VpcState(region, response.VpcSet);
   }
 
-  async create(specPart: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcVpcState>> {
+  async create(specPart: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcState>> {
     const client = this.vpcClient.getClient(specPart.spec.Region);
     const vpcResponse = await client.CreateVpc({
       VpcName: specPart.spec.VpcName,
@@ -63,7 +63,7 @@ export class _VpcService extends _BaseTaggableResourceService<VpcSpec, VpcVpcSta
     return this._tcVpcSet2VpcState(specPart.spec.Region, [vpcResponse.Vpc!])![0];
   }
 
-  async delete(...resources: ResourceInstance<VpcVpcState>[]): Promise<void> {
+  async delete(...resources: ResourceInstance<VpcState>[]): Promise<void> {
     for (const r of resources) {
       const state = r.state;
       const client = this.vpcClient.getClient(state.Region);
@@ -73,7 +73,7 @@ export class _VpcService extends _BaseTaggableResourceService<VpcSpec, VpcVpcSta
     }
   }
 
-  async load(declare: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcVpcState>[]> {
+  async load(declare: ResourceConfig<VpcSpec>): Promise<ResourceInstance<VpcState>[]> {
     const client = this.vpcClient.getClient(declare.spec.Region);
     const response = await client.DescribeVpcs({
       // VpcIds: resource.states.map(s => s.VpcId!)!,
@@ -87,12 +87,12 @@ export class _VpcService extends _BaseTaggableResourceService<VpcSpec, VpcVpcSta
     return this._tcVpcSet2VpcState(declare.spec.Region, response.VpcSet).map(e => e);
   }
 
-  _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): ResourceInstance<VpcVpcState>[] {
+  _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): ResourceInstance<VpcState>[] {
     const _this=this;
-    const result = new Array<ResourceInstance<VpcVpcState>>;
+    const result = new Array<ResourceInstance<VpcState>>;
     for (const vpc of tc_vpcSet ?? []) {
       const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;
-      const toState: VpcVpcState = {
+      const toState: VpcState = {
         ...vpc,
         // 如果有自己的字段
         Region: region,

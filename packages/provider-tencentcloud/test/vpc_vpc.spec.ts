@@ -1,7 +1,7 @@
 // noinspection JSUnusedAssignment,PointlessBooleanExpressionJS
 
 import {afterEach, beforeEach, describe, expect, it} from "vitest";
-import {VpcVpcState} from "../src";
+import {VpcState} from "../src";
 import {TextFixture} from "./fixture.ts";
 import {ResourceInstance} from "@qpa/core";
 
@@ -37,7 +37,7 @@ describe('vpc_vpc', () => {
           CidrBlock: '10.0.0.0/16',
           VpcId: vpc.state.VpcId,
         }
-      } as ResourceInstance<VpcVpcState>);
+      } as ResourceInstance<VpcState>);
 
 
     });

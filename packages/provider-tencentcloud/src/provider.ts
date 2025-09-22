@@ -10,7 +10,7 @@ import {TencentCloudConfig} from "./factory.ts";
 export interface _TencentCloudClientConfig extends TencentCloudConfig {
 }
 
-export abstract class _BaseClientWarp {
+export abstract class _ClientWarp {
   protected readonly credential: TencentCloudCredential;
 
   protected constructor(config: _TencentCloudClientConfig) {
@@ -26,7 +26,7 @@ export abstract class _BaseClientWarp {
 
 }
 
-export abstract class _BaseResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
+export abstract class _TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
   protected constructor(protected tc: _TencentCloud) {
     super();
   }
@@ -51,7 +51,7 @@ export interface TencentCloudCredential extends tc_Credential {
 /**
  * 支持tag的资源 Taggable
  */
-export abstract class _BaseTaggableResourceService<SPEC, STATE> extends _BaseResourceService<SPEC, STATE> {
+export abstract class _TaggableResourceService<SPEC, STATE> extends _TencentCloudResourceService<SPEC, STATE> {
   protected constructor(tc: _TencentCloud) {
     super(tc);
   }
@@ -155,7 +155,7 @@ export class TencentCloudResourceType implements ResourceType {
   }
 }
 
-export abstract class _BaseResourceFactory {
+export abstract class _ResourceFactory {
   protected constructor(protected tc: _TencentCloud) {
   }
 }
@@ -171,7 +171,6 @@ export class _TencentCloud {
 
   constructor(readonly project: Project) {
   }
-
 }
 
 export class _TencentCloudProvider extends Provider {
@@ -190,30 +189,9 @@ export class _TencentCloudProvider extends Provider {
   /**
    */
   async findResourceInstances(): Promise<ResourceInstance<unknown>[]> {
-    // const result = new Array<ResourceInstance<unknown>>();
-    // for (const [_,service] of this.resourceServices) {
-    //   result.push(...await service.loadAll());
-    // }
     return this.tagClient.findResourceInstances(this.resourceServices);
   }
 }
-
-// class _ResourceServices extends Map<ResourceType, ResourceService<unknown, unknown>> {
-//   constructor(...args: [ResourceType, ResourceService<unknown, unknown>][]) {
-//     super(args);
-//     // 确保原型链正确
-//     Object.setPrototypeOf(this, _ResourceServices.prototype);
-//   }
-//
-//   register(service: _BaseResourceService<unknown, unknown>) {
-//     const type = service.resourceType;
-//     if (this.has(type)) {
-//       throw Error(`resource service[${type}] already registered`);
-//     }
-//     this.set(type, service);
-//   }
-// }
-
 
 /**
  * 集中配置Retry的工具类

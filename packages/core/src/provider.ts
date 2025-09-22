@@ -157,7 +157,10 @@ export class Vendor {
         console.log('所有指定资源删除完成。');
     }
 
-    async apply<TSpec, TState>(expected: ResourceConfig<TSpec>, service: ResourceService<TSpec, TState>): Promise<Resource_<TSpec, TState>> {
+
+    async apply<TSpec, TState>(resourceType: ResourceType, expected: ResourceConfig<TSpec>): Promise<Resource_<TSpec, TState>> {
+        const service = this.provider.resourceServices.get(resourceType) as ResourceService<TSpec, TState>;
+
         let actual = await service.load(expected);
         // todo 已存在的应该删除？
         if (actual.length == 0) {
@@ -176,7 +179,6 @@ export class Vendor {
         this._resourceInstances.push(...actual);
         return result;
     }
-
 }
 
 
