@@ -121,25 +121,38 @@ export interface ProjectConfig {
 
 export type Apply = (project: Project) => Promise<void>;
 
+export class Vendors extends Array<Vendor> {
+  private constructor() {
+    super();
+  }
+
+  /**
+   * @internal
+   */
+  static _create(): Vendors {
+    return new Vendors();
+  }
+
+  register(provider: Provider): Vendor {
+    const result = Vendor._create(provider);
+    this.push(result);
+    return result;
+  }
+}
+
 export class Project extends BaseProject {
-  private _vendors: Vendor[] = [];
+  vendors: Vendors = Vendors._create();
 
   private constructor(config: ProjectConfig) {
     super(config);
   }
 
-  registerVendor(provider: Provider): Vendor {
-    const result = Vendor._create(provider);
-    this._vendors.push(result);
-    return result;
-  }
-
   get resourceInstances(): ResourceInstance<unknown>[] {
-    return this._vendors.flatMap(p => p.resourceInstances);
+    return this.vendors.flatMap(p => p.resourceInstances);
   }
 
   get resources(): Resource<unknown, unknown>[] {
-    return this._vendors
+    return this.vendors
       .flatMap(p => Array.from(p._resources.values()));
   }
 
@@ -154,13 +167,13 @@ export class Project extends BaseProject {
     await apply(this);
 
     // cleanup
-    for (const vendor of this._vendors) {
+    for (const vendor of this.vendors) {
       await vendor.cleanup();
     }
   }
 
   async refresh(): Promise<void> {
-    for (const vendor of this._vendors) {
+    for (const vendor of this.vendors) {
       await vendor.refresh();
     }
   }
@@ -171,7 +184,7 @@ export class Project extends BaseProject {
    * - 各Provider按资源类型固定的顺序进行删除，比如先删除虚拟机、再删除网络等等。
    */
   async destroy(): Promise<void> {
-    for (const vendor of this._vendors) {
+    for (const vendor of this.vendors) {
       await vendor.destroy();
     }
   }

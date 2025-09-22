@@ -1,6 +1,6 @@
 import {VpcFactory} from "./vpc/factory.ts";
 import {_VpcService} from "./vpc/vpc.ts";
-import {_TencentCloudProvider, _TencentCloud, TencentCloudCredential} from "./provider.ts";
+import {_TencentCloud, _TencentCloudProvider, TencentCloudCredential} from "./provider.ts";
 import {Project} from "@qpa/core";
 import {_SubnetService} from "./vpc/subnet.ts";
 import {_CvmInstanceService} from "./cvm/instance.ts";
@@ -23,7 +23,7 @@ export class TencentCloud {
 
   constructor(project: Project, config: TencentCloudConfig) {
 
-    const vendor = project.registerVendor(new _TencentCloudProvider(project, config));
+    const vendor = project.vendors.register(new _TencentCloudProvider(project, config));
     const tc = new _TencentCloud(project);
 
     // vpc
