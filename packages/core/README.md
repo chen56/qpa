@@ -1,10 +1,8 @@
 # @qpa/core
 
-## 核心概念定义
+## IOC工具核心概念定义
 
-备注：
-
-- 不用declared和Undeclared的原因是`declare`是ts关键字
+本节内容为较完整的IOC工具核心概念定义，QPA目前倾向于轻量级的IaC工具，只支持重建，而不支持比较更新，只选用少量概念。
 
 从资源声明角度看:
 
@@ -29,18 +27,18 @@
 	- **非托管实例(Unmanaged Instances):** 那些在云上存在但从未被当前 IaC 配置声明或管理的资源实例（即“非托管资源”的实际体现）。
     - **正常非托管资源（Normal Unmanaged Instances）** 手工管理、脱离IaC 管理的资源实例。
     - **孤立资源（Orphaned Instances）** 因各种原因由IaC创建，云环境中依然存在，但已经不再受任何 IaC 工具管理和识别的资源实例。
-- **托管实例(Managed Instances):** 由 IaC 工具负责管理生命周期的资源。
-  - **一致资源实例(In-Sync Instances):** 其状态与 IaC 声明的期望状态匹配的实际资源实例。
-  - **漂移资源实例(Drifted Resources):** 其状态与 IaC 声明的期望状态不一致的实际资源实例，可能表现为：
-    - **属性差异(Attribute Differences Instances):** 实际属性值与声明不符。
-    - **重复创建(Duplicate Instances):** 存在多个与同一份声明对应的实际资源实例。
-  - **故障忽略资源** (Failed Ignore Resources)：因云 API 临时故障或依赖未解决，无法执行操作的资源，标记为忽略后暂不处理，故障修复后可恢复管理。
-  - **强制锁定资源** (Locked Resources)：禁止修改 / 删除的资源，需手工解除锁定后才能管理（如 AWS EC2 实例的 Termination Protection）。
-  - **待删除资源(Pending Deletion Instances):** 配置已移除，等待工具删除（工具计划内）。
+  - **托管实例(Managed Instances):** 由 IaC 工具负责管理生命周期的资源。
+    - **一致资源实例(In-Sync Instances):** 其状态与 IaC 声明的期望状态匹配的实际资源实例。
+    - **漂移资源实例(Drifted Resources):** 其状态与 IaC 声明的期望状态不一致的实际资源实例，可能表现为：
+      - **属性差异(Attribute Differences Instances):** 实际属性值与声明不符。
+      - **重复创建(Duplicate Instances):** 存在多个与同一份声明对应的实际资源实例。
+    - **故障忽略资源** (Failed Ignore Resources)：因云 API 临时故障或依赖未解决，无法执行操作的资源，标记为忽略后暂不处理，故障修复后可恢复管理。
+    - **强制锁定资源** (Locked Resources)：禁止修改 / 删除的资源，需手工解除锁定后才能管理（如 AWS EC2 实例的 Termination Protection）。
+    - **待删除资源(Pending Deletion Instances):** 配置已移除，等待工具删除（工具计划内）。
 + 待创建资源(Expected Instances) : 配置中声明但未实例化的资源（无实例）
 
 
-### 其他名词
+### 状态
 
 状态(State)
 
@@ -53,19 +51,14 @@ Actual Resources: 云平台上真实存在的资源（无论是否被 IaC 工具
 
 已存在资源(Existing Resources)的服务状态
 
-- Pending
+#### 详细状态
+
+Active
+
+- 启动中(Starting)
 - 运行中(Running)
 - 停止中(Stopping)
 - 已停止(Stopped)
-
-Execution Plan (执行计划)，详细列出将要
-
-- _create (创建)
-- update-in-place (原地更新)
-- replace (销毁重建)
-- destroy (销毁) 的资源
-
-### 详细状态
 
 Provision
 
@@ -87,6 +80,15 @@ Deletion
 * Doing something
 * Doing something Failed
 * Done something
+
+### 执行计划
+
+Execution Plan (执行计划)，详细列出将要
+
+- create (创建)
+- update-in-place (原地更新)
+- replace (销毁重建)
+- destroy (销毁) 的资源
 
 ### 同义词
 
