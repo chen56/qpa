@@ -16,8 +16,8 @@ describe('vpc_vpc', () => {
     await fixture.reset();
   })
 
-  it('vpc apply', {timeout: 15000}, async () => {
-    await project.apply(async _ => {
+  it('vpc up', {timeout: 15000}, async () => {
+    await project.up(async _ => {
       const vpc = await tc.vpc.vpc({
         name: "vpc1",
         spec: {

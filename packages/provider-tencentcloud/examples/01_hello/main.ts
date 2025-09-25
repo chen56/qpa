@@ -157,7 +157,7 @@ await Cli.run<Vars>({
     varsSchema: VarsSchema,
     varsUI: varsUI,
 
-    apply: async (context) => {
+    up: async (context) => {
         const project = context.project;
         const vars = context.vars;
 

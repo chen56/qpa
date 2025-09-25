@@ -17,6 +17,6 @@ export class CvmFactory extends _ResourceFactory {
   }
 
   async instance(expected: ResourceConfig<CvmInstanceSpec>): Promise<Resource<CvmInstanceSpec, CvmInstanceState>> {
-    return await this.vendor.apply(TencentCloudResourceType.cvm_instance,expected)
+    return await this.vendor.up(TencentCloudResourceType.cvm_instance,expected)
   }
 }

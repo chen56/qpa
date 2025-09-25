@@ -1,6 +1,6 @@
 export type {ProjectConfig} from "./core.ts";
 export {Project} from "./core.ts";
-export type {Apply} from "./core.ts";
+export type {UpFunc} from "./core.ts";
 
 export {Resource_} from "./core.ts";
 export type {Resource} from "./core.ts";

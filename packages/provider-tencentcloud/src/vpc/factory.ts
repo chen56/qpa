@@ -16,10 +16,10 @@ export class VpcFactory extends _ResourceFactory {
   }
 
   async vpc(expected: ResourceConfig<VpcSpec>): Promise<Resource<VpcSpec, VpcState>> {
-    return await this.vendor.apply(TencentCloudResourceType.vpc_vpc, expected)
+    return await this.vendor.up(TencentCloudResourceType.vpc_vpc, expected)
   }
 
   async subnet(expected: ResourceConfig<VpcSubnetSpec>): Promise<Resource<VpcSubnetSpec, VpcSubnetState>> {
-    return await this.vendor.apply(TencentCloudResourceType.vpc_subnet,expected)
+    return await this.vendor.up(TencentCloudResourceType.vpc_subnet,expected)
   }
 }

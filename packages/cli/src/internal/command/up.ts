@@ -8,31 +8,30 @@ import * as inquirer from '@inquirer/prompts';
 
 import path from "node:path";
 import fs from 'fs/promises';
-import {_GlobalOptions, ApplyFunc, Cli} from '../../cli.ts';
+import {_GlobalOptions, UpFunc, Cli} from '../../cli.ts';
 
-// 定义 apply 子命令选项的接口 (继承全局选项)
-interface ApplyOptions extends _GlobalOptions {
+// 定义 子命令选项的接口 (继承全局选项)
+interface UpOptions extends _GlobalOptions {
 }
 
 // 接受父命令 (通常是 program 实例) 作为参数
 export default function registerCommand<Vars>(parentCommand: Command,
                                               cli: Cli,
-                                              apply: ApplyFunc<Vars>,
+                                              upFunc: UpFunc<Vars>,
                                               varsSchema: z.ZodObject<Record<keyof Vars, z.ZodTypeAny>>,
                                               varsUI: Map<z.ZodType, VarUI>): void {
-  // 在父命令上创建 'apply' 子命令
-  parentCommand.command('apply')
-    .description('apply config')
+  parentCommand.command('up')
+    .description('up config')
     // options 参数会自动包含所有选项的值 (包括全局选项如果定义在父命令上)
-    .action(async (options: ApplyOptions) => {
+    .action(async (options: UpOptions) => {
       if (options.verbose) {
         console.log(`Options:${JSON.stringify(options)}`);
       }
 
       let vars: Vars = await _readVars(cli.workdir, varsSchema, varsUI)
 
-      await cli.project.apply(async (project: Project) => {
-        await apply({
+      await cli.project.up(async (project: Project) => {
+        await upFunc({
           project: project,
           vars: vars
         });

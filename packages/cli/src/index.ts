@@ -1,5 +1,5 @@
 import {Cli, CliConfig} from "./cli.ts"
-import * as apply from "./internal/command/apply.ts";
+import * as up from "./internal/command/up.ts";
 import * as destroy from "./internal/command/destroy.ts";
 import * as list from "./internal/command/list.ts";
 
@@ -13,14 +13,14 @@ export type {OptionTable} from "./zod_ext.ts"
 export type {TextInput} from "./zod_ext.ts"
 export {VariableFactory} from "./zod_ext.ts"
 
-export type {ApplyFunc} from "./cli.ts";
+export type {UpFunc} from "./cli.ts";
 export type {CliConfig} from "./cli.ts";
-export type {ApplyContext} from "./cli.ts";
+export type {UpContext} from "./cli.ts";
 
 /*
  * Cli 扩展-Cli.create工厂方法
  *
- * Cli类和Cli.create分避免和ApplyCommand等命令的循环依赖（依赖倒置）
+ * Cli类和Cli.create分避免和子命令的循环依赖（依赖倒置）
  */
 declare module './cli.ts' {
   // 扩展 Cli 类的静态函数
@@ -38,7 +38,7 @@ Cli.run = async function <Vars>(config: CliConfig<Vars>): Promise<void> {
 
   // --- 注册子命令 ---
   // 调用每个子命令的注册函数，并将主 root 实例传递进去
-  apply.default(root, cli, config.apply, config.varsSchema, config.varsUI ?? new Map<z.ZodType, VarUI>());
+  up.default(root, cli, config.up, config.varsSchema, config.varsUI ?? new Map<z.ZodType, VarUI>());
   destroy.default(root, cli);
   list.default(root, cli);
 

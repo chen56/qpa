@@ -167,7 +167,7 @@ await Cli.run<MyVars>({
   project: Project.of({name: "test"}),
   varsSchema: VarsSchema,
   varsUI: varsUI,
-  apply: async (context) => {
+  up: async (context) => {
     const project = context.project;
     const vars = context.vars;
     console.log("load vars:", JSON.stringify(vars))

@@ -99,7 +99,7 @@ export class Vendor {
     /**
      * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
      *
-     * 因为清理方法是apply的最后一步，此方法必须在外部调用完apply后才能使用。
+     * 因为清理方法是up的最后一步，此方法必须在外部调用完up后才能使用。
      *
      * 清理待删除资源(Pending Deletion Instances)
      * 服务提供者Provider应确保此方法内部先获取最新的实际资源实例，再删除所有Pending Deletion Instances
@@ -158,7 +158,10 @@ export class Vendor {
     }
 
 
-    async apply<TSpec, TState>(resourceType: ResourceType, expected: ResourceConfig<TSpec>): Promise<Resource_<TSpec, TState>> {
+    /**
+     * 声明资源(Declared Resources)上线，以便提供服务
+     */
+    async up<TSpec, TState>(resourceType: ResourceType, expected: ResourceConfig<TSpec>): Promise<Resource_<TSpec, TState>> {
         const service = this.provider.resourceServices.get(resourceType) as ResourceService<TSpec, TState>;
 
         let actual = await service.load(expected);
@@ -171,7 +174,7 @@ export class Vendor {
         }
 
         if (actual.length > 1) {
-            throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行destroy后apply重建,冲突实例：${actual.map(e => e.toJson())}`)
+            throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行destroy后up重建,冲突实例：${actual.map(e => e.toJson())}`)
         }
 
         const result = new Resource_(expected, actual);

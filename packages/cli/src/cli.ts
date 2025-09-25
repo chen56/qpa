@@ -17,7 +17,7 @@ export class Cli {
   }
 }
 
-export interface ApplyContext<Vars> {
+export interface UpContext<Vars> {
   project: Project;
   vars: Vars;
 }
@@ -25,12 +25,12 @@ export interface ApplyContext<Vars> {
 export interface CliConfig<Vars> {
   workdir: string;
   project: Project;
-  apply: ApplyFunc<Vars>;
+  up: UpFunc<Vars>;
   varsSchema: z.ZodObject<Record<keyof Vars, z.ZodType>>;
   varsUI?: Map<z.ZodType, VarUI>;
 }
 
-export type ApplyFunc<Vars> = (context: ApplyContext<Vars>) => Promise<void>;
+export type UpFunc<Vars> = (context: UpContext<Vars>) => Promise<void>;
 
 export interface _GlobalOptions {
   verbose?: boolean;

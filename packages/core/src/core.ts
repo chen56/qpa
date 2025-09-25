@@ -111,7 +111,7 @@ export interface ProjectConfig {
   name: string;
 }
 
-export type Apply = (project: Project) => Promise<void>;
+export type UpFunc = (project: Project) => Promise<void>;
 
 export class Vendors extends Array<Vendor> {
   private constructor() {
@@ -154,10 +154,13 @@ export class Project {
     return new Project(config);
   }
 
-  async apply(apply: Apply): Promise<void> {
+  /**
+   * 配置部署上线
+   */
+  async up(up: UpFunc): Promise<void> {
     await this.refresh();
 
-    await apply(this);
+    await up(this);
 
     // cleanup
     for (const vendor of this.vendors) {
