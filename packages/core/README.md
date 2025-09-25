@@ -88,7 +88,7 @@ Execution Plan (执行计划)，详细列出将要
 - create (创建)
 - update-in-place (原地更新)
 - replace (销毁重建)
-- destroy (销毁) 的资源
+- delete (销毁) 的资源
 
 ### 同义词
 

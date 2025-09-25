@@ -19,7 +19,7 @@ export class ResourceInstance<STATE> {
     this.resourceType = resourceService.resourceType;
   }
 
-  async destroy(): Promise<void> {
+  async delete(): Promise<void> {
     await this.resourceService.delete(this);
   }
 
@@ -179,9 +179,9 @@ export class Project {
    * - 按Provider注册到Project的后注册先删除的顺序依次删除所有Provider资源
    * - 各Provider按资源类型固定的顺序进行删除，比如先删除虚拟机、再删除网络等等。
    */
-  async destroy(): Promise<void> {
+  async down(): Promise<void> {
     for (const vendor of this.vendors) {
-      await vendor.destroy();
+      await vendor.down();
     }
   }
 }

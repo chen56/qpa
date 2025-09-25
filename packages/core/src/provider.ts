@@ -120,7 +120,7 @@ export class Vendor {
      *
      * 销毁所有实际存在的资源实例
      * */
-    async destroy(): Promise<void> {
+    async down(): Promise<void> {
         await this.refresh();
         const safeCopy = this._resourceInstances.slice()
         await this.removeResourceInstances(safeCopy);
@@ -140,15 +140,15 @@ export class Vendor {
             .filter(type => uniqueResourceTypesToDelete.has(type));
 
         // 3. 按类型顺序逐批删除资源
-        for (const typeToDestroy of deletionOrderTypes) {
-            const instancesOfType = instances.filter(res => res.resourceType === typeToDestroy);
+        for (const typeToDelete of deletionOrderTypes) {
+            const instancesOfType = instances.filter(res => res.resourceType === typeToDelete);
 
-            console.log(`--- 正在删除 ${typeToDestroy} 类型的资源 ${instancesOfType.length} 个 ---`);
+            console.log(`--- 正在删除 ${typeToDelete} 类型的资源 ${instancesOfType.length} 个 ---`);
             for (const instance of instancesOfType) {
                 console.log(`正在删除实例: ${instance.name} (类型: ${instance.resourceType})`);
 
                 // real delete
-                await instance.destroy();
+                await instance.delete();
                 this._resourceInstances.delete(instance);
 
                 console.log(`实例 ${instance.name} (类型: ${instance.resourceType}) 删除完成。`);
@@ -174,7 +174,7 @@ export class Vendor {
         }
 
         if (actual.length > 1) {
-            throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行destroy后up重建,冲突实例：${actual.map(e => e.toJson())}`)
+            throw new Error(`名为(${expected.name})的资源, 发现重复/冲突资源实例(Duplicate/Conflicting Resources): 可能是重复创建等故障导致同名冲突实例，需要您手工清除或执行down后up重建,冲突实例：${actual.map(e => e.toJson())}`)
         }
 
         const result = new Resource_(expected, actual);

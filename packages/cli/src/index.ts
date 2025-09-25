@@ -1,6 +1,6 @@
 import {Cli, CliConfig} from "./cli.ts"
 import * as up from "./internal/command/up.ts";
-import * as destroy from "./internal/command/destroy.ts";
+import * as down from "./internal/command/down.ts";
 import * as list from "./internal/command/list.ts";
 
 import {Command} from "commander";
@@ -39,7 +39,7 @@ Cli.run = async function <Vars>(config: CliConfig<Vars>): Promise<void> {
   // --- 注册子命令 ---
   // 调用每个子命令的注册函数，并将主 root 实例传递进去
   up.default(root, cli, config.up, config.varsSchema, config.varsUI ?? new Map<z.ZodType, VarUI>());
-  destroy.default(root, cli);
+  down.default(root, cli);
   list.default(root, cli);
 
   await root.parseAsync(process.argv);
