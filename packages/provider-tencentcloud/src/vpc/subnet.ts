@@ -56,7 +56,7 @@ export class _SubnetService extends _TaggableResourceService<VpcSubnetSpec, VpcS
     return this._toResourceInstanceFunc(specPart.spec.Region)(response.Subnet!);
   }
 
-  async delete(...resources: ResourceInstance<VpcSubnetState>[]): Promise<void> {
+  async delete(resources: ResourceInstance<VpcSubnetState>[]): Promise<void> {
     for (const r of resources) {
       const state = r.state;
       const client = this.vpcClient.getClient(state.Region);

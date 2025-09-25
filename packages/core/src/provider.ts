@@ -190,7 +190,7 @@ export abstract class ResourceService<SPEC, STATE> {
 
     abstract create(config: ResourceConfig<SPEC>): Promise<ResourceInstance<STATE>>;
 
-    abstract delete(...instances: ResourceInstance<STATE>[]): Promise<void>;
+    abstract delete(instances: ResourceInstance<STATE>[]): Promise<void>;
 
     /**
      * @return 可能返回多个实际的同名云资源，因为一个资源可能被非正常的多次创建，重复问题留给上层程序判断解决

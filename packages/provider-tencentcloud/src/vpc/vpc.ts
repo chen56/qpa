@@ -63,7 +63,7 @@ export class _VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
     return this._tcVpcSet2VpcState(specPart.spec.Region, [vpcResponse.Vpc!])![0];
   }
 
-  async delete(...resources: ResourceInstance<VpcState>[]): Promise<void> {
+  async delete(resources: ResourceInstance<VpcState>[]): Promise<void> {
     for (const r of resources) {
       const state = r.state;
       const client = this.vpcClient.getClient(state.Region);

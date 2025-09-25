@@ -123,7 +123,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
     return this._toResourceInstanceFunc(config.spec.Region)(describeResponse.InstanceSet![0]);
   }
 
-  async delete(...resources: ResourceInstance<CvmInstanceState>[]): Promise<void> {
+  async delete(resources: ResourceInstance<CvmInstanceState>[]): Promise<void> {
     // 单台删除，别怕慢，就怕乱
     for (const r of resources) {
       const state = r.state;

@@ -20,7 +20,7 @@ export class ResourceInstance<STATE> {
   }
 
   async delete(): Promise<void> {
-    await this.resourceService.delete(this);
+    await this.resourceService.delete([this]);
   }
 
   toJson() {
