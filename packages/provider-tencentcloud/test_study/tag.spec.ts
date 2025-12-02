@@ -15,7 +15,10 @@ describe('tags', {timeout: 15000}, async () => {
             ResourcePrefix: "subnet",
             ResourceIds: ["subnet-30ml1e7s"],
             ResourceRegion: "ap-guangzhou",
-            TagKeys: [Constants.tagNames.project, Constants.tagNames.resource],
+            TagKeys: [
+              Constants.tagNames.project,
+              Constants.tagNames.resource
+            ],
           }
         )
       )
@@ -50,15 +53,15 @@ describe('tags', {timeout: 15000}, async () => {
         {TagKey: Constants.tagNames.project, TagValue: ["test"]},
         {TagKey: Constants.tagNames.resource, TagValue: ["test-subnet1"]},
       ],
-      ResourceId: "subnet-on5f8p2w",
+      // ResourceId: "subnet-on5f8p2w",
     })))
 
     console.log("DescribeResourcesByTags", toJson(await tagClient.getClient().DescribeResourcesByTags({
             // ResourceRegion: "ap-guangzhou",
             // ServiceType: "vpc",
             // ResourcePrefix: "subnet",
-            // TagFilters: [{TagKey: Constants.tagNames.project, TagValue: ["test"]}],
-            TagFilters: [
+          ResourceId: "subnet-on5f8p2w",
+          TagFilters: [
               {TagKey: Constants.tagNames.project, TagValue: ["test"]},
               {TagKey: Constants.tagNames.resource, TagValue: ["test-subnet1"]},
             ],

@@ -3,7 +3,7 @@ import {
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
-import {TencentCloudResourceType, _TaggableResourceService, _TencentCloud} from "../provider.ts";
+import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudContext} from "../provider.ts";
 import {Constants} from "@qpa/core";
 import {_VpcClientWarp} from "./client.ts";
 
@@ -18,6 +18,7 @@ export interface VpcSpec extends tc_CreateVpcRequest {
 
 export interface VpcState extends tc_Vpc {
   Region: string;
+
   toString(): string;
 }
 
@@ -26,9 +27,10 @@ export interface VpcState extends tc_Vpc {
 export class _VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   resourceType: TencentCloudResourceType = TencentCloudResourceType.vpc_vpc
 
-  constructor(tc: _TencentCloud, private readonly vpcClient: _VpcClientWarp) {
+  constructor(tc: _TencentCloudContext, private readonly vpcClient: _VpcClientWarp) {
     super(tc);
   }
+
   loadAll(): Promise<ResourceInstance<VpcState>[]> {
     throw new Error("Method not implemented.");
   }
@@ -88,7 +90,7 @@ export class _VpcService extends _TaggableResourceService<VpcSpec, VpcState> {
   }
 
   _tcVpcSet2VpcState(region: string, tc_vpcSet?: tc_Vpc[]): ResourceInstance<VpcState>[] {
-    const _this=this;
+    const _this = this;
     const result = new Array<ResourceInstance<VpcState>>;
     for (const vpc of tc_vpcSet ?? []) {
       const resourceName = (vpc.TagSet ?? []).find(tag => tag.Key === Constants.tagNames.resource)?.Value;

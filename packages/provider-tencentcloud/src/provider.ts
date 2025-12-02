@@ -1,11 +1,12 @@
 import {Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {Project, ResourceInstance, ResourceType} from "@qpa/core";
-import {_TagClient} from "./internal/tag_service.ts";
-import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
+import {_TagClientWarp} from "./internal/tag_service.ts";
 import {Provider, ResourceService} from "@qpa/core";
-import {retry, handleAll, ConstantBackoff, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
+import {retry, handleAll, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
 import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {TencentCloudConfig} from "./factory.ts";
+import {IBackoffFactory} from "cockatiel/dist/backoff/Backoff";
+import {IRetryBackoffContext} from "cockatiel/dist/RetryPolicy";
 
 export interface _TencentCloudClientConfig extends TencentCloudConfig {
 }
@@ -27,7 +28,7 @@ export abstract class _ClientWarp {
 }
 
 export abstract class _TencentCloudResourceService<SPEC, STATE> extends ResourceService<SPEC, STATE> {
-  protected constructor(protected tc: _TencentCloud) {
+  protected constructor(protected tc: _TencentCloudContext) {
     super();
   }
 
@@ -52,7 +53,7 @@ export interface TencentCloudCredential extends tc_Credential {
  * 支持tag的资源 Taggable
  */
 export abstract class _TaggableResourceService<SPEC, STATE> extends _TencentCloudResourceService<SPEC, STATE> {
-  protected constructor(tc: _TencentCloud) {
+  protected constructor(tc: _TencentCloudContext) {
     super(tc);
   }
 
@@ -156,7 +157,7 @@ export class TencentCloudResourceType implements ResourceType {
 }
 
 export abstract class _ResourceFactory {
-  protected constructor(protected tc: _TencentCloud) {
+  protected constructor(protected tc: _TencentCloudContext) {
   }
 }
 
@@ -166,24 +167,16 @@ export abstract class _ResourceFactory {
  * 作为各类服务、工厂的参数，用来获取公共工具
  *
  */
-export class _TencentCloud {
-  readonly runners: _Runners = new _Runners();
-
-  constructor(readonly project: Project) {
+export class _TencentCloudContext {
+  constructor(readonly project: Project,readonly runners: _Runners) {
   }
 }
 
 export class _TencentCloudProvider extends Provider {
-  private readonly tagClient: _TagClient;
 
-  constructor(readonly project: Project, props: {
-    credential: TencentCloudCredential
-  }) {
+  constructor(readonly project: Project,
+              private readonly tagClient: _TagClientWarp) {
     super();
-    const tagClient = new tc_TagClient({
-      credential: props.credential,
-    });
-    this.tagClient = new _TagClient(project, tagClient);
   }
 
   /**
@@ -193,21 +186,50 @@ export class _TencentCloudProvider extends Provider {
   }
 }
 
+type _WaitingOpts = {
+  policy?: Policy;
+  maxAttempts?: number;
+  backoff?: IBackoffFactory<IRetryBackoffContext<unknown>>;
+  timeout?: {
+    duration: number;
+    strategyOrOpts: TimeoutStrategy | {
+      strategy: TimeoutStrategy;
+      abortOnReturn: boolean;
+    };
+  };
+};
+
 /**
  * 集中配置Retry的工具类
  */
 export class _Runners {
 
+
+  retryForCreate(opts?: _WaitingOpts) {
+    return _Runners._withDefaultOpts(opts);
+  }
+
   /**
    * 等待资源删除完成的策略
    */
-  removeResourceWaiting(policy?: Policy) {
+  retryForDelete(opts?: _WaitingOpts) {
+    return _Runners._withDefaultOpts(opts);
+  }
+
+  private static _withDefaultOpts(opts?: _WaitingOpts) {
+    opts = opts ?? {};
     return wrap(
       retry(
-        policy ?? handleAll, // handle all errors
-        {maxAttempts: 50, backoff: new ConstantBackoff(100)}, // retry three times, with no backoff
+        opts.policy ?? handleAll, // handle all errors
+        {
+          maxAttempts: opts.maxAttempts,
+          backoff: opts.backoff
+        }, // retry three times, with no backoff
       ),
-      timeout(15000, TimeoutStrategy.Aggressive),
+      timeout(
+        opts.timeout?.duration ?? 15000,
+        opts.timeout?.strategyOrOpts ?? TimeoutStrategy.Aggressive),
     );
   }
+
 }

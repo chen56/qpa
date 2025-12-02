@@ -1,9 +1,10 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
 import {ResourceConfig, ResourceInstance} from "@qpa/core";
-import {_Runners, _TaggableResourceService, _TencentCloud, TencentCloudResourceType} from "../provider.ts";
+import {_Runners, _TaggableResourceService, _TencentCloudContext, TencentCloudResourceType} from "../provider.ts";
 import {Constants} from "@qpa/core";
 import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
+import {_TagClientWarp} from "../internal/tag_service.ts";
 
 
 const _INSTANCE_CHARGE_TYPES = ["SPOTPAID", "POSTPAID_BY_HOUR"] as const;
@@ -29,7 +30,7 @@ const _INSTANCE_CHARGE_TYPES = ["SPOTPAID", "POSTPAID_BY_HOUR"] as const;
  *   - DedicatedClusterId  目前不支持专有集群(因为难以测试)
  *   - ChcIds  目前不支持超算集群(因为难以测试)
  **/
-export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChargePrepaid' | 'InstanceCount' | 'LaunchTemplate' | 'DisasterRecoverGroupIds' | 'HpcClusterId' | 'DedicatedClusterId' | 'ChcIds'> {
+export interface CvmInstanceSpec extends Omit<RunInstancesRequest, 'InstanceChargePrepaid' | 'InstanceCount' | 'LaunchTemplate' | 'DisasterRecoverGroupIds' | 'HpcClusterId' | 'DedicatedClusterId' | 'ChcIds' | 'DryRun'> {
   // todo temp waiting to remove
   Region: string;
 
@@ -54,9 +55,10 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
   private readonly runners: _Runners;
 
   constructor(
-    tc: _TencentCloud,
+    tc: _TencentCloudContext,
     private readonly cvmClient: _CvmClientWrap,
-    private readonly vpcClient: _VpcClientWarp) {
+    private readonly vpcClient: _VpcClientWarp,
+    private readonly tagClient: _TagClientWarp) {
     super(tc);
     this.runners = tc.runners;
   }
@@ -100,8 +102,8 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
       // InstanceCount 应该始终为 1，因为 QPA 框架简化为只创建单个实例
       InstanceCount: 1, // 确保明确设置为1
     });
-    if (!response.InstanceIdSet || response.InstanceIdSet.length == 0) {
-      throw new Error("创建 cvm instance 失败，RunInstances 未返回 InstanceIdSet");
+    if (!response.InstanceIdSet || response.InstanceIdSet.length < 1) {
+      throw new Error("创建 cvm instance 失败，RunInstances 未返回 InstanceIdSet, 请删除后重新操作");
     }
     if (response.InstanceIdSet.length != 1) {
       throw new Error(`内部bug: 我们禁止了InstanceCount的设置，理论上一次只能创建单台cvm instance,而现在是多台:${JSON.stringify(response.InstanceIdSet)} `);
@@ -109,18 +111,47 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
     const resourceId = response.InstanceIdSet[0];
     console.log(`cvm instance 创建成功，ID: ${resourceId}`);
 
-    // 5. 调用 DescribeInstances 获取完整实例状态（Terraform 模式）
-    const describeResponse = await client.DescribeInstances({
-      InstanceIds: [resourceId],
-    })
+    const runner = this.runners.retryForCreate();
+    const createdInstance = await runner.execute(async (context) => {
+      // 5. 调用 DescribeInstances 获取完整实例状态（Terraform 模式）
+      const describeInstancesResponse = await client.DescribeInstances({
+        InstanceIds: [resourceId],
+      })
 
-    if ((describeResponse.InstanceSet ?? []).length == 0) {
-      throw new Error("创建 cvm instance 失败，DescribeInstances 未返回 InstanceSet");
-    }
+      const instanceSet = describeInstancesResponse!.InstanceSet ?? [];
+
+      if (instanceSet.length < 1) {
+        throw new Error(`实例(name:${config.name}, InstanceId:${resourceId})还未创建完成，继续等待`);
+      }
+
+      const instance = instanceSet[0];
+
+      if (instance.InstanceState == "LAUNCH_FAILED") {
+        throw new Error(`实例(name:${config.name}, InstanceId:${resourceId})启动失败，请重清理后再重新创建, 失败原因:${instance.LatestOperationErrorMsg ?? "未知"}`);
+      }
+
+      if (instance.InstanceState != "RUNNING") {
+        return instance;
+      }
+
+      throw new Error(`实例(name:${config.name}, InstanceId:${resourceId}, InstanceState:${instance.InstanceState})还未启动完成，继续等待`);
+    });
+
+
+    await this.tagClient.waitingTagsAttached({
+      region: Region,
+      serviceType: TencentCloudResourceType.cvm_instance.serviceType,
+      resourcePrefix: TencentCloudResourceType.cvm_instance.resourcePrefix,
+      resourceId: resourceId,
+      tagFilters: [
+        {TagKey: Constants.tagNames.project, TagValue: [this.project.name]},
+        {TagKey: Constants.tagNames.resource, TagValue: [config.name]},
+      ]
+    });
 
     // todo 当前未实现对tags的 waiting
     // Wait for the tags attached to the vm since tags attachment it's async while vm creation.
-    return this._toResourceInstanceFunc(config.spec.Region)(describeResponse.InstanceSet![0]);
+    return this._toResourceInstanceFunc(config.spec.Region)(createdInstance);
   }
 
   async delete(resources: ResourceInstance<CvmInstanceState>[]): Promise<void> {
@@ -132,9 +163,9 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
       await cvmClient.TerminateInstances({InstanceIds: [state.InstanceId!]})
 
       // 创建重试策略
-      const waitingDeleteComplete = this.runners.removeResourceWaiting();
+      const runner = this.runners.retryForDelete();
 
-      await waitingDeleteComplete.execute(async (context) => {
+      await runner.execute(async (context) => {
         console.log(`cvm - waiting cvm instance delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
 
         const describeInstancesResponse = await cvmClient.DescribeInstances({
@@ -151,7 +182,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
           throw new Error(`实例${r.state.InstanceId}还未删除干净，继续等待`);
         }
       });
-      await waitingDeleteComplete.execute(async (context) => {
+      await runner.execute(async (context) => {
         console.log(`vpc - waiting delete cvm complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
         const vpcClient = this.vpcClient.getClient(state.Region);
 
