@@ -1,0 +1,5 @@
+---
+"@qpa/core": major
+---
+
+yes
