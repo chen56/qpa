@@ -6,7 +6,7 @@
  * @return 获取查询出ResourceScope内的所有的资源状态
  */
 import {Resource_, ResourceConfig, ResourceInstance, ResourceType} from "./core.ts";
-import * as common from "./internal/_common.ts";
+import * as _common from "./internal/_common.ts";
 
 
 /**
@@ -83,7 +83,7 @@ export class Vendor {
             for (const [type, _] of this.resourceServices) {
                 resourceTypeDependencies.set(type, type.dependencies);
             }
-            this.sortedResourceTypesCache = common.topologicalSortDFS(resourceTypeDependencies);
+            this.sortedResourceTypesCache = _common.topo_sort(resourceTypeDependencies);
         }
 
         return this.sortedResourceTypesCache;

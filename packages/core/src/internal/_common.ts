@@ -1,7 +1,7 @@
 /**
  * 依赖集合排序：不允许循环依赖
  */
-export function topologicalSortDFS<T>(dependenciesTree: Map<T, T[]>): T[] {
+export function topo_sort<T>(dependenciesTree: Map<T, T[]>): T[] {
   const adjList = new Map<T, Set<T>>();
   const allNodes = new Set<T>();
 

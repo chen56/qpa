@@ -1,6 +1,6 @@
 import {expect, test, describe} from 'vitest'
 
-import {topologicalSortDFS} from '../../src/internal/_common.ts'; // 导入你的函数和枚举
+import {topo_sort} from '../../src/internal/_common.ts'; // 导入你的函数和枚举
 
 
 describe('topologicalSortDFS (with string node types)', () => {
@@ -16,7 +16,7 @@ describe('topologicalSortDFS (with string node types)', () => {
         ['LoadBalancer', ['VM']],
         ['VM', ['Database']],
       ]);
-      const sorted = topologicalSortDFS(dependencies);
+      const sorted = topo_sort(dependencies);
       expect(sorted).toStrictEqual(['LoadBalancer', 'VM', 'Database']);
     });
 
@@ -41,7 +41,7 @@ describe('topologicalSortDFS (with string node types)', () => {
         ['API_Service', ['Caching_Layer']],
         ['Database_Service', ['Caching_Layer']],
       ]);
-      const sorted = topologicalSortDFS(dependencies);
+      const sorted = topo_sort(dependencies);
       // 预期顺序可以是 ["WebApp", "Database_Service", "API_Service", "Caching_Layer"]
       // 或           ["WebApp", "API_Service", "Database_Service", "Caching_Layer"]
       expect(sorted).toStrictEqual(["WebApp", "Database_Service", "API_Service", "Caching_Layer"]);
@@ -54,7 +54,7 @@ describe('topologicalSortDFS (with string node types)', () => {
     // --- 边界情况 ---
     test('should return an empty array for an empty dependency map', () => {
       const dependencies = new Map<string, string[]>();
-      const sorted = topologicalSortDFS(dependencies);
+      const sorted = topo_sort(dependencies);
       expect(sorted).toEqual([]);
     });
 
@@ -62,7 +62,7 @@ describe('topologicalSortDFS (with string node types)', () => {
       const dependencies = new Map<string, string[]>([
         ['Standalone_Function', []],
       ]);
-      const sorted = topologicalSortDFS(dependencies);
+      const sorted = topo_sort(dependencies);
       expect(sorted).toEqual(['Standalone_Function']);
     });
 
@@ -73,7 +73,7 @@ describe('topologicalSortDFS (with string node types)', () => {
         ['Backend_Service', ['Frontend_Service']],
         ['DataLake_Storage', ['Analytics_Dashboard']],
       ]);
-      const sorted = topologicalSortDFS(dependencies);
+      const sorted = topo_sort(dependencies);
       expect(sorted).toStrictEqual(["DataLake_Storage", "Analytics_Dashboard", "Backend_Service", "Frontend_Service",]);
     });
 
@@ -82,7 +82,7 @@ describe('topologicalSortDFS (with string node types)', () => {
         ['Application_Server', ['Database_Instance']],
         ['CDN_Distribution', []], // CDN没有依赖
       ]);
-      const sorted = topologicalSortDFS(dependencies);
+      const sorted = topo_sort(dependencies);
       expect(sorted).toStrictEqual(["CDN_Distribution", "Application_Server", "Database_Instance",]);
     });
 
@@ -97,7 +97,7 @@ describe('topologicalSortDFS (with string node types)', () => {
         ['ServiceA', ['ServiceB']],
         ['ServiceB', ['ServiceA']],
       ]);
-      expect(() => topologicalSortDFS(dependencies)).toThrow('Cyclic dependency detected involving: ServiceB -> ServiceA');
+      expect(() => topo_sort(dependencies)).toThrow('Cyclic dependency detected involving: ServiceB -> ServiceA');
     });
 
     test('should throw an error for a longer cyclic dependency chain', () => {
@@ -107,7 +107,7 @@ describe('topologicalSortDFS (with string node types)', () => {
         ['ComponentY', ['ComponentZ']],
         ['ComponentZ', ['ComponentX']],
       ]);
-      expect(() => topologicalSortDFS(dependencies)).toThrow(/Cyclic dependency detected/);
+      expect(() => topo_sort(dependencies)).toThrow(/Cyclic dependency detected/);
     });
 
     test('should throw an error for a self-loop (resource depending on itself)', () => {
@@ -115,7 +115,7 @@ describe('topologicalSortDFS (with string node types)', () => {
       const dependencies = new Map<string, string[]>([
         ['Self_Loop_Service', ['Self_Loop_Service']],
       ]);
-      expect(() => topologicalSortDFS(dependencies)).toThrow(/Cyclic dependency detected/);
+      expect(() => topo_sort(dependencies)).toThrow(/Cyclic dependency detected/);
     });
 
   });
