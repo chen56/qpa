@@ -1,14 +1,14 @@
 {
-  "name": "qpa",
+  "name": "planc",
   "version": "0.1.5",
-  "description": "qpa",
+  "description": "planc",
   "keywords": [
-    "qpa"
+    "planc"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chen56/qpa.git"
+    "url": "git+https://github.com/chen56/planc.git"
   },
   "homepage": "https://github.com/chen56",
   "bugs": {

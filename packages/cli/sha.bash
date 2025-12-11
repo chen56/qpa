@@ -28,11 +28,11 @@ example() {  _run pnpm exec jiti examples/cli/main.ts "$@" || printf "%b\n" "---
 # app 入口
 ##########################################
 # 守卫语句，本脚本如果作为lib导入使用则不再执行后续命令入口代码
-# - 当本脚本作为命令被执行时'$ ./sha', $0为'./sha,
-# - 当本脚本当作类库导入时即: '. ./sha'，$0值为bash/zsh等
+# - 当本脚本作为命令被执行时'$ ./sha.bash', $0为'./sha.bash,
+# - 当本脚本当作类库导入时即: '. ./sha.bash'，$0值为bash/zsh等
 if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
   return 0
 fi
 
-# 命令式执行的入口代码, 即'$ ./sha' 而不是'. ./sha'
+# 命令式执行的入口代码, 即'$ ./sha.bash' 而不是'. ./sha.bash'
 sha "$@"

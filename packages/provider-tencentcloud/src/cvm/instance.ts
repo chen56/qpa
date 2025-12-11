@@ -1,7 +1,7 @@
 import {RunInstancesRequest, Instance} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_models.js";
-import {ResourceConfig, ResourceInstance} from "@qpa/core";
+import {ResourceConfig, ResourceInstance} from "@planc/core";
 import {_Runners, _TaggableResourceService, _TencentCloudContext, TencentCloudResourceType} from "../provider.ts";
-import {Constants} from "@qpa/core";
+import {Constants} from "@planc/core";
 import {_CvmClientWrap} from "./client.ts";
 import {_VpcClientWarp} from "../vpc/client.ts";
 import {_TagClientWarp} from "../internal/tag_service.ts";
@@ -99,7 +99,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
           ]
         },
       ],
-      // InstanceCount 应该始终为 1，因为 QPA 框架简化为只创建单个实例
+      // InstanceCount 应该始终为 1，因为 PlanC 框架简化为只创建单个实例
       InstanceCount: 1, // 确保明确设置为1
     });
     if (!response.InstanceIdSet || response.InstanceIdSet.length < 1) {
@@ -159,14 +159,14 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
     for (const r of resources) {
       const state = r.state;
       const cvmClient = this.cvmClient.getClient(state.Region);
-      console.log(`cvm instance 删除准备，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
+      console.log(`cvm instance 删除准备，plancName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
       await cvmClient.TerminateInstances({InstanceIds: [state.InstanceId!]})
 
       // 创建重试策略
       const runner = this.runners.retryForDelete();
 
       await runner.execute(async (context) => {
-        console.log(`cvm - waiting cvm instance delete complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
+        console.log(`cvm - waiting cvm instance delete complete，plancName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
 
         const describeInstancesResponse = await cvmClient.DescribeInstances({
           // 按标签过滤
@@ -183,7 +183,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
         }
       });
       await runner.execute(async (context) => {
-        console.log(`vpc - waiting delete cvm complete，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
+        console.log(`vpc - waiting delete cvm complete，plancName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`, context);
         const vpcClient = this.vpcClient.getClient(state.Region);
 
         const response = await vpcClient.DescribeUsedIpAddress({
@@ -201,7 +201,7 @@ export class _CvmInstanceService extends _TaggableResourceService<CvmInstanceSpe
       });
 
 
-      console.log(`cvm instance 删除成功，qpaName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
+      console.log(`cvm instance 删除成功，plancName:${r.name} InstanceId: ${state.InstanceId} InstanceName:${state.InstanceName}`);
     }
   }
 

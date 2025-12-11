@@ -1,4 +1,4 @@
-# @qpa/provider-tencentcloud
+# @planc/provider-tencentcloud
 
 ## 0.1.5
 
@@ -6,7 +6,7 @@
 
 - publish test v0.1.5
 - Updated dependencies
-  - @qpa/core@0.1.5
+  - @planc/core@0.1.5
 
 ## 0.1.4
 
@@ -14,7 +14,7 @@
 
 - publish test
 - Updated dependencies
-  - @qpa/core@0.1.4
+  - @planc/core@0.1.4
 
 ## 0.1.3
 
@@ -22,4 +22,4 @@
 
 - first publish all packages
 - Updated dependencies
-  - @qpa/core@0.1.3
+  - @planc/core@0.1.3

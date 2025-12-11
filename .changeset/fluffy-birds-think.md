@@ -1,5 +1,5 @@
 ---
-"@qpa/core": major
+"@planc/core": major
 ---
 
 yes

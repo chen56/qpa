@@ -1,8 +1,8 @@
-# @qpa/core
+# @planc/core
 
 ## IOC工具核心概念定义
 
-本节内容为较完整的IOC工具核心概念定义，QPA目前倾向于轻量级的IaC工具，只支持重建，而不支持比较更新，只选用少量概念。
+本节内容为较完整的IOC工具核心概念定义，PlanC目前倾向于轻量级的IaC工具，只支持重建，而不支持比较更新，只选用少量概念。
 
 从资源声明角度看:
 
@@ -47,7 +47,7 @@
 
 Actual Resources: 云平台上真实存在的资源（无论是否被 IaC 工具管理）。 Actual/Created Resources
 
-资源管理范围/边界(Managed Resource Scope):  QPA项目不存本地状态，只用云上的Tag等技术来圈定管理范围。
+资源管理范围/边界(Managed Resource Scope):  PlanC项目不存本地状态，只用云上的Tag等技术来圈定管理范围。
 
 已存在资源(Existing Resources)的服务状态
 
@@ -101,6 +101,6 @@ Execution Plan (执行计划)，详细列出将要
 - Pending Deletion Resources
 	- Orphaned/Ghost Resources（孤立/幽灵资源），有异议，有人解释为无法删除的资源，即iac工具已无法跟踪的资源
 
-## QPA 过程式配置的概念裁剪
+## PlanC 过程式配置的概念裁剪
 
 

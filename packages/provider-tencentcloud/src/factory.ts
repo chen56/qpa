@@ -1,7 +1,7 @@
 import {VpcFactory} from "./vpc/factory.ts";
 import {_VpcService} from "./vpc/vpc.ts";
 import {_TencentCloudContext, _TencentCloudProvider, _Runners, TencentCloudCredential} from "./provider.ts";
-import {Project} from "@qpa/core";
+import {Project} from "@planc/core";
 import {_SubnetService} from "./vpc/subnet.ts";
 import {_CvmInstanceService} from "./cvm/instance.ts";
 import {CvmFactory} from "./cvm/factory.ts";

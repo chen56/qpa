@@ -3,7 +3,7 @@
 import {afterEach, beforeEach, describe, expect, it} from "vitest";
 import {VpcSubnetState} from "../src";
 import {TextFixture} from "./fixture.ts";
-import {ResourceInstance} from "@qpa/core";
+import {ResourceInstance} from "@planc/core";
 
 describe('vpc_vpc', () => {
   const fixture = TextFixture.of();

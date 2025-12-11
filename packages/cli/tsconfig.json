@@ -16,7 +16,7 @@
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
     // paths基于baseUrl
     "paths": {
-      "@qpa/core": ["../core/src"]
+      "@planc/core": ["../core/src"]
     }
   },
   "include": [

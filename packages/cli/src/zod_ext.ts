@@ -5,7 +5,7 @@ export interface VarUI {
 }
 
 export interface OptionTable<Model, Option, Output> extends VarUI {
-  type: 'qpa.OptionTable';
+  type: 'planc.OptionTable';
   query: (model: Partial<Model>) => Promise<Option[]>; // fetchData 接收整个表单的当前值
   getValue: (row: Option) => Output;
   columns?: ({
@@ -15,21 +15,21 @@ export interface OptionTable<Model, Option, Output> extends VarUI {
 }
 
 export interface TextInput extends VarUI {
-  type: 'qpa.TextInput';
+  type: 'planc.TextInput';
 }
 
 
 export const VariableFactory = {
   createOptionTable<Model, Option, Output>(props: Omit<OptionTable<Model, Option, Output>, "type">): OptionTable<Model, Option, Output> {
     return {
-      type: "qpa.OptionTable",
+      type: "planc.OptionTable",
       ...props,
     };
   },
   createTextInput(props?: Omit<TextInput, "type">): TextInput {
     props = props ?? {};
     return {
-      type: "qpa.TextInput",
+      type: "planc.TextInput",
       ...props,
     };
   }

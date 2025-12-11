@@ -1,8 +1,8 @@
 import {Client as CvmClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/cvm/v20170312/cvm_client.js";
 import {_TencentCloudContext, _ResourceFactory, TencentCloudResourceType} from "../provider.ts";
-import {ResourceConfig, Resource} from "@qpa/core";
+import {ResourceConfig, Resource} from "@planc/core";
 import {CvmInstanceSpec, CvmInstanceState} from "./instance.ts";
-import {Vendor} from "@qpa/core";
+import {Vendor} from "@planc/core";
 import {_CvmClientWrap} from "./client.ts";
 
 export class CvmFactory extends _ResourceFactory {

@@ -2,20 +2,20 @@
   "lockfileVersion": 1,
   "workspaces": {
     "": {
-      "name": "qpa",
+      "name": "planc",
       "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.32.1",
         "@typescript-eslint/parser": "^8.32.1",
       },
     },
     "packages/cli": {
-      "name": "@qpa/cli",
+      "name": "@planc/cli",
       "version": "0.1.2",
       "bin": {
-        "qpa": "src/command/index.ts",
+        "planc": "src/command/index.ts",
       },
       "dependencies": {
-        "@qpa/core": "^0.1.0",
+        "@planc/core": "^0.1.0",
         "commander": "^13.1.0",
       },
       "devDependencies": {
@@ -25,7 +25,7 @@
       },
     },
     "packages/core": {
-      "name": "@qpa/core",
+      "name": "@planc/core",
       "version": "0.1.2",
       "bin": {
         "bun": "./src/index.ts",
@@ -48,10 +48,10 @@
       },
     },
     "packages/provider-tencentcloud": {
-      "name": "@qpa/provider-tencentcloud",
+      "name": "@planc/provider-tencentcloud",
       "version": "0.1.2",
       "dependencies": {
-        "@qpa/core": "^0.1.0",
+        "@planc/core": "^0.1.0",
         "dotenv": "^16.5.0",
         "tencentcloud-sdk-nodejs": "^4.0.973",
       },
@@ -153,11 +153,11 @@
 
     "@nodelib/fs.walk": ["@nodelib/fs.walk@1.2.8", "", { "dependencies": { "@nodelib/fs.scandir": "2.1.5", "fastq": "^1.6.0" } }, "sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg=="],
 
-    "@qpa/cli": ["@qpa/cli@workspace:packages/cli"],
+    "@planc/cli": ["@planc/cli@workspace:packages/cli"],
 
-    "@qpa/core": ["@qpa/core@workspace:packages/core"],
+    "@planc/core": ["@planc/core@workspace:packages/core"],
 
-    "@qpa/provider-tencentcloud": ["@qpa/provider-tencentcloud@workspace:packages/provider-tencentcloud"],
+    "@planc/provider-tencentcloud": ["@planc/provider-tencentcloud@workspace:packages/provider-tencentcloud"],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.40.2", "https://registry.npmmirror.com/@rollup/rollup-android-arm-eabi/-/rollup-android-arm-eabi-4.40.2.tgz", { "os": "android", "cpu": "arm" }, "sha512-JkdNEq+DFxZfUwxvB58tHMHBHVgX23ew41g1OQinthJ+ryhdRk67O31S7sYw8u2lTjHUPFxwar07BBt1KHp/hg=="],
 
@@ -205,7 +205,7 @@
 
     "@types/node": ["@types/node@22.15.3", "https://registry.npmmirror.com/@types/node/-/node-22.15.3.tgz", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-lX7HFZeHf4QG/J7tBZqrCAXwz9J5RD56Y6MpP0eJkka8p+K0RY/yBTW7CYFJ4VGCclxqOLKmiGP5juQc6MKgcw=="],
 
-    "@typescript-eslint/eslint-plugin": ["@typescript-eslint/eslint-plugin@8.32.1", "", { "dependencies": { "@eslint-community/regexpp": "^4.10.0", "@typescript-eslint/scope-manager": "8.32.1", "@typescript-eslint/type-utils": "8.32.1", "@typescript-eslint/utils": "8.32.1", "@typescript-eslint/visitor-keys": "8.32.1", "graphemer": "^1.4.0", "ignore": "^7.0.0", "natural-compare": "^1.4.0", "ts-api-utils": "^2.1.0" }, "peerDependencies": { "@typescript-eslint/parser": "^8.0.0 || ^8.0.0-alpha.0", "eslint": "^8.57.0 || ^9.0.0", "typescript": ">=4.8.4 <5.9.0" } }, "sha512-6u6Plg9nP/J1GRpe/vcjjabo6Uc5YQPAMxsgQyGC/I0RuukiG1wIe3+Vtg3IrSCVJDmqK3j8adrtzXSENRtFgg=="],
+    "@typescript-eslint/eslint-plugin": ["@typescript-eslint/eslint-plugin@8.32.1", "", { "dependencies": { "@eslint-community/regexpp": "^4.10.0", "@typescript-eslint/scope-manager": "8.32.1", "@typescript-eslint/type-utils": "8.32.1", "@typescript-eslint/utils": "8.32.1", "@typescript-eslint/visitor-keys": "8.32.1", "graphemer": "^1.4.0", "ignore": "^7.0.0", "natural-compare": "^1.4.0", "ts-api-utils": "^2.1.0" }, "peerDependencies": { "@typescript-eslint/parser": "^8.0.0 || ^8.0.0-alpha.0", "eslint": "^8.57.0 || ^9.0.0", "typescript": ">=4.8.4 <5.9.0" } }, "sha512-6u6Plg9nP/J1GRpe/vcjjabo6Uc5YPlanCMxsgQyGC/I0RuukiG1wIe3+Vtg3IrSCVJDmqK3j8adrtzXSENRtFgg=="],
 
     "@typescript-eslint/parser": ["@typescript-eslint/parser@8.32.1", "", { "dependencies": { "@typescript-eslint/scope-manager": "8.32.1", "@typescript-eslint/types": "8.32.1", "@typescript-eslint/typescript-estree": "8.32.1", "@typescript-eslint/visitor-keys": "8.32.1", "debug": "^4.3.4" }, "peerDependencies": { "eslint": "^8.57.0 || ^9.0.0", "typescript": ">=4.8.4 <5.9.0" } }, "sha512-LKMrmwCPoLhM45Z00O1ulb6jwyVr2kr3XJp+G+tSEZcbauNnScewcQwtJqXDhXeYPDEjZ8C1SjXm015CirEmGg=="],
 

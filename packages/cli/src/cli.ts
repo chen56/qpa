@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 
-import {Project} from "@qpa/core";
+import {Project} from "@planc/core";
 import * as z from "zod";
 import {VarUI} from "./zod_ext.ts";
 

@@ -16,14 +16,14 @@ ref: <https://semver.org/>
 ### snapshot 手工流程
 
 ```bash
-# 一次纯净的 shb clean_all > shb build > shb test > shb pack
-shb repack
+# 一次纯净的 shab.bash clean_all > shab.bash build > shab.bash test > shab.bash pack
+shab.bash repack
 # 观察 build、dist 目录是否符合发布预期
 
 # 开发发布
 changeset
 changeset version --snapshot snapshot  # 可改为相应的名称
-# 默认的npm tag为latest，即执行 pnpm install @qpa/core 时的包
+# 默认的npm tag为latest，即执行 pnpm install @planc/core 时的包
 # 而snapshot包不应该更新latest
 # snapshot 也不应该给git打tag
 changeset publish --tag snapshot --no-git-tag
@@ -36,7 +36,7 @@ git commit -m 'snapshot publish description '
 git push 
 
 # 
-pnpm install @qpa/core@0.0.0-snapshot-20250523090000
+pnpm install @planc/core@0.0.0-snapshot-20250523090000
 # 或者
-pnpm install @qpa/core@snapshot
+pnpm install @planc/core@snapshot
 ```

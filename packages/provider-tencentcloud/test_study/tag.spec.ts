@@ -3,7 +3,7 @@
 import {describe, it} from "vitest";
 import {TextFixture} from "../test/fixture.ts";
 import {_TagClientWarp} from "../src/internal/tag_service.ts";
-import {Constants} from "@qpa/core";
+import {Constants} from "@planc/core";
 
 describe('tags', {timeout: 15000}, async () => {
   const fixture = TextFixture.of();

@@ -1,11 +1,11 @@
-import {Project} from "@qpa/core";
+import {Project} from "@planc/core";
 import * as console from "node:console";
 import * as z from "zod";
 import {Cli} from "../../src";
 import {VarUI, VariableFactory} from "../../src/zod_ext.ts";
 
 /*
- * 模仿一个QPA项目
+ * 模仿一个PlanC项目
  */
 
 // 2. 模拟 API 函数 (返回 Promise)

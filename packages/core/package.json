@@ -1,15 +1,15 @@
 {
-  "name": "@qpa/core",
+  "name": "@planc/core",
   "version": "0.0.0-snapshot-20250523083142",
   "description": "pa cli",
   "keywords": [
-    "qpa",
+    "planc",
     "cli"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chen56/qpa.git"
+    "url": "git+https://github.com/chen56/planc.git"
   },
   "homepage": "https://github.com/chen56",
   "bugs": {

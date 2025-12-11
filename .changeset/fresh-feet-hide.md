@@ -1,7 +1,7 @@
 ---
-"@qpa/cli": major
-"@qpa/core": major
-"@qpa/provider-tencentcloud": major
+"@planc/cli": major
+"@planc/core": major
+"@planc/provider-tencentcloud": major
 ---
 
 changeset test

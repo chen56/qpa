@@ -97,8 +97,8 @@ __execute_in_workspace(){
   done
 
   ## load cmd function from workspace
-  if [ -f "./sha" ]; then
-    . "./sha"
+  if [ -f "./sha.sha" ]; then
+    . sha.bash
   fi
 
   local after_load
@@ -195,7 +195,7 @@ pref() {
 ## 脚本入口
 #############################################################
 
-# 守卫语句，当'source ./sha'执行，脚本被当类库导入时，$0为bash或zsh等值
+# 守卫语句，当'source ./sha.bash'执行，脚本被当类库导入时，$0为bash或zsh等值
 # 即当类库引用时不执行后续命令式入口代码
 if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
   echo 'shb脚本为mono项目脚本，不能作为类库导入，只能命令式执行'

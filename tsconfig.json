@@ -24,7 +24,7 @@
     "tsBuildInfoFile": "./build/tsconfig.tsbuildinfo",
     // paths基于baseUrl
     "paths": {
-//      "@qpa/*": ["packages/*/src"]
+//      "@planc/*": ["packages/*/src"]
     }
 
   },

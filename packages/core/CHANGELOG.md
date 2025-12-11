@@ -1,4 +1,4 @@
-# @qpa/core
+# @planc/core
 
 ## 0.1.5
 

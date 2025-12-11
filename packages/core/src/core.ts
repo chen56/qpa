@@ -3,7 +3,7 @@ import * as _common from "./internal/_common.ts";
 /**
  * 实际资源，包含
  * - state字段: 特定于云厂商的实际资源状态信息，数据结构以云api资源数据结构为基础,可能会增加一些字段,比如region
- * - 其他字段：云上资源从tag等提取出的QPA元信息，比如resource_name等
+ * - 其他字段：云上资源从tag等提取出的PlanC元信息，比如resource_name等
  */
 export class ResourceInstance<STATE> {
   private readonly resourceService: ResourceService<unknown, STATE>;
@@ -204,7 +204,7 @@ export abstract class Provider {
     readonly resourceServices = new ResourceServices();
 
     /**
-     * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
+     * SPI方法，不应被客户程序直接调用，客户程序应通过@planc/core的Project使用
      *
      * 查询最新的 ResourceScope 内的所有的已存在资源的状态信息
      *
@@ -269,14 +269,14 @@ export class Vendor {
     }
 
     /**
-     * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
+     * SPI方法，不应被客户程序直接调用，客户程序应通过@planc/core的Project使用
      **/
     async refresh(): Promise<void> {
         this._resourceInstances = new __ResourceInstances(...await this.provider.findResourceInstances());
     }
 
     /**
-     * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
+     * SPI方法，不应被客户程序直接调用，客户程序应通过@planc/core的Project使用
      *
      * 因为清理方法是up的最后一步，此方法必须在外部调用完up后才能使用。
      *
@@ -295,7 +295,7 @@ export class Vendor {
     }
 
     /**
-     * SPI方法，不应被客户程序直接调用，客户程序应通过@qpa/core的Project使用
+     * SPI方法，不应被客户程序直接调用，客户程序应通过@planc/core的Project使用
      *
      * 销毁所有实际存在的资源实例
      * */
@@ -349,7 +349,7 @@ export class Vendor {
             actual = [await service.create(expected)];
         }
         if (actual.length === 0) {
-            throw new Error(`bug: 应该不会发生, 可能是QPA的bug, 资源${expected.name}的实际资源实例数量应该不为0, 但是目前为0 `)
+            throw new Error(`bug: 应该不会发生, 可能是PlanC的bug, 资源${expected.name}的实际资源实例数量应该不为0, 但是目前为0 `)
         }
 
         if (actual.length > 1) {

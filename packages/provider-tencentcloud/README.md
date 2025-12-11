@@ -1,3 +1,3 @@
-# @qpa/core
+# @planc/core
 
-@qpa/provider-tencentcloud
+@planc/provider-tencentcloud

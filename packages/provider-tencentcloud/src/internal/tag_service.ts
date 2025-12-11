@@ -1,10 +1,10 @@
 import {Client as tc_TagClient} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_client.js";
 import {ResourceTag, TagFilter} from "tencentcloud-sdk-nodejs/tencentcloud/services/tag/v20180813/tag_models.js";
-import {Project, ResourceInstance, ResourceService, ResourceType} from "@qpa/core";
+import {Project, ResourceInstance, ResourceService, ResourceType} from "@planc/core";
 import {Arrays, Paging} from "./common.ts";
 import {TencentCloudResourceType, _TaggableResourceService, _ClientWarp, _TencentCloudContext, _Runners} from "../provider.ts";
-import {Constants} from "@qpa/core";
-import {TencentCloudConfig} from "@qpa/provider-tencentcloud";
+import {Constants} from "@planc/core";
+import {TencentCloudConfig} from "@planc/provider-tencentcloud";
 
 const __PAGE_LIMIT = 100;
 

@@ -19,7 +19,7 @@ export default defineConfig({
             // 将 "@/" 映射到当前文件所在目录下的 "src" 目录
             // '@/': path.resolve(__dirname, './src/'),
             // 注意：这里的路径是相对于 vite.config.ts 文件所在的目录解析的
-            // path.resolve(__dirname, './src/') 会解析到 /Users/chen/git/chen56/qpa/packages/provider-tencentcloud/src/
+            // path.resolve(__dirname, './src/') 会解析到 /Users/chen/git/chen56/planc/packages/provider-tencentcloud/src/
         },
     },
     test: {

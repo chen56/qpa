@@ -2,9 +2,9 @@ import {
   CreateVpcRequest as tc_CreateVpcRequest,
   Vpc as tc_Vpc
 } from "tencentcloud-sdk-nodejs/tencentcloud/services/vpc/v20170312/vpc_models.js";
-import {ResourceConfig, ResourceInstance} from "@qpa/core";
+import {ResourceConfig, ResourceInstance} from "@planc/core";
 import {TencentCloudResourceType, _TaggableResourceService, _TencentCloudContext} from "../provider.ts";
-import {Constants} from "@qpa/core";
+import {Constants} from "@planc/core";
 import {_VpcClientWarp} from "./client.ts";
 
 /*

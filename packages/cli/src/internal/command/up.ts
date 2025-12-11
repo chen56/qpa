@@ -1,5 +1,5 @@
 import type {Command} from "commander";
-import {Project} from "@qpa/core";
+import {Project} from "@planc/core";
 import * as z from "zod";
 
 import {VarUI, VariableFactory, OptionTable} from "../../zod_ext.ts";
@@ -98,7 +98,7 @@ async function _readVarField<Vars>(
   })()
 
   switch (varUI.type) {
-    case "qpa.TextInput":
+    case "planc.TextInput":
       return inquirer.input({
         message: `[文本输入] ${varTitle}`,
         validate: async (value) => {
@@ -112,7 +112,7 @@ async function _readVarField<Vars>(
           return `ERROR:\n ${errors.map((value, index) => `${index + 1} ${value} \n`)} `;
         }
       });
-    case "qpa.OptionTable":
+    case "planc.OptionTable":
       const optionTable = varUI as OptionTable<Vars, any, any>;
       const optionTableData = await optionTable.query(vars as any)
       if (optionTableData.length == 0) {

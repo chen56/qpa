@@ -1,11 +1,11 @@
-import {Project} from "@qpa/core";
-import {Cli} from "@qpa/cli";
+import {Project} from "@planc/core";
+import {Cli} from "@planc/cli";
 import {TencentCloud} from "../../src/factory.ts";
 import * as dotenv from 'dotenv';
 import * as dotenvExpand from 'dotenv-expand';
 import * as console from "node:console";
 import * as z from "zod";
-import {VariableFactory, VarUI} from "@qpa/cli";
+import {VariableFactory, VarUI} from "@planc/cli";
 import {
     Image,
     InstanceFamilyConfig,

@@ -1,12 +1,12 @@
 import {Credential as tc_Credential} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
-import {Project, ResourceInstance, ResourceType} from "@qpa/core";
+import {Project, ResourceInstance, ResourceType} from "@planc/core";
 import {_TagClientWarp} from "./internal/tag_service.ts";
-import {Provider, ResourceService} from "@qpa/core";
+import {Provider, ResourceService} from "@planc/core";
 import {retry, handleAll, Policy, wrap, timeout, TimeoutStrategy} from 'cockatiel';
 import {ClientConfig as tc_ClientConfig} from "tencentcloud-sdk-nodejs/tencentcloud/common/interface.js";
 import {TencentCloudConfig} from "./factory.ts";
-import {IBackoffFactory} from "cockatiel/dist/backoff/Backoff";
-import {IRetryBackoffContext} from "cockatiel/dist/RetryPolicy";
+import {IBackoffFactory} from "cockatiel";
+import {IRetryBackoffContext} from "cockatiel";
 
 export interface _TencentCloudClientConfig extends TencentCloudConfig {
 }
